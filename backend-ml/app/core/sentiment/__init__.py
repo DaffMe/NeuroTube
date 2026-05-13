@@ -1,0 +1,1 @@
+# Core sentiment module

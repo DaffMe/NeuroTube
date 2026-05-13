@@ -1,0 +1,158 @@
+"""
+Redis consumer worker for Neurotube.
+
+Listens on the 'neurotube:jobs' queue (BRPOP) for jobs published by the Go fetcher.
+For each job:
+  1. Runs VADER sentiment analysis on every comment
+  2. Computes aggregate sentiment metrics
+  3. Saves results to PostgreSQL
+  4. Updates job status in Redis to 'completed'
+"""
+
+import asyncio
+import json
+import logging
+import redis.asyncio as aioredis
+
+from app.core.config import settings
+from app.core.sentiment.sentiment import analyze_comment
+from app.crud import crud
+from app.db.session import AsyncSessionLocal
+
+logger = logging.getLogger(__name__)
+
+QUEUE_KEY = "neurotube:jobs"
+STATUS_PREFIX = "neurotube:status:"
+
+
+async def process_job(job_data: dict):
+    """
+    Process a single analysis job:
+    1. Save video metadata to DB
+    2. Analyze each comment with VADER
+    3. Save comments with sentiment to DB
+    4. Compute and save sentiment summary
+    5. Update job status
+    """
+    job_id = job_data["jobId"]
+    video_id = job_data["videoId"]
+    video_info = job_data["videoInfo"]
+    raw_comments = job_data["comments"]
+
+    logger.info(f"🔬 [{job_id}] Processing {len(raw_comments)} comments for video {video_id}")
+
+    async with AsyncSessionLocal() as db:
+        try:
+            # 1. Create job record
+            await crud.create_job(db, job_id, video_id)
+
+            # Update status to analyzing
+            redis_client = aioredis.from_url(settings.REDIS_URL)
+            await redis_client.set(STATUS_PREFIX + job_id, "analyzing", ex=3600)
+
+            # 2. Save video metadata
+            await crud.save_video(db, video_info)
+
+            # 3. Analyze sentiment for each comment
+            analyzed_comments = []
+            for comment in raw_comments:
+                # Use textOriginal for better formatting, fallback to textDisplay
+                text = comment.get("textOriginal") or comment.get("textDisplay", "")
+                
+                if text.strip():
+                    sentiment_result = analyze_comment(text)
+                    comment["sentiment"] = sentiment_result["sentiment"]
+                    comment["sentimentScore"] = sentiment_result["sentimentScore"]
+                else:
+                    comment["sentiment"] = "neutral"
+                    comment["sentimentScore"] = 0.0
+
+                # Ensure fields match DB model naming (snake_case)
+                comment["text_original"] = comment.get("textOriginal", "")
+                comment["is_reply"] = comment.get("isReply", False)
+                comment["parent_id"] = comment.get("parentId")
+                
+                analyzed_comments.append(comment)
+
+            # 4. Save analyzed comments to DB
+            saved_count = await crud.save_comments_batch(db, video_id, analyzed_comments)
+            logger.info(f"💾 [{job_id}] Saved {saved_count} new comments to DB")
+
+            # 5. Compute and save sentiment summary
+            positive = sum(1 for c in analyzed_comments if c["sentiment"] == "positive")
+            negative = sum(1 for c in analyzed_comments if c["sentiment"] == "negative")
+            neutral = sum(1 for c in analyzed_comments if c["sentiment"] == "neutral")
+            total = len(analyzed_comments)
+            avg_score = (
+                sum(c["sentimentScore"] for c in analyzed_comments) / total
+                if total > 0
+                else 0.0
+            )
+
+            await crud.save_sentiment_summary(
+                db,
+                video_id=video_id,
+                positive=positive,
+                negative=negative,
+                neutral=neutral,
+                total_comments=total,
+                average_score=round(avg_score, 4),
+            )
+
+            # 6. Update job status to completed
+            await crud.update_job_status(db, job_id, "completed")
+            await redis_client.set(STATUS_PREFIX + job_id, "completed", ex=3600)
+
+            logger.info(
+                f"✅ [{job_id}] Analysis complete: "
+                f"+{positive} / -{negative} / ~{neutral} ({total} total)"
+            )
+
+            await redis_client.close()
+
+        except Exception as e:
+            logger.exception(f"❌ [{job_id}] Failed to process job: {e}")
+            try:
+                await crud.update_job_status(db, job_id, "failed", str(e))
+                redis_client = aioredis.from_url(settings.REDIS_URL)
+                await redis_client.set(STATUS_PREFIX + job_id, f"failed:{e}", ex=3600)
+                await redis_client.close()
+            except Exception:
+                pass
+
+
+async def worker_loop():
+    """
+    Main worker loop. Uses BRPOP to block-wait for new jobs from Redis.
+    Runs in a background asyncio task.
+    """
+    logger.info("🔄 Redis worker started — waiting for jobs...")
+
+    redis_client = aioredis.from_url(settings.REDIS_URL)
+
+    while True:
+        try:
+            # BRPOP blocks until a message is available (timeout 5s to allow shutdown)
+            result = await redis_client.brpop(QUEUE_KEY, timeout=5)
+            if result is None:
+                continue
+
+            _, raw_data = result
+            job_data = json.loads(raw_data)
+
+            logger.info(f"📨 Received job: {job_data.get('jobId', 'unknown')}")
+
+            # Process asynchronously
+            await process_job(job_data)
+
+        except json.JSONDecodeError as e:
+            logger.error(f"❌ Failed to decode job data: {e}")
+        except Exception as e:
+            logger.error(f"❌ Worker error: {e}")
+            await asyncio.sleep(2)  # Brief backoff on error
+
+
+def start_worker():
+    """Start the worker in the current event loop."""
+    loop = asyncio.get_event_loop()
+    loop.create_task(worker_loop())

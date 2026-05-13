@@ -1,0 +1,12 @@
+﻿.env
+node_modules/
+__pycache__/
+.venv/
+dist/
+.DS_Store
+pgdata/
+*.log
+.vscode/
+frontend/node_modules/
+backend-fetcher/bin/
+backend-ml/venv/

@@ -1,0 +1,7 @@
+- [x] Scaffold Vite React TS project in `frontend/` directory.
+- [x] Install dependencies (`tailwindcss`, `framer-motion`, `@tanstack/react-router`, `lucide-react`, Shadcn UI).
+- [x] Configure `tailwind.config.js` and `index.css` for the "Pink Mem Form" aesthetic.
+- [x] Setup routing (single-page with state transitions via Framer Motion).
+- [x] Build UI Components (Header, AnalyzedVideoList, VideoDetails, CommentCharts, CommentSection, StatBlock, LoadingSpinner).
+- [x] Update `backend-ml/app/core/sentiment/sentiment.py` with custom lexicon (Gaming/Horror/Indonesian)
+- [x] Verify changes by running a new analysis job and checking the frontend and browser.
