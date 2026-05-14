@@ -1,10 +1,11 @@
-# 🧠 NeuroTube: High-Performance YouTube Sentiment Engine
+# 🧠 NeuroTube × Google Antigravity
 
 <div align="center">
 
 ![NeuroTube Banner](https://img.shields.io/badge/NeuroTube-Sentiment_Analyzer-FF69B4?style=for-the-badge&logo=youtube&logoColor=white)
 
 **Distributed microservices architecture for massive-scale YouTube comment analysis**
+*Powered by Google Antigravity AI*
 
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -19,7 +20,9 @@
 
 ## 🌟 Overview
 
-**NeuroTube** is a professional-grade sentiment analysis platform designed to handle the high volume of engagement on modern YouTube videos. Unlike simple script-based tools, NeuroTube utilizes a **distributed microservices architecture** with a Go-based fetcher and a Python-based ML engine, connected via Redis, to process thousands of comments and nested replies with extreme efficiency.
+**NeuroTube** is a professional-grade sentiment analysis platform designed to handle the high volume of engagement on modern YouTube videos. This project was developed using **Google Antigravity**, an advanced agentic AI coding assistant, to achieve high-performance architecture and polished user experience.
+
+The system design and core functionality were inspired by the excellent work of [00200200's youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
 
 ### ✨ Key Features
 
@@ -138,9 +141,10 @@ docker compose up --build -d
 
 ---
 
-## 📜 License
+## 📝 Acknowledgments
 
-This project is licensed under the **MIT License**. Feel free to use, modify, and distribute.
+- **AI Development**: This project was built with the assistance of **Google Antigravity AI**.
+- **Inspiration**: System design inspired by [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
 
 ---
 
