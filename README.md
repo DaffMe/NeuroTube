@@ -1,4 +1,4 @@
-# 🧠 NeuroTube × Google Antigravity
+# 🧠 NeuroTube: High-Performance YouTube Sentiment Engine
 
 <div align="center">
 
