@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
-	"neurotube/backend-fetcher/internal/queue"
-	"neurotube/backend-fetcher/internal/youtube"
+	"NeuroTube/backend-fetcher/internal/queue"
+	"NeuroTube/backend-fetcher/internal/youtube"
 )
 
 // Handler holds dependencies for HTTP handlers.
@@ -61,7 +61,7 @@ type ErrorResponse struct {
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{
 		"status":  "ok",
-		"service": "neurotube-fetcher",
+		"service": "NeuroTube-fetcher",
 		"time":    time.Now().UTC().Format(time.RFC3339),
 	})
 }

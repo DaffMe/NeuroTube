@@ -1,6 +1,6 @@
-# 🛠️ Neurotube Admin Guide
+# 🛠️ NeuroTube Admin Guide
 
-This guide provides instructions for managing, monitoring, and troubleshooting the Neurotube microservices ecosystem.
+This guide provides instructions for managing, monitoring, and troubleshooting the NeuroTube microservices ecosystem.
 
 ---
 
@@ -53,20 +53,20 @@ docker compose ps
 
 ### PostgreSQL (Database)
 The database stores video metadata, analyzed comments, and sentiment summaries.
-- **Connection**: `postgresql://neurotube:neurotube_secret@localhost:5432/neurotube`
+- **Connection**: `postgresql://NeuroTube:NeuroTube_secret@localhost:5432/NeuroTube`
 - **Interactive Shell**:
   ```bash
-  docker exec -it neurotube-postgres psql -U neurotube
+  docker exec -it NeuroTube-postgres psql -U NeuroTube
   ```
 
 ### Redis (Queue & Status)
 Redis handles job queuing between Go and Python, and stores real-time job status.
 - **Interactive CLI**:
   ```bash
-  docker exec -it neurotube-redis redis-cli
+  docker exec -it NeuroTube-redis redis-cli
   ```
-- **Check Queue Length**: `LLEN neurotube:jobs`
-- **Check Job Status**: `GET neurotube:status:<jobId>`
+- **Check Queue Length**: `LLEN NeuroTube:jobs`
+- **Check Job Status**: `GET NeuroTube:status:<jobId>`
 
 ---
 
@@ -75,7 +75,7 @@ Redis handles job queuing between Go and Python, and stores real-time job status
 | Variable | Description | Default |
 | :--- | :--- | :--- |
 | `YOUTUBE_API_KEY` | Your Google Cloud API Key | **Required** |
-| `POSTGRES_PASSWORD` | Database password | `neurotube_secret` |
+| `POSTGRES_PASSWORD` | Database password | `NeuroTube_secret` |
 | `FETCHER_PORT` | Port for Go Fetcher API | `8080` |
 | `ML_PORT` | Port for Python ML API | `8000` |
 | `FRONTEND_PORT` | Port for React UI | `5173` |

@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
-	"neurotube/backend-fetcher/internal/handler"
-	"neurotube/backend-fetcher/internal/queue"
+	"NeuroTube/backend-fetcher/internal/handler"
+	"NeuroTube/backend-fetcher/internal/queue"
 )
 
 func main() {
@@ -82,7 +82,7 @@ func main() {
 
 	// Graceful shutdown
 	go func() {
-		log.Printf("🚀 Neurotube Fetcher listening on :%s", port)
+		log.Printf("🚀 NeuroTube Fetcher listening on :%s", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("❌ Server error: %v", err)
 		}

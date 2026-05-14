@@ -52,7 +52,7 @@ graph TD
 ## 🖥️ Project Structure
 
 ```
-Neurotube/
+NeuroTube/
 ├── 🐳 docker-compose.yml           # Full stack orchestration
 ├── 🔧 .env.example                 # Environment template
 ├── 🌐 frontend/                    # React (TS) + Tailwind v4

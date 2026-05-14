@@ -1,6 +1,6 @@
-# Build Neurotube Frontend via Stitch MCP
+# Build NeuroTube Frontend via Stitch MCP
 
-Based on the PRD, we will build the "Neurotube" frontend focusing on a highly interactive, "bouncy," and visually pleasing user experience (UX) adapted from the "Mem Form" aesthetic (soft pinks, magenta, dark/light modes).
+Based on the PRD, we will build the "NeuroTube" frontend focusing on a highly interactive, "bouncy," and visually pleasing user experience (UX) adapted from the "Mem Form" aesthetic (soft pinks, magenta, dark/light modes).
 
 ## Proposed Changes
 

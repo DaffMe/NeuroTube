@@ -1,5 +1,5 @@
 """
-API routes for the Neurotube ML backend.
+API routes for the NeuroTube ML backend.
 
 Provides endpoints for the frontend to:
 - Get analysis results by job ID
@@ -25,7 +25,7 @@ async def health():
     """Health check endpoint."""
     return {
         "status": "ok",
-        "service": "neurotube-ml",
+        "service": "NeuroTube-ml",
         "time": datetime.utcnow().isoformat() + "Z",
     }
 

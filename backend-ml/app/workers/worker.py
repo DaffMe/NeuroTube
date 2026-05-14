@@ -1,5 +1,5 @@
 """
-Redis consumer worker for Neurotube.
+Redis consumer worker for NeuroTube.
 
 Listens on the 'neurotube:jobs' queue (BRPOP) for jobs published by the Go fetcher.
 For each job:

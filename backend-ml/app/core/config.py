@@ -7,7 +7,7 @@ load_dotenv()
 class Settings:
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://neurotube:neurotube_secret@localhost:5432/neurotube",
+        "postgresql+asyncpg://neurotube:neurotube_secret@localhost:5432/NeuroTube",
     )
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     ALLOWED_ORIGINS: str = os.getenv(

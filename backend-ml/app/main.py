@@ -1,5 +1,5 @@
 """
-Neurotube ML Backend — FastAPI Application
+NeuroTube ML Backend — FastAPI Application
 
 This service:
 1. Consumes jobs from Redis (published by the Go fetcher)
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
     # Startup
-    logger.info("🚀 Starting Neurotube ML Backend...")
+    logger.info("🚀 Starting NeuroTube ML Backend...")
 
     # Initialize database tables
     await init_db()
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
 
 # ── App ───────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Neurotube ML Engine",
+    title="NeuroTube ML Engine",
     description="Sentiment analysis engine for YouTube comments",
     version="1.0.0",
     lifespan=lifespan,
@@ -78,4 +78,4 @@ app.include_router(analysis_router, prefix="/api")
 
 @app.get("/")
 async def root():
-    return {"service": "neurotube-ml", "status": "running"}
+    return {"service": "NeuroTube-ml", "status": "running"}

@@ -17,7 +17,7 @@ function getSystemTheme(): "dark" | "light" {
 export function ThemeProvider({
   children,
   defaultTheme = "dark",
-  storageKey = "neurotube-theme",
+  storageKey = "NeuroTube-theme",
 }: {
   children: ReactNode;
   defaultTheme?: Theme;

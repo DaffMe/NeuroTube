@@ -1,5 +1,5 @@
 """
-SQLModel database models for Neurotube.
+SQLModel database models for NeuroTube.
 
 These models define the PostgreSQL schema and match the frontend's
 TypeScript interfaces (VideoInfo, Comment, SentimentResult, AnalyzedVideo).

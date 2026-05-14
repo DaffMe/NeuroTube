@@ -1,8 +1,8 @@
-# Neurotube Frontend — Build Walkthrough
+# NeuroTube Frontend — Build Walkthrough
 
 ## Summary
 
-Built the complete Neurotube frontend from scratch inside `frontend/` using **Vite + React + TypeScript + Tailwind CSS v4 + Shadcn UI + Framer Motion + Recharts**. The app delivers a highly interactive, bouncy, pink-themed UI for YouTube comment sentiment analysis.
+Built the complete NeuroTube frontend from scratch inside `frontend/` using **Vite + React + TypeScript + Tailwind CSS v4 + Shadcn UI + Framer Motion + Recharts**. The app delivers a highly interactive, bouncy, pink-themed UI for YouTube comment sentiment analysis.
 
 ## Architecture
 

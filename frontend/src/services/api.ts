@@ -1,6 +1,6 @@
 import type { AnalysisResponse, AnalyzedVideo } from "@/types";
 
-const STORAGE_KEY = "neurotube_history";
+const STORAGE_KEY = "NeuroTube_history";
 
 const FETCHER_API = (import.meta.env.VITE_FETCHER_API_URL || "http://localhost:8080") + "/api";
 const ML_API = (import.meta.env.VITE_ML_API_URL || "http://localhost:8000") + "/api";

@@ -1,5 +1,5 @@
 """
-CRUD operations for Neurotube database models.
+CRUD operations for NeuroTube database models.
 
 All database writes go through this layer to maintain data integrity.
 Response serialization uses camelCase to match frontend TypeScript interfaces.
