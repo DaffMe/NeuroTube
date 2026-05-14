@@ -24,6 +24,17 @@
 
 The system design and core functionality were inspired by the excellent work of [00200200's youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
 
+---
+
+## 🖥️ User Interface Showcase
+
+### 🏠 Landing Page
+![Home Page](assets/ui_home.png)
+
+### 📊 Analysis Dashboard
+![Dashboard](assets/ui_dashboard.png)
+
+---
 ### ✨ Key Features
 
 - **🚀 Hybrid Microservices** - Combines the speed of **Go** for data fetching with the ML power of **Python**.
