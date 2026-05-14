@@ -1,118 +1,150 @@
-# 🧠 NeuroTube
+# 🧠 NeuroTube: High-Performance YouTube Sentiment Engine
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-blue.svg)]()
-[![Backend](https://img.shields.io/badge/backend-Go%20%2B%20FastAPI-green.svg)]()
+<div align="center">
 
-> **NeuroTube** is a high-performance, AI-powered sentiment analysis platform for YouTube. It processes thousands of comments in seconds using a distributed microservices architecture to give you deep insights into audience sentiment.
+![NeuroTube Banner](https://img.shields.io/badge/NeuroTube-Sentiment_Analyzer-FF69B4?style=for-the-badge&logo=youtube&logoColor=white)
+
+**Distributed microservices architecture for massive-scale YouTube comment analysis**
+
+[![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)](https://reactjs.org/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+
+</div>
 
 ---
 
-## ✨ Features
+## 🌟 Overview
 
-- 🚀 **Lightning Fast**: Fetch and analyze thousands of comments in seconds.
-- 📊 **Deep Insights**: Breakdown of positive, neutral, and negative sentiments with interactive charts.
-- 💬 **Full Thread Support**: Analyze not just top-level comments, but all nested replies.
-- 🧠 **Smart NLP Engine**: Custom-tuned sentiment analysis optimized for YouTube slang and artistic content.
-- 🕒 **History Management**: Track and manage your recent analyses with persistent server-side storage.
-- 🎨 **Premium UI**: Modern, responsive dashboard built with Tailwind CSS v4 and Framer Motion.
+**NeuroTube** is a professional-grade sentiment analysis platform designed to handle the high volume of engagement on modern YouTube videos. Unlike simple script-based tools, NeuroTube utilizes a **distributed microservices architecture** with a Go-based fetcher and a Python-based ML engine, connected via Redis, to process thousands of comments and nested replies with extreme efficiency.
+
+### ✨ Key Features
+
+- **🚀 Hybrid Microservices** - Combines the speed of **Go** for data fetching with the ML power of **Python**.
+- **💬 Full Reply Retrieval** - Deep-dive analysis that captures every single nested reply, bypassing standard API limits.
+- **🧠 Custom NLP Lexicon** - Sentiment engine specifically tuned for YouTube slang, emojis, and artistic/musical appreciation.
+- **📊 Real-time Dashboard** - Interactive visualizations of sentiment distribution and engagement trends.
+- **🕒 Persistent History** - Robust server-side storage using PostgreSQL to track and manage your analysis history.
+- **🐳 One-Command Deployment** - Fully containerized with Docker Compose for a seamless setup experience.
 
 ---
 
 ## 🏗️ Architecture
 
-NeuroTube is built as a distributed system to handle high concurrency and large data volumes:
+The project is architected for scalability and separation of concerns:
 
 ```mermaid
 graph TD
-    User((User)) -->|YouTube URL| Frontend[React Frontend]
-    Frontend -->|Request| Fetcher[Go Fetcher]
-    Fetcher -->|Comments| Redis[(Redis Broker)]
-    Redis -->|Tasks| MLEngine[Python ML Engine]
-    MLEngine -->|Sentiment Data| DB[(PostgreSQL)]
-    DB -->|History| Frontend
+    User((User)) -->|YouTube URL| Frontend[React + Vite]
+    Frontend -->|Job Request| Fetcher[Go Service]
+    Fetcher -->|Parallel Fetch| YT_API[YouTube Data API v3]
+    Fetcher -->|Push Task| Redis[(Redis Broker)]
+    Redis -->|Worker Pull| MLEngine[Python Worker]
+    MLEngine -->|Sentiment Scoring| DB[(PostgreSQL)]
+    DB -->|History & Results| Frontend
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🖥️ Project Structure
 
-### Frontend
-- **React 19** & **TypeScript**
-- **Vite** (Build Tool)
-- **Tailwind CSS v4** (Styling)
-- **Framer Motion** (Animations)
-- **Recharts** (Data Visualization)
-- **Bun** (Package Manager)
-
-### Backend Services
-- **Go (Golang)**: High-speed YouTube data retrieval.
-- **Python (FastAPI)**: Machine Learning engine for sentiment scoring.
-- **VADER Sentiment**: Enhanced with custom lexicons for better accuracy.
-
-### Infrastructure
-- **Redis**: Message broker for asynchronous task processing.
-- **PostgreSQL**: Persistent storage for analysis results and history.
-- **Docker & Docker Compose**: Seamless orchestration and deployment.
+```
+Neurotube/
+├── 🐳 docker-compose.yml           # Full stack orchestration
+├── 🔧 .env.example                 # Environment template
+├── 🌐 frontend/                    # React (TS) + Tailwind v4
+│   ├── 📁 src/components/          # UI Components (Framer Motion)
+│   └── 🔗 src/services/api.ts      # API integration layer
+├── 🐹 backend-fetcher/             # Go Service
+│   ├── 📁 internal/youtube/        # High-speed data retrieval
+│   └── 📁 internal/queue/          # Redis task producer
+├── 🐍 backend-ml/                  # Python FastAPI Service
+│   ├── 📁 app/core/sentiment/      # VADER Engine + Custom Lexicon
+│   ├── 📁 app/workers/             # Redis task consumer
+│   └── 📁 app/crud/                # Database operations
+└── 🗄️ postgres_data/               # Persistent database volume
+```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Tech Stack
+
+### ⚡ Data Retrieval (Fetcher)
+- **Go (Golang)**: Chosen for its superior concurrency and network performance.
+- **YouTube API v3**: Optimized with pagination for full comment thread recovery.
+- **Redis**: Acts as the high-speed bridge between services.
+
+### 🧠 Sentiment Engine (ML Service)
+- **Python 3.11 & FastAPI**: Industry-standard for ML deployment.
+- **VADER Sentiment**: Enhanced with a custom lexicon for YouTube-specific context.
+- **SQLModel**: Modern, type-safe ORM for PostgreSQL interaction.
+
+### 🎨 User Experience (Frontend)
+- **React 19 & TypeScript**: Latest stable frontend features.
+- **Bun**: Ultra-fast JavaScript runtime and package manager.
+- **Tailwind CSS v4**: Cutting-edge utility-first styling.
+- **Framer Motion**: Smooth, high-end UI animations.
+- **Recharts**: Responsive sentiment data visualization.
+
+---
+
+## 🛠️ Quick Start
 
 ### Prerequisites
-- [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
-- YouTube Data API Key ([Get it here](https://console.cloud.google.com/))
+- 🐳 **Docker** and **Docker Compose**
+- 🔑 **YouTube Data API Key** ([Get one here](https://console.cloud.google.com/))
 
-### Installation
+### 1. Clone & Enter
+```bash
+git clone https://github.com/DaffMe/NeuroTube.git
+cd NeuroTube
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/DaffMe/NeuroTube.git
-   cd NeuroTube
-   ```
+### 2. Configure
+```bash
+# Copy template
+cp .env.example .env
 
-2. **Configure Environment Variables**
-   Create a `.env` file in the root directory:
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and add your `YOUTUBE_API_KEY`.
+# Edit .env with your YouTube API Key
+# YOUTUBE_API_KEY=your_key_here
+```
 
-3. **Start the application**
-   ```bash
-   docker compose up --build -d
-   ```
+### 3. Launch
+```bash
+docker compose up --build -d
+```
 
-4. **Access the Dashboard**
-   - Frontend: `http://localhost:5173`
-   - Fetcher API: `http://localhost:8080`
-   - ML Engine API: `http://localhost:8000`
-
----
-
-## 📖 API Documentation
-
-### Fetcher (Go)
-- `POST /api/analyze`: Trigger analysis for a YouTube URL.
-
-### ML Engine (Python)
-- `GET /api/history`: Retrieve analysis history.
-- `DELETE /api/history`: Clear all analysis history.
-- `GET /api/job/{job_id}`: Check status of an analysis job.
+### 4. Access
+- **Web Dashboard**: `http://localhost:5173`
+- **Go API**: `http://localhost:8080`
+- **Python API**: `http://localhost:8000`
+- **Interactive API Docs**: `http://localhost:8000/docs`
 
 ---
 
-## 🤝 Contributing
+## 📖 API Reference
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Core Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/analyze` | Initiates full analysis of a YouTube video |
+| `GET` | `/api/history` | Retrieves stored analysis history |
+| `DELETE` | `/api/history` | Permanently clears all analysis data |
+| `GET` | `/api/job/{id}` | Polls status of a specific analysis task |
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**. Feel free to use, modify, and distribute.
 
 ---
 
-<p align="center">Made with ❤️ for the YouTube Community</p>
+<div align="center">
+  <p>Built for the next generation of social media analysis.</p>
+  <b>Developed by [DaffMe](https://github.com/DaffMe)</b>
+</div>
