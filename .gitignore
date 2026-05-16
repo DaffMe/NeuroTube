@@ -1,4 +1,4 @@
-﻿.env
+.env
 node_modules/
 __pycache__/
 .venv/
@@ -10,3 +10,8 @@ pgdata/
 frontend/node_modules/
 backend-fetcher/bin/
 backend-ml/venv/
+# Development Files
+ADMIN_GUIDE.md
+implementation_plan.md
+task.md
+walkthrough.md
