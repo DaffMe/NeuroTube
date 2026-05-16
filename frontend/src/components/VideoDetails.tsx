@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink, User } from "lucide-react";
 import type { VideoInfo } from "@/types";
+import { ExpandableText } from "./ExpandableText";
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
@@ -85,9 +85,16 @@ export function VideoDetails({ video }: Props) {
 
         {/* Description */}
         {video.description && (
-          <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
-            {video.description}
-          </p>
+          <div className="rounded-2xl bg-secondary/30 p-4">
+            <h3 className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+              Description
+            </h3>
+            <ExpandableText 
+              text={video.description} 
+              limit={160}
+              className="text-xs leading-relaxed text-muted-foreground/90 font-medium"
+            />
+          </div>
         )}
       </div>
     </motion.div>

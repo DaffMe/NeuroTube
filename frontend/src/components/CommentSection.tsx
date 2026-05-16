@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThumbsUp, ChevronDown, ChevronUp, Filter, CornerDownRight } from "lucide-react";
 import type { Comment } from "@/types";
 import { Button } from "@/components/ui/button";
+import { ExpandableText } from "./ExpandableText";
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
@@ -48,9 +49,11 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
               {comment.sentiment}
             </span>
           </div>
-          <p className="mt-1 text-xs leading-relaxed text-foreground/90 whitespace-pre-wrap break-words font-medium">
-            {comment.textOriginal || comment.textDisplay}
-          </p>
+          <ExpandableText 
+            text={comment.textOriginal || comment.textDisplay} 
+            limit={180}
+            className="mt-1 text-xs leading-relaxed text-foreground/90 font-medium"
+          />
           <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground/60 font-semibold">
             <div className="flex items-center gap-1">
               <ThumbsUp className="h-3 w-3" />
