@@ -165,6 +165,18 @@ YOUTUBE_CULTURE_LEXICON = {
     "evil": 0.0,      # Neutralize for Evil Neuro
     "demon": 0.5,
     "monster": 1.0,
+    
+    # Neutralize common emphasis words in YouTube comments
+    "damn": 0.0,
+    "damnn": 0.0,
+    "freaking": 0.0,
+    "freak": 0.0,
+    "crazy": 0.0,
+    "insane": 0.0,
+    "wild": 0.0,
+    "wtf": 0.0,      # Often used as "WTF that's good"
+    "lmao": 1.0,     # Ensure laughing is positive
+    "lmfao": 1.0,
 }
 
 # Cinematic/Music Appreciation (Neutralize negative triggers for art)
@@ -238,6 +250,18 @@ def analyze_comment(text: str) -> dict:
     if "cutting onions" in clean_text or "cut onions" in clean_text:
         # This is a 100% positive trope for "moving/sad video"
         return {"sentiment": "positive", "sentimentScore": 0.8}
+
+    import re
+    # 1. Timestamp shield: Comments with timestamps like 1:23 are often factual/descriptive
+    if re.search(r'\d+:\d+', clean_text):
+        # Unless it's explicitly toxic, treat as neutral
+        scores = _analyzer.polarity_scores(text)
+        if -0.6 < scores["compound"] < 0.6:
+            return {"sentiment": "neutral", "sentimentScore": 0.0}
+
+    # 2. Pure questions: "Who is this?", "What song?"
+    if clean_text.endswith("?") and len(clean_text.split()) < 8:
+        return {"sentiment": "neutral", "sentimentScore": 0.0}
 
     scores = _analyzer.polarity_scores(text)
     compound = scores["compound"]
