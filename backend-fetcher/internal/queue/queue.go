@@ -8,7 +8,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"NeuroTube/backend-fetcher/internal/youtube"
+	"neurotube/backend-fetcher/internal/youtube"
 )
 
 const (

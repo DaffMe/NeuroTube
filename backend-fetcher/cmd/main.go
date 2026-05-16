@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
-	"NeuroTube/backend-fetcher/internal/handler"
-	"NeuroTube/backend-fetcher/internal/queue"
+	"neurotube/backend-fetcher/internal/handler"
+	"neurotube/backend-fetcher/internal/queue"
 )
 
 func main() {

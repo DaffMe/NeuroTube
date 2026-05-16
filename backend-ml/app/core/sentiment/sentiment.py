@@ -197,6 +197,29 @@ _analyzer.lexicon.update({
     "parah": 0.5,     # Often used as "Keren parah" (Crazy cool)
     "nangis": 0.0,    # Neutralize cry in ID
     "sakit": 0.0,     # "Sakit hati" (Heartbroken) is usually positive engagement in art
+    "menangis": 0.0,
+    "matanya": 0.0,   # Often related to "kaca-kaca" (teary eyes)
+    
+    # Neutralize words that are often factual or descriptive in comments
+    "video": 0.0,
+    "channel": 0.0,
+    "youtube": 0.0,
+    "watch": 0.0,
+    "comment": 0.0,
+    "subscribe": 0.0,
+    "notification": 0.0,
+    "durasi": 0.0,
+    "menit": 0.0,
+    "detik": 0.0,
+    "jam": 0.0,
+    "time": 0.0,
+    "wait": 0.0,
+    "question": 0.0,
+    "tanya": 0.0,
+    "apa": 0.0,
+    "siapa": 0.0,
+    "kapan": 0.0,
+    "kenapa": 0.0,
 })
 
 
@@ -219,10 +242,12 @@ def analyze_comment(text: str) -> dict:
     scores = _analyzer.polarity_scores(text)
     compound = scores["compound"]
 
-    # Adjusted thresholds for better balance
-    if compound >= 0.15:
+    # Opsi A: Calibrated thresholds for YouTube comments. 
+    # YouTube users often use 'extreme' language that VADER captures as negative.
+    # We widen the 'neutral' zone significantly to reduce false negatives.
+    if compound >= 0.20:
         label = "positive"
-    elif compound <= -0.25:
+    elif compound <= -0.40:
         label = "negative"
     else:
         label = "neutral"

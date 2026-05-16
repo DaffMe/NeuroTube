@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
-	"NeuroTube/backend-fetcher/internal/queue"
-	"NeuroTube/backend-fetcher/internal/youtube"
+	"neurotube/backend-fetcher/internal/queue"
+	"neurotube/backend-fetcher/internal/youtube"
 )
 
 // Handler holds dependencies for HTTP handlers.
