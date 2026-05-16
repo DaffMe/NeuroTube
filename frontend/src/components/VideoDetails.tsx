@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink, User } from "lucide-react";
 import type { VideoInfo } from "@/types";
 import { ExpandableText } from "./ExpandableText";
