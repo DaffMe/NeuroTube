@@ -7,12 +7,16 @@
 **Distributed microservices architecture for massive-scale YouTube comment analysis**  
 *Powered by Google Antigravity AI*
 
-[![GitHub Stars](https://img.shields.io/github/stars/DaffMe/NeuroTube?style=social)](https://github.com/DaffMe/NeuroTube)
-[![GitHub Forks](https://img.shields.io/github/forks/DaffMe/NeuroTube?style=social)](https://github.com/DaffMe/NeuroTube)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![GitHub Stars](https://img.shields.io/github/stars/DaffMe/NeuroTube?style=for-the-badge&color=blue&logo=github)](https://github.com/DaffMe/NeuroTube)
+[![GitHub Forks](https://img.shields.io/github/forks/DaffMe/NeuroTube?style=for-the-badge&color=purple&logo=github)](https://github.com/DaffMe/NeuroTube)
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+</p>
 
 </div>
 
