@@ -35,24 +35,23 @@
 
 ## 🌟 Overview
 
-**NeuroTube** is a professional-grade sentiment analysis platform designed to handle the high volume of engagement on modern YouTube videos. Built with a distributed architecture, it decouples data retrieval from intensive machine learning processing to ensure high availability and responsiveness.
+**NeuroTube** is a sophisticated sentiment intelligence platform engineered to analyze high-volume audience engagement on YouTube. By leveraging a distributed microservices architecture, the system maintains high availability while processing complex NLP tasks at scale.
 
-The project leverages **Go** for high-speed concurrent fetching of thousands of comments (including nested replies) and **Python (FastAPI)** for sophisticated NLP analysis using an enhanced VADER engine.
+The pipeline integrates a high-performance **Go** service for concurrent data ingestion and a **Python-based FastAPI** engine for deep sentiment scoring. This ensures that even videos with tens of thousands of comments are analyzed with minimal latency and high accuracy.
 
 ---
 
 ## ✨ Key Features
 
-- **🚀 Hybrid Microservices** - Combines the speed of **Go** for data fetching with the ML power of **Python**.
-- **💬 Full Reply Retrieval** - Deep-dive analysis that captures every single nested reply, bypassing standard API limits through optimized pagination.
-- **🧠 Advanced NLP Engine** - Sentiment engine specifically tuned for:
-  - **YouTube Slang**: (rizz, gyatt, W/L, ratio, cooking).
-  - **Gaming/Horror**: Context-aware analysis for intense emotional engagement.
-  - **Artistic/Music**: Handles "moving" or "sad" comments as positive engagement (e.g., "cutting onions", "sobbing").
-  - **Indonesian Context**: Built-in support for informal Indonesian sentiment (mantap, gokil, parah, nangis).
-- **📊 Real-time Dashboard** - Interactive visualizations of sentiment distribution and engagement trends.
-- **🕒 Persistent History** - Server-side storage using PostgreSQL to track and manage analysis history.
-- **🐳 One-Command Deployment** - Fully containerized with Docker Compose for a seamless setup experience.
+- **🚀 Scalable Microservices Architecture** - Orchestrated decoupling of high-speed data ingestion (Go) and compute-intensive NLP processing (Python).
+- **💬 Deep-Thread Ingestion** - Advanced pagination logic to ensure comprehensive retrieval of nested replies, bypassing standard endpoint limitations for full-context analysis.
+- **🧠 Domain-Specific NLP Engine** - A calibrated sentiment processor engineered for high-accuracy interpretation of digital subcultures:
+  - **Platform Vernacular**: Native recognition of emerging internet idioms and status-driven discourse.
+  - **Contextual Sentiment**: Differentiates high-arousal engagement (Gaming/Horror) and emotional resonance (Artistic/Music) from traditional negative polarity.
+  - **Multilingual Support**: Specialized processing for informal Indonesian dialects and regional intensifiers.
+- **📊 Dynamic Analytics Dashboard** - Real-time telemetry and data visualization for sentiment distribution and audience engagement metrics.
+- **🕒 Stateful Analysis History** - Persistent server-side storage via PostgreSQL, enabling longitudinal tracking and historical data management.
+- **🐳 Containerized Orchestration** - Streamlined deployment via Docker Compose, ensuring environment consistency and zero-config initialization.
 
 ---
 
