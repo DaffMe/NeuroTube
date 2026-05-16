@@ -111,22 +111,37 @@ graph TD
 
 ```bash
 NeuroTube/
-├── 🐳 docker-compose.yml           # Full stack orchestration
-├── 🔧 .env.example                 # Environment template
-├── 🌐 frontend/                    # React (TS) + Tailwind v4
-│   ├── 📁 src/components/          # UI Components (Framer Motion)
-│   ├── 📁 src/hooks/               # Custom TanStack query hooks
-│   └── 📁 src/services/            # API integration layer
-├── 🐹 backend-fetcher/             # Go Service (The "Scraper")
-│   ├── 📁 cmd/main.go              # Entry point & Chi Router
-│   ├── 📁 internal/youtube/        # Logic for deep-thread retrieval
-│   └── 📁 internal/queue/          # Redis task producer
-├── 🐍 backend-ml/                  # Python Service (The "Brain")
-│   ├── 📁 app/core/sentiment/      # Custom NLP Logic & Lexicon
-│   ├── 📁 app/api/routes/          # FastAPI REST endpoints
-│   ├── 📁 app/workers/             # Redis task consumer (ML logic)
-│   └── 📁 app/models/              # SQLModel database schemas
-└── 🗄️ postgres_data/               # Persistent database volume
+├── 🐳 docker-compose.yml           # Distributed service orchestration
+├── 🔧 .env.example                 # Environment configuration template
+├── 🌐 frontend/                    # React (TS) + Tailwind v4 Dashboard
+│   ├── 🐳 Dockerfile               # Production-optimized container
+│   ├── 📦 package.json             # Bun/NPM dependencies
+│   └── 📁 src/
+│       ├── 🎨 components/          # Reusable UI architecture
+│       │   ├── ui/                 # Shadcn/UI primitive components
+│       │   ├── VideoDetails.tsx    # Metadata & 'Read More' logic
+│       │   ├── CommentCharts.tsx   # Recharts visualization layer
+│       │   └── CommentSection.tsx  # Deep-thread sentiment filtering
+│       ├── 🚦 routes/              # Client-side routing logic
+│       ├── 🔗 services/            # Axios API integration layer
+│       └── 📝 types/               # Global TypeScript definitions
+├── 🐹 backend-fetcher/             # High-Speed Go Data Ingestor
+│   ├── 🐳 Dockerfile               # Multi-stage Go build config
+│   ├── 📁 cmd/                     # Application entry points
+│   └── 📁 internal/
+│       ├── 🎥 youtube/             # Parallel comment retrieval logic
+│       ├── 📨 queue/               # Redis producer (Job Dispatcher)
+│       └── 📡 handler/             # HTTP router & middleware
+├── 🐍 backend-ml/                  # Python FastAPI Intelligence Service
+│   ├── 🐳 Dockerfile               # Python runtime & ML dependencies
+│   ├── 📁 app/
+│   │   ├── 🚀 main.py              # FastAPI application gateway
+│   │   ├── 🌐 api/routes/          # Analysis & History endpoints
+│   │   ├── ⚙️ core/sentiment/       # VADER v2.0 Engine & Lexicons
+│   │   ├── 📊 models/              # SQLModel (Pydantic + SQLAlchemy)
+│   │   └── 🛠️ workers/             # Async Redis consumer (Analysis logic)
+│   └── 📋 requirements.txt         # Intelligence stack dependencies
+└── 🗄️ postgres_data/               # Persistent relational storage volume
 ```
 
 ---
