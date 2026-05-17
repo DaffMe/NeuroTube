@@ -235,6 +235,39 @@ _analyzer.lexicon.update({
 })
 
 
+def preprocess_tracklist(text: str) -> str:
+    """
+    Strips out list-based timestamps and catalog entries (like tracklists).
+    If the comment is purely a tracklist, returns empty string.
+    """
+    import re
+    lines = text.split('\n')
+    cleaned_lines = []
+    timestamp_pattern = re.compile(r'\b\d{1,2}:\d{2}(?::\d{2})?\b')
+    
+    total_timestamps = len(timestamp_pattern.findall(text))
+    
+    for line in lines:
+        line_clean = line.strip()
+        if not line_clean:
+            continue
+            
+        if timestamp_pattern.search(line_clean):
+            if total_timestamps >= 2:
+                # If the line starts with a timestamp or has catalog markers
+                if (re.match(r'^\s*\[?\d{1,2}:\d{2}', line_clean) or 
+                    "ost" in line_clean.lower() or 
+                    "track" in line_clean.lower() or
+                    "-" in line_clean):
+                    continue
+            
+            line_clean = timestamp_pattern.sub("", line_clean).strip()
+            
+        cleaned_lines.append(line_clean)
+        
+    return " ".join(cleaned_lines).strip()
+
+
 def analyze_comment(text: str) -> dict:
     """
     Analyze the sentiment of a single comment.
@@ -245,25 +278,30 @@ def analyze_comment(text: str) -> dict:
             "sentimentScore": float  (-1.0 to 1.0, compound score)
         }
     """
+    # 1. Clean tracklists and timestamps
+    processed_text = preprocess_tracklist(text)
+    if not processed_text:
+        return {"sentiment": "neutral", "sentimentScore": 0.0}
+
     # Pre-processing for specific tropes
-    clean_text = text.lower()
+    clean_text = processed_text.lower()
     if "cutting onions" in clean_text or "cut onions" in clean_text:
         # This is a 100% positive trope for "moving/sad video"
         return {"sentiment": "positive", "sentimentScore": 0.8}
 
     import re
-    # 1. Timestamp shield: Comments with timestamps like 1:23 are often factual/descriptive
+    # 2. Timestamp shield: If any single timestamps remain, check if it's descriptive
     if re.search(r'\d+:\d+', clean_text):
         # Unless it's explicitly toxic, treat as neutral
-        scores = _analyzer.polarity_scores(text)
+        scores = _analyzer.polarity_scores(processed_text)
         if -0.6 < scores["compound"] < 0.6:
             return {"sentiment": "neutral", "sentimentScore": 0.0}
 
-    # 2. Pure questions: "Who is this?", "What song?"
+    # 3. Pure questions: "Who is this?", "What song?"
     if clean_text.endswith("?") and len(clean_text.split()) < 8:
         return {"sentiment": "neutral", "sentimentScore": 0.0}
 
-    scores = _analyzer.polarity_scores(text)
+    scores = _analyzer.polarity_scores(processed_text)
     compound = scores["compound"]
 
     # Opsi A: Calibrated thresholds for YouTube comments. 
