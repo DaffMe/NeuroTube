@@ -1,4 +1,4 @@
-# <img src="assets/favicon.png" width="30" height="30" align="center" /> NeuroTube: High-Performance YouTube Sentiment Engine
+# <img src="assets/favicon.png" width="24" height="24" align="absmiddle" /> NeuroTube: High-Performance YouTube Sentiment Engine
 
 <div align="center">
 
