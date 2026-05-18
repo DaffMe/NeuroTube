@@ -42,8 +42,9 @@ _analyzer.lexicon.update(GAMING_LEXICON)
 
 # Override Emojis that are often positive/neutral in gaming
 GAMING_EMOJIS = {
-    "😭": "excited crying",  # Often used for "ngakak" or overwhelming excitement
-    "💀": "laughing dead",   # Used as "mati ketawa" (laughing to death)
+    "😭": "laughing crying wholesome joy",  # Overwhelming excitement / cute / laughing hysterically
+    "💀": "extremely funny positive dead",    # Laughing to death / hilarious
+    "☠️": "extremely funny positive dead",
     "😱": "shocked excitement",
     "🔥": "awesome",
     "💯": "perfect",
@@ -188,6 +189,33 @@ YOUTUBE_CULTURE_LEXICON = {
     "wtf": 0.0,      # Often used as "WTF that's good"
     "lmao": 1.0,     # Ensure laughing is positive
     "lmfao": 1.0,
+
+    # Gaming & Social/Co-op Interaction Neutralizations
+    "scared": 0.0,
+    "afraid": 0.0,
+    "anxious": 0.0,
+    "lonely": 0.0,
+    "terrible": 0.0,
+    "kill": 0.0,
+    "kills": 0.0,
+    "killed": 0.0,
+    "killing": 0.0,
+    "died": 0.0,
+    "fight": 0.0,
+    "fighting": 0.0,
+    "defeat": 0.0,
+    "defeated": 0.0,
+    "attack": 0.0,
+    "attacks": 0.0,
+    "weak": 0.0,
+    "weirdo": 0.0,
+    "dumb": 0.0,
+    "ruin": 0.0,
+    "ruins": 0.0,
+    "hurt": 0.0,
+    "hurts": 0.0,
+    "sadly": 0.0,
+    "badly": 0.0,
 }
 
 # Cinematic/Music Appreciation (Neutralize negative triggers for art)
@@ -296,6 +324,18 @@ SLANG_REPLACEMENTS = {
     "voice killed": "voice was spectacular",
     "beat kills": "beat is spectacular",
     "song kills": "song is spectacular",
+    
+    # Gen-Z / Laughter / Social Media Idioms (preventing negative score on "weak", "cry", "dead")
+    "got me weak": "made me laugh so much",
+    "i'm weak": "i am laughing so hard",
+    "im weak": "i am laughing so hard",
+    "i am weak": "i am laughing so hard",
+    "got me crying": "made me laugh so hard",
+    "i'm dead": "i am laughing so hard",
+    "im dead": "i am laughing so hard",
+    "i am dead": "i am laughing so hard",
+    "actually weak": "actually laughing so hard",
+    "that shit got me": "that made me laugh so much",
 }
 
 # Rick Astley Lyric Quote Detection (highly positive/loyal community engagement)
@@ -361,10 +401,10 @@ def analyze_comment(text: str) -> dict:
         for s in sentences:
             sentence_scores.append(_analyzer.polarity_scores(s)["compound"])
         
-        # Negativity safeguard: if any sentence is extremely toxic/negative (<= -0.50),
+        # Negativity safeguard: if any sentence is extremely toxic/negative (<= -0.70),
         # keep it negative to prevent false positives for harassment/toxicity.
         min_score = min(sentence_scores)
-        if min_score <= -0.50:
+        if min_score <= -0.70:
             compound = min_score
         else:
             # Self-weighted average to ignore neutral sentence dilution
