@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink, User } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink } from "lucide-react";
 import type { VideoInfo } from "@/types";
 import { ExpandableText } from "./ExpandableText";
 
@@ -92,7 +92,7 @@ export function VideoDetails({ video }: Props) {
             </h3>
             <ExpandableText 
               text={video.description} 
-              limit={160}
+              lineLimit={4}
               className="text-xs leading-relaxed text-muted-foreground/90 font-medium"
             />
           </div>

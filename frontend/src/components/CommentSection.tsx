@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThumbsUp, ChevronDown, ChevronUp, Filter, CornerDownRight } from "lucide-react";
+import { ThumbsUp, ChevronDown, ChevronUp, Filter } from "lucide-react";
 import type { Comment } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ExpandableText } from "./ExpandableText";
@@ -51,7 +51,7 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
           </div>
           <ExpandableText 
             text={comment.textOriginal || comment.textDisplay} 
-            limit={180}
+            lineLimit={4}
             className="mt-1 text-xs leading-relaxed text-foreground/90 font-medium"
           />
           <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground/60 font-semibold">
