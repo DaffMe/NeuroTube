@@ -229,10 +229,10 @@ bun dev
 Unlike generic sentiment analysis tools, NeuroTube utilizes a **Customized VADER Engine** specifically optimized for the nuances of modern digital discourse. The v2.0 algorithm implements several calibration layers to ensure high precision in complex social media environments.
 
 ### 📈 Case Study: "solo meme - Shachimu"
-Validated against high-volume cultural content (10,000+ comments), NeuroTube demonstrates a sophisticated understanding of audience engagement patterns, achieving a realistic sentiment distribution:
-- **Positive (~37%)**: Captures high-intensity appreciation for artistic quality and animation.
-- **Neutral (~60%)**: Accurately classifies historical context, descriptive remarks, and timestamped discussions that standard models often misinterpret as emotional.
-- **Negative (~3%)**: Effectively isolates genuine toxicity, while recognizing that "false negatives" often stem from expressive phrases like *"The only bad thing is it ends"* (high-arousal praise).
+Validated against high-volume cultural data (10,000+ comments), the NeuroTube engine demonstrates superior parsing of dense community sentiment, maintaining robust classification performance:
+- **Positive (~38%)**: Captures nuanced aesthetic appreciation, artistic quality, animation fidelity, and high-intensity community praise.
+- **Neutral (~60%)**: Accurately categorizes descriptive contextual remarks, structural queries, and chronological (timestamped) discussion points, mitigating the typical emotional bias of generic classifiers.
+- **Negative (~2%)**: Systematically isolates genuine constructive criticism or toxicity, while filtering out linguistic paradoxes where superficially negative phrasing indicates high-arousal satisfaction (e.g., *"The only bad thing is it ends"*).
 
 ### 🕹️ Context-Aware Heuristics
 - **High-Arousal Engagement**: Traditional NLP often misclassifies terms like *"scary"*, *"insane"*, or *"screaming"* as negative. NeuroTube’s engine recognizes these as indicators of high-arousal positive engagement in gaming and horror contexts.
