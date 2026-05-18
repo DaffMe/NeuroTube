@@ -5,6 +5,7 @@
   
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+  --color-logo-tube: hsl(var(--logo-tube));
   
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
@@ -37,65 +38,67 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 330 20% 15%;
+    --background: 359 20% 98%;
+    --foreground: 293 36% 18%;
+    --logo-tube: 293 36% 18%;
     
-    --primary: 330 85% 62%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 359 98% 82%;
+    --primary-foreground: 293 36% 18%;
     
-    --secondary: 330 40% 98%;
-    --secondary-foreground: 330 60% 20%;
+    --secondary: 359 40% 94%;
+    --secondary-foreground: 293 36% 18%;
     
-    --accent: 325 80% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 359 90% 75%;
+    --accent-foreground: 293 36% 18%;
     
-    --muted: 330 30% 97%;
-    --muted-foreground: 330 15% 40%;
+    --muted: 293 20% 95%;
+    --muted-foreground: 293 20% 40%;
     
     --card: 0 0% 100%;
-    --card-foreground: 330 20% 15%;
+    --card-foreground: 293 36% 18%;
     
-    --border: 330 30% 94%;
-    --input: 330 30% 94%;
-    --ring: 330 85% 62%;
+    --border: 359 30% 90%;
+    --input: 359 30% 90%;
+    --ring: 359 98% 82%;
     
     --radius: 1rem;
 
     /* Chart specific for light mode */
-    --chart-tick: 330 15% 50%;
+    --chart-tick: 293 20% 50%;
     --chart-tooltip-bg: 0 0% 100%;
-    --chart-tooltip-border: 330 30% 92%;
-    --chart-tooltip-text: 330 20% 15%;
+    --chart-tooltip-border: 359 30% 90%;
+    --chart-tooltip-text: 293 36% 18%;
   }
 
   .dark {
-    --background: 280 25% 6%;
-    --foreground: 330 30% 96%;
+    --background: 293 36% 12%;
+    --foreground: 359 40% 96%;
+    --logo-tube: 270 100% 95%;
     
-    --primary: 330 80% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 359 98% 82%;
+    --primary-foreground: 293 36% 18%;
     
-    --secondary: 280 30% 10%;
-    --secondary-foreground: 330 30% 96%;
+    --secondary: 293 40% 20%;
+    --secondary-foreground: 359 40% 96%;
     
-    --accent: 325 70% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 359 90% 75%;
+    --accent-foreground: 293 36% 18%;
     
-    --muted: 280 20% 12%;
-    --muted-foreground: 330 20% 75%;
+    --muted: 293 30% 25%;
+    --muted-foreground: 359 20% 75%;
     
-    --card: 280 25% 8%;
-    --card-foreground: 330 30% 96%;
+    --card: 293 36% 16%;
+    --card-foreground: 359 40% 96%;
     
-    --border: 280 30% 16%;
-    --input: 280 30% 16%;
-    --ring: 330 80% 65%;
+    --border: 293 40% 25%;
+    --input: 293 40% 25%;
+    --ring: 359 98% 82%;
 
     /* Chart specific for dark mode */
-    --chart-tick: 330 20% 70%;
-    --chart-tooltip-bg: 280 25% 10%;
-    --chart-tooltip-border: 280 30% 18%;
-    --chart-tooltip-text: 330 30% 96%;
+    --chart-tick: 359 20% 70%;
+    --chart-tooltip-bg: 293 36% 16%;
+    --chart-tooltip-border: 293 40% 25%;
+    --chart-tooltip-text: 359 40% 96%;
   }
 
   * {

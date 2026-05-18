@@ -15,11 +15,24 @@ export function ExpandableText({
   className = "", 
   buttonClassName = "" 
 }: ExpandableTextProps) {
+  const isLineBased = typeof lineLimit === "number";
+
+  // Deterministically initialize overflow state to prevent layout jumps during transitions
+  const [hasOverflow, setHasOverflow] = useState(() => {
+    if (isLineBased) {
+      const lines = text.split("\n");
+      let estimatedLines = 0;
+      const charsPerLine = 75; // average characters per line for text-xs in comment container
+      for (const line of lines) {
+        estimatedLines += Math.max(1, Math.ceil(line.length / charsPerLine));
+      }
+      return estimatedLines > lineLimit || text.length > 300;
+    }
+    return text.length > (limit ?? 200);
+  });
+
   const [isExpanded, setIsExpanded] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
-  const [hasOverflow, setHasOverflow] = useState(false);
-
-  const isLineBased = typeof lineLimit === "number";
 
   useEffect(() => {
     if (!isLineBased) return;
@@ -29,7 +42,12 @@ export function ExpandableText({
 
     const checkOverflow = () => {
       if (!isExpanded) {
-        setHasOverflow(el.scrollHeight > el.clientHeight);
+        // Defer to next animation frame to let Framer Motion transitions/fonts settle
+        requestAnimationFrame(() => {
+          if (el) {
+            setHasOverflow(el.scrollHeight > el.clientHeight);
+          }
+        });
       }
     };
 

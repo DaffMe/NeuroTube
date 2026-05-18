@@ -21,7 +21,24 @@ interface CommentItemProps {
 
 function CommentItem({ comment, replies = [], isReply = false }: CommentItemProps) {
   const [showReplies, setShowReplies] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const hasReplies = replies.length > 0;
+
+  const authorName = comment.authorDisplayName || "User";
+  const cleanName = authorName.startsWith("@") ? authorName.slice(1) : authorName;
+  const initial = cleanName.charAt(0).toUpperCase() || "?";
+  
+  // Deterministic pastel color palette based on username hash
+  const avatarColors = [
+    "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 ring-pink-500/20",
+    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-purple-500/20",
+    "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 ring-indigo-500/20",
+    "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 ring-rose-500/20",
+    "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 ring-violet-500/20",
+  ];
+  
+  const hash = cleanName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const colorClass = avatarColors[hash % avatarColors.length];
 
   return (
     <div className="flex flex-col gap-1">
@@ -33,11 +50,23 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
           isReply ? "ml-1 border-l border-border/50" : ""
         }`}
       >
-        <img
-          src={comment.authorProfileImageUrl}
-          alt={comment.authorDisplayName}
-          className={`${isReply ? "h-6 w-6" : "h-8 w-8"} shrink-0 rounded-full ring-2 ring-background`}
-        />
+        {!imgError && comment.authorProfileImageUrl ? (
+          <img
+            src={comment.authorProfileImageUrl}
+            alt={comment.authorDisplayName}
+            referrerPolicy="no-referrer"
+            onError={() => setImgError(true)}
+            className={`${isReply ? "h-6 w-6" : "h-8 w-8"} shrink-0 rounded-full ring-2 ring-background object-cover`}
+          />
+        ) : (
+          <div
+            className={`${
+              isReply ? "h-6 w-6 text-[10px]" : "h-8 w-8 text-xs"
+            } shrink-0 rounded-full flex items-center justify-center font-bold uppercase ring-2 ring-background ${colorClass}`}
+          >
+            {initial}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className={`font-semibold tracking-tight ${isReply ? "text-[11px]" : "text-xs"}`}>

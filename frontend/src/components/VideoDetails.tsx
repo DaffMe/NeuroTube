@@ -37,6 +37,7 @@ export function VideoDetails({ video }: Props) {
         <img
           src={video.thumbnail}
           alt={video.title}
+          referrerPolicy="no-referrer"
           className="h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />

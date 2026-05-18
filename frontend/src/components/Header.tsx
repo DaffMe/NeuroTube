@@ -34,8 +34,9 @@ export function Header() {
           >
             <img src="/favicon.png" alt="Logo" className="h-full w-full object-contain" />
           </motion.div>
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            NeuroTube
+          <span className="flex items-center font-extrabold tracking-tight">
+            <span className="text-primary">Neuro</span>
+            <span className="text-logo-tube transition-colors duration-300">Tube</span>
           </span>
         </motion.a>
 
