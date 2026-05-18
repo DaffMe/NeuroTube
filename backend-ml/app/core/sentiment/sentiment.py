@@ -120,6 +120,17 @@ INDONESIAN_EXTRAS = {
 
 # International YouTube Slang & Culture
 YOUTUBE_CULTURE_LEXICON = {
+    # Platform & Conversational Neutralizations (overriding standard English VADER negative bias)
+    "discord": 0.0,
+    "dies": 0.0,
+    "death": 0.0,
+    "dying": 0.0,
+    "loser": 0.0,
+    "fake": 0.0,
+    "revenge": 0.0,
+    "dangerous": 0.0,
+    "mad": 0.0,
+
     # Speed/Kai/Streaming Slang
     "w": 3.0,
     "l": -3.0,
@@ -268,6 +279,31 @@ def preprocess_tracklist(text: str) -> str:
     return " ".join(cleaned_lines).strip()
 
 
+SLANG_REPLACEMENTS = {
+    "could not be happier": "extremely happy",
+    "couldn't be happier": "extremely happy",
+    "could not be more happy": "extremely happy",
+    "couldn't be more happy": "extremely happy",
+    "could not be prouder": "extremely proud",
+    "couldn't be prouder": "extremely proud",
+    "no longer a loser": "a winner",
+    "no longer loser": "a winner",
+    "too dangerous to be left alive": "legendary and awesome",
+    "dangerous to be left alive": "legendary and awesome",
+    "mad lad": "awesome person",
+    "madlad": "awesome person",
+    "voice kills": "voice is spectacular",
+    "voice killed": "voice was spectacular",
+    "beat kills": "beat is spectacular",
+    "song kills": "song is spectacular",
+}
+
+# Rick Astley Lyric Quote Detection (highly positive/loyal community engagement)
+RICKROLL_LYRICS = [
+    "give you up", "let you down", "run around and desert you",
+    "make you cry", "say goodbye", "tell a lie", "hurt you", "never gonna"
+]
+
 def analyze_comment(text: str) -> dict:
     """
     Analyze the sentiment of a single comment.
@@ -278,35 +314,69 @@ def analyze_comment(text: str) -> dict:
             "sentimentScore": float  (-1.0 to 1.0, compound score)
         }
     """
+    import re
     # 1. Clean tracklists and timestamps
     processed_text = preprocess_tracklist(text)
     if not processed_text:
         return {"sentiment": "neutral", "sentimentScore": 0.0}
 
-    # Pre-processing for specific tropes
     clean_text = processed_text.lower()
+
+    # Pre-processing for specific tropes
     if "cutting onions" in clean_text or "cut onions" in clean_text:
         # This is a 100% positive trope for "moving/sad video"
         return {"sentiment": "positive", "sentimentScore": 0.8}
 
-    import re
-    # 2. Timestamp shield: If any single timestamps remain, check if it's descriptive
+    # 2. Rick Astley Special Quote Shield
+    lyric_matches = sum(1 for lyric in RICKROLL_LYRICS if lyric in clean_text)
+    if lyric_matches >= 2:
+        return {"sentiment": "positive", "sentimentScore": 0.8}
+
+    # 3. Timestamp shield: If any single timestamps remain, check if it's descriptive
     if re.search(r'\d+:\d+', clean_text):
         # Unless it's explicitly toxic, treat as neutral
         scores = _analyzer.polarity_scores(processed_text)
         if -0.6 < scores["compound"] < 0.6:
             return {"sentiment": "neutral", "sentimentScore": 0.0}
 
-    # 3. Pure questions: "Who is this?", "What song?"
+    # 4. Pure questions: "Who is this?", "What song?"
     if clean_text.endswith("?") and len(clean_text.split()) < 8:
         return {"sentiment": "neutral", "sentimentScore": 0.0}
 
-    scores = _analyzer.polarity_scores(processed_text)
-    compound = scores["compound"]
+    # 5. Apply Slang and Double-Negation Phrase Mapping
+    for original, replacement in SLANG_REPLACEMENTS.items():
+        if original in clean_text:
+            processed_text = re.sub(re.escape(original), replacement, processed_text, flags=re.IGNORECASE)
 
-    # Opsi A: Calibrated thresholds for YouTube comments. 
+    # 6. Sentence-by-sentence evaluation and aggregation to prevent negation leakage
+    sentences = [s.strip() for s in re.split(r'[.!?\n]', processed_text) if s.strip()]
+    
+    if len(sentences) <= 1:
+        # Single sentence or short comment: directly evaluate
+        scores = _analyzer.polarity_scores(processed_text)
+        compound = scores["compound"]
+    else:
+        # Multi-sentence comment: evaluate each sentence and aggregate
+        sentence_scores = []
+        for s in sentences:
+            sentence_scores.append(_analyzer.polarity_scores(s)["compound"])
+        
+        # Negativity safeguard: if any sentence is extremely toxic/negative (<= -0.50),
+        # keep it negative to prevent false positives for harassment/toxicity.
+        min_score = min(sentence_scores)
+        if min_score <= -0.50:
+            compound = min_score
+        else:
+            # Self-weighted average to ignore neutral sentence dilution
+            weighted_sum = sum(c * abs(c) for c in sentence_scores)
+            abs_sum = sum(abs(c) for c in sentence_scores)
+            if abs_sum == 0:
+                compound = 0.0
+            else:
+                compound = weighted_sum / abs_sum
+
+    # Calibrated thresholds for YouTube comments. 
     # YouTube users often use 'extreme' language that VADER captures as negative.
-    # We widen the 'neutral' zone significantly to reduce false negatives.
     if compound >= 0.20:
         label = "positive"
     elif compound <= -0.40:
