@@ -239,11 +239,11 @@ Validated against high-volume cultural content (10,000+ comments), NeuroTube dem
 - **Linguistic Adaptability**: Our engine implements **Timestamp & Question Shields** to neutralize purely functional comments (e.g., "12:34 What is the song?"), preventing them from skewing emotional metrics.
 
 ### 🌏 Multilingual & Slang Optimization
-- **Indonesian Lexicon (Bahasa Gaul)**: Native support for informal Indonesian sentiment, including hand-curated mappings for terms like `mantap`, `gokil`, and `parah` (as an intensifier).
-- **Platform-Specific Vernacular**: Comprehensive support for evolving internet slang and YouTube-specific idioms:
-  - **Competitive Slang**: `W`, `L`, `Ratio`, `Peak`, `Mid`.
-  - **Emergent Vernacular**: `Rizz`, `Gyatt`, `Cooked`, `Cooking`.
-  - **Status Indicators**: `GOAT`, `Legend`, `Underrated`.
+- **Indonesian Lexicon (Bahasa Gaul)**: Calibrated mapping for informal Indonesian expressions, including hand-curated intensity coefficients for regional slang and colloquial modifiers.
+- **Platform-Specific Vernacular**: Comprehensive lexical support for internet subcultures and platform-specific idioms:
+  - **Engagement Polarity Modifiers**: Robust recognition of competitive community terminology and gaming-derived polarity shifters.
+  - **Dynamic Neologisms**: Specialized processing for emerging social media vocabulary, neologisms, and action-state metaphors.
+  - **Reputational & Status Indicators**: Accurate weightings for internet-culture honorifics and community-driven status indicators.
 
 ---
 
