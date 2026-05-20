@@ -74,8 +74,8 @@ export default function HomePage() {
         const newHistory = await fetchHistory();
         setHistory(newHistory);
 
-      } catch (err: any) {
-        setError(err.message || "An error occurred during analysis");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred during analysis");
       } finally {
         setLoading(false);
         setLoadingMessage("");
@@ -96,8 +96,8 @@ export default function HomePage() {
     try {
       const data = await getAnalysisByVideo(video.videoId);
       setResult(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load analysis");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load analysis");
     } finally {
       setLoading(false);
       setLoadingMessage("");
@@ -114,7 +114,7 @@ export default function HomePage() {
     try {
       await deleteHistoryFromServer();
       setHistory([]);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to clear history:", err);
       // Fallback to just clearing local if server fails
       setHistory([]);
