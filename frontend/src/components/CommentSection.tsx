@@ -4,6 +4,7 @@ import { ThumbsUp, ChevronDown, ChevronUp, Filter } from "lucide-react";
 import type { Comment } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ExpandableText } from "./ExpandableText";
+import { getTimelineData } from "@/lib/timeline";
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
@@ -130,20 +131,30 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
 
 interface Props {
   comments: Comment[];
+  selectedDate: string | null;
+  onSelectDate: (date: string | null) => void;
 }
 
 const PAGE_SIZE = 10;
 
-export function CommentSection({ comments }: Props) {
+export function CommentSection({ comments, selectedDate, onSelectDate }: Props) {
   const [filter, setFilter] = useState<"all" | "positive" | "neutral" | "negative">("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expanded, setExpanded] = useState(true);
 
   // Group comments: Map parentId -> replies
   const groupedComments = useMemo(() => {
-    const main = comments.filter(c => !c.isReply);
+    const { getBucketKey } = getTimelineData(comments);
+    
+    // Filter comments by selectedDate if applicable
+    const dateFiltered = selectedDate
+      ? comments.filter((c) => getBucketKey(c.publishedAt) === selectedDate)
+      : comments;
+
+    const main = dateFiltered.filter(c => !c.isReply);
     const repliesMap: Record<string, Comment[]> = {};
     
+    // Replies can belong to main comments that are filtered out or in
     comments.forEach(c => {
       if (c.isReply && c.parentId) {
         if (!repliesMap[c.parentId]) repliesMap[c.parentId] = [];
@@ -151,23 +162,29 @@ export function CommentSection({ comments }: Props) {
       }
     });
 
-    // Apply filtering to main comments
+    // Apply sentiment filtering to main comments
     const filteredMain = filter === "all" ? main : main.filter((c) => c.sentiment === filter);
     
     return {
       main: filteredMain,
       repliesMap
     };
-  }, [comments, filter]);
+  }, [comments, filter, selectedDate]);
 
   const visible = groupedComments.main.slice(0, visibleCount);
   const hasMore = visibleCount < groupedComments.main.length;
 
+  const dateComments = useMemo(() => {
+    if (!selectedDate) return comments;
+    const { getBucketKey } = getTimelineData(comments);
+    return comments.filter((c) => getBucketKey(c.publishedAt) === selectedDate);
+  }, [comments, selectedDate]);
+
   const filters = [
-    { key: "all" as const, label: "All", count: comments.length },
-    { key: "positive" as const, label: "Positive", count: comments.filter((c) => c.sentiment === "positive").length },
-    { key: "neutral" as const, label: "Neutral", count: comments.filter((c) => c.sentiment === "neutral").length },
-    { key: "negative" as const, label: "Negative", count: comments.filter((c) => c.sentiment === "negative").length },
+    { key: "all" as const, label: "All", count: dateComments.filter(c => !c.isReply).length },
+    { key: "positive" as const, label: "Positive", count: dateComments.filter((c) => !c.isReply && c.sentiment === "positive").length },
+    { key: "neutral" as const, label: "Neutral", count: dateComments.filter((c) => !c.isReply && c.sentiment === "neutral").length },
+    { key: "negative" as const, label: "Negative", count: dateComments.filter((c) => !c.isReply && c.sentiment === "negative").length },
   ];
 
   return (
@@ -208,6 +225,21 @@ export function CommentSection({ comments }: Props) {
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             className="overflow-hidden"
           >
+            {/* Filter banner when selectedDate is active */}
+            {selectedDate && (
+              <div className="mx-6 mb-4 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs font-semibold text-primary">
+                <span>
+                  Showing comments from <strong>{selectedDate}</strong>
+                </span>
+                <button
+                  onClick={() => onSelectDate(null)}
+                  className="rounded-xl border border-primary/30 px-3 py-1 bg-background hover:bg-muted text-primary text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  Show All Dates
+                </button>
+              </div>
+            )}
+
             {/* Filter tabs */}
             <div className="flex gap-2 overflow-x-auto px-6 pb-6 no-scrollbar">
               {filters.map(({ key, label, count }) => (

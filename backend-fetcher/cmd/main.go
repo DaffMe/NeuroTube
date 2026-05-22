@@ -65,6 +65,7 @@ func main() {
 	r.Get("/api/health", h.Health)
 	r.Post("/api/analyze", h.Analyze)
 	r.Get("/api/status/{jobId}", h.Status)
+	r.Get("/api/status/{jobId}/stream", h.StatusStream)
 
 	// ── Server ───────────────────────────────────────────────────
 	port := os.Getenv("PORT")

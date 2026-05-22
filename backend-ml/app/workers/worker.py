@@ -55,7 +55,8 @@ async def process_job(job_data: dict):
 
             # 3. Analyze sentiment for each comment
             analyzed_comments = []
-            for comment in raw_comments:
+            total_comments_to_analyze = len(raw_comments)
+            for idx, comment in enumerate(raw_comments):
                 # Use textOriginal for better formatting, fallback to textDisplay
                 text = comment.get("textOriginal") or comment.get("textDisplay", "")
                 
@@ -74,9 +75,34 @@ async def process_job(job_data: dict):
                 
                 analyzed_comments.append(comment)
 
+                # Update progress every 50 comments (or if it's the last one) to avoid spamming Redis
+                if (idx % 50 == 0 or idx == total_comments_to_analyze - 1) and total_comments_to_analyze > 0:
+                    ml_percent = int(50 + (idx / total_comments_to_analyze) * 40)  # range 50% - 90%
+                    await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
+
             # 4. Save analyzed comments to DB
             saved_count = await crud.save_comments_batch(db, video_id, analyzed_comments)
             logger.info(f"💾 [{job_id}] Saved {saved_count} new comments to DB")
+            await redis_client.set(f"neurotube:progress:{job_id}", 90, ex=3600)
+
+            # Extract topics for positive and negative comments
+            pos_comment_texts = [
+                c.get("text_original") or c.get("textDisplay", "")
+                for c in analyzed_comments
+                if c["sentiment"] == "positive"
+            ]
+            neg_comment_texts = [
+                c.get("text_original") or c.get("textDisplay", "")
+                for c in analyzed_comments
+                if c["sentiment"] == "negative"
+            ]
+            pos_comment_texts = [t for t in pos_comment_texts if t.strip()]
+            neg_comment_texts = [t for t in neg_comment_texts if t.strip()]
+
+            from app.core.topics import extract_topics
+            topics_positive = extract_topics(pos_comment_texts, "positive")
+            topics_negative = extract_topics(neg_comment_texts, "negative")
+            await redis_client.set(f"neurotube:progress:{job_id}", 95, ex=3600)
 
             # 5. Compute and save sentiment summary
             positive = sum(1 for c in analyzed_comments if c["sentiment"] == "positive")
@@ -97,11 +123,17 @@ async def process_job(job_data: dict):
                 neutral=neutral,
                 total_comments=total,
                 average_score=round(avg_score, 4),
+                topics_positive=topics_positive,
+                topics_negative=topics_negative,
             )
 
             # 6. Update job status to completed
             await crud.update_job_status(db, job_id, "completed")
             await redis_client.set(STATUS_PREFIX + job_id, "completed", ex=3600)
+            await redis_client.set(f"neurotube:progress:{job_id}", 100, ex=3600)
+            
+            # Save cache entry with 24 hour TTL (Quota Guard)
+            await redis_client.set(f"neurotube:cache:{video_id}", job_id, ex=86400)
 
             logger.info(
                 f"✅ [{job_id}] Analysis complete: "

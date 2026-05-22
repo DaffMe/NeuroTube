@@ -344,6 +344,71 @@ RICKROLL_LYRICS = [
     "make you cry", "say goodbye", "tell a lie", "hurt you", "never gonna"
 ]
 
+_local_transformer = None
+
+def get_local_transformer():
+    global _local_transformer
+    if _local_transformer is not None:
+        return _local_transformer
+    try:
+        from transformers import pipeline
+        # Lazy load pipeline
+        _local_transformer = pipeline("sentiment-analysis", model="lxyuan/distilbert-base-multilingual-cased-sentiments-student")
+        return _local_transformer
+    except ImportError:
+        return None
+
+def analyze_with_gemini(text: str) -> str | None:
+    from app.core.config import settings
+    import httpx
+    if not settings.GEMINI_API_KEY:
+        return None
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": (
+                        "Analyze the sentiment of the following comment. "
+                        "Respond with ONLY a single word: positive, negative, or neutral. "
+                        "Do not include punctuation or explain your reasoning.\n\n"
+                        f"Comment: \"{text}\""
+                    )
+                }]
+            }]
+        }
+        resp = httpx.post(url, json=payload, timeout=2.0)
+        if resp.status_code == 200:
+            result = resp.json()
+            content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
+            if "positive" in content_text:
+                return "positive"
+            elif "negative" in content_text:
+                return "negative"
+            elif "neutral" in content_text:
+                return "neutral"
+    except Exception:
+        pass
+    return None
+
+def analyze_with_transformer(text: str) -> str | None:
+    classifier = get_local_transformer()
+    if not classifier:
+        return None
+    try:
+        results = classifier(text[:512])
+        if results and len(results) > 0:
+            label = results[0]["label"].lower()
+            if label in ["positive", "pos"]:
+                return "positive"
+            elif label in ["negative", "neg"]:
+                return "negative"
+            elif label in ["neutral", "neu"]:
+                return "neutral"
+    except Exception:
+        pass
+    return None
+
 def analyze_comment(text: str) -> dict:
     """
     Analyze the sentiment of a single comment.
@@ -415,14 +480,42 @@ def analyze_comment(text: str) -> dict:
             else:
                 compound = weighted_sum / abs_sum
 
-    # Calibrated thresholds for YouTube comments. 
-    # YouTube users often use 'extreme' language that VADER captures as negative.
-    if compound >= 0.20:
-        label = "positive"
-    elif compound <= -0.40:
-        label = "negative"
+    # Calibrated thresholds for YouTube comments with hybrid engine fallback.
+    # Ambiguous or neutral compound range check (-0.35 to 0.15)
+    if -0.35 < compound < 0.15:
+        gemini_sentiment = analyze_with_gemini(processed_text)
+        if gemini_sentiment:
+            if gemini_sentiment == "positive":
+                compound = 0.5
+            elif gemini_sentiment == "negative":
+                compound = -0.5
+            else:
+                compound = 0.0
+            label = gemini_sentiment
+        else:
+            transformer_sentiment = analyze_with_transformer(processed_text)
+            if transformer_sentiment:
+                if transformer_sentiment == "positive":
+                    compound = 0.5
+                elif transformer_sentiment == "negative":
+                    compound = -0.5
+                else:
+                    compound = 0.0
+                label = transformer_sentiment
+            else:
+                if compound >= 0.20:
+                    label = "positive"
+                elif compound <= -0.40:
+                    label = "negative"
+                else:
+                    label = "neutral"
     else:
-        label = "neutral"
+        if compound >= 0.20:
+            label = "positive"
+        elif compound <= -0.40:
+            label = "negative"
+        else:
+            label = "neutral"
 
     return {
         "sentiment": label,

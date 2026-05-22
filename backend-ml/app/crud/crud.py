@@ -190,6 +190,8 @@ async def save_sentiment_summary(
     neutral: int,
     total_comments: int,
     average_score: float,
+    topics_positive: Optional[list] = None,
+    topics_negative: Optional[list] = None,
 ) -> SentimentSummary:
     """Save or update the aggregated sentiment summary for a video."""
     existing = await db.execute(
@@ -203,6 +205,8 @@ async def save_sentiment_summary(
         summary.neutral = neutral
         summary.total_comments = total_comments
         summary.average_score = average_score
+        summary.topics_positive = topics_positive
+        summary.topics_negative = topics_negative
         summary.updated_at = datetime.utcnow()
     else:
         summary = SentimentSummary(
@@ -212,6 +216,8 @@ async def save_sentiment_summary(
             neutral=neutral,
             total_comments=total_comments,
             average_score=average_score,
+            topics_positive=topics_positive,
+            topics_negative=topics_negative,
         )
         db.add(summary)
 
@@ -275,6 +281,8 @@ async def get_analysis_history(
                     "neutral": summary.neutral if summary else 0,
                     "totalComments": summary.total_comments if summary else 0,
                     "averageScore": summary.average_score if summary else 0.0,
+                    "topicsPositive": summary.topics_positive if summary else None,
+                    "topicsNegative": summary.topics_negative if summary else None,
                 },
             }
         )
@@ -292,3 +300,16 @@ async def clear_all_data(db: AsyncSession):
     await db.execute(delete(CommentData))
     await db.execute(delete(VideoData))
     await db.commit()
+
+
+async def delete_video_data(db: AsyncSession, video_id: str):
+    """
+    Delete all data related to a specific video (Jobs, Summary, Comments, Video).
+    """
+    from sqlalchemy import delete
+    await db.execute(delete(CommentData).where(CommentData.video_id == video_id))
+    await db.execute(delete(SentimentSummary).where(SentimentSummary.video_id == video_id))
+    await db.execute(delete(AnalysisJob).where(AnalysisJob.video_id == video_id))
+    await db.execute(delete(VideoData).where(VideoData.id == video_id))
+    await db.commit()
+

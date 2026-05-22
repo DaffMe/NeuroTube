@@ -23,9 +23,10 @@ interface Props {
   history: AnalyzedVideo[];
   onSelect: (video: AnalyzedVideo) => void;
   onClear: () => void;
+  onDelete: (videoId: string) => void;
 }
 
-export function AnalyzedVideoList({ history, onSelect, onClear }: Props) {
+export function AnalyzedVideoList({ history, onSelect, onClear, onDelete }: Props) {
   if (history.length === 0) return null;
 
   return (
@@ -53,7 +54,7 @@ export function AnalyzedVideoList({ history, onSelect, onClear }: Props) {
             className="text-xs text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="mr-1 h-3 w-3" />
-            Clear
+            Clear All
           </Button>
         </motion.div>
       </div>
@@ -65,14 +66,14 @@ export function AnalyzedVideoList({ history, onSelect, onClear }: Props) {
         animate="visible"
       >
         {history.map((video) => (
-          <motion.button
+          <motion.div
             key={video.id}
             variants={itemVariants}
-            whileHover={{ scale: 1.02, x: 4 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.01, x: 4 }}
+            whileTap={{ scale: 0.99 }}
             transition={spring}
             onClick={() => onSelect(video)}
-            className="flex w-full items-center gap-3 rounded-2xl border border-border/50 bg-card/50 p-3 text-left backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-2xl border border-border/50 bg-card/50 p-3 text-left backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card cursor-pointer group"
           >
             <img
               src={video.thumbnail}
@@ -84,11 +85,21 @@ export function AnalyzedVideoList({ history, onSelect, onClear }: Props) {
               <p className="truncate text-sm font-medium">{video.title}</p>
               <p className="text-xs text-muted-foreground">{video.channelTitle}</p>
             </div>
-            <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-              <BarChart3 className="h-3 w-3" />
-              {video.sentimentResult.totalComments}
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                <BarChart3 className="h-3 w-3" />
+                {video.sentimentResult.totalComments}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                onClick={() => onDelete(video.videoId)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
-          </motion.button>
+          </motion.div>
         ))}
       </motion.div>
     </motion.section>

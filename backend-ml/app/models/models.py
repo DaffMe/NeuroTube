@@ -6,8 +6,9 @@ TypeScript interfaces (VideoInfo, Comment, SentimentResult, AnalyzedVideo).
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field
+from sqlalchemy import Column, JSON
 
 
 class AnalysisJob(SQLModel, table=True):
@@ -70,4 +71,6 @@ class SentimentSummary(SQLModel, table=True):
     neutral: int = 0
     total_comments: int = 0
     average_score: float = 0.0
+    topics_positive: Optional[list] = Field(default=None, sa_column=Column(JSON))
+    topics_negative: Optional[list] = Field(default=None, sa_column=Column(JSON))
     updated_at: datetime = Field(default_factory=datetime.utcnow)

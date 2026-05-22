@@ -9,15 +9,19 @@ import { VideoDetails } from "@/components/VideoDetails";
 import { CommentCharts } from "@/components/CommentCharts";
 import { CommentSection } from "@/components/CommentSection";
 import { SentimentSummary } from "@/components/StatBlock";
+import { AiSummary } from "@/components/AiSummary";
+import { SentimentTimeline } from "@/components/SentimentTimeline";
 import {
   isValidYouTubeUrl,
   submitAnalysisJob,
   getJobStatus,
+  getJobStatusStreamUrl,
   getAnalysisResults,
   getAnalysisByVideo,
   fetchHistory,
   getLocalHistory,
   deleteHistoryFromServer,
+  deleteVideoFromServer,
 } from "@/services/api";
 import type { AnalysisResponse, AnalyzedVideo } from "@/types";
 
@@ -28,8 +32,10 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [progress, setProgress] = useState<number | undefined>(undefined);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [history, setHistory] = useState<AnalyzedVideo[]>(getLocalHistory());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Fetch history from server on mount
   useEffect(() => {
@@ -46,22 +52,63 @@ export default function HomePage() {
       setError("");
       setLoading(true);
       setLoadingMessage("Submitting job...");
+      setProgress(0);
 
       try {
         // 1. Submit job
-        const { jobId } = await submitAnalysisJob(target);
+        const jobRes = await submitAnalysisJob(target);
+        const jobId = jobRes.jobId;
 
-        // 2. Poll status
-        let completed = false;
-        while (!completed) {
-          await new Promise((r) => setTimeout(r, 2000));
-          const statusRes = await getJobStatus(jobId);
-          setLoadingMessage(statusRes.message);
+        // 2. Stream progress via SSE (if not already completed)
+        let completed = jobRes.status === "completed";
+        if (!completed) {
+          try {
+            await new Promise<void>((resolve, reject) => {
+              const eventSource = new EventSource(getJobStatusStreamUrl(jobId));
 
-          if (statusRes.status === "completed") {
-            completed = true;
-          } else if (statusRes.status.startsWith("failed")) {
-            throw new Error(statusRes.message);
+              eventSource.onmessage = (event) => {
+                try {
+                  const data = JSON.parse(event.data);
+                  if (typeof data.progress === "number") {
+                    setProgress(data.progress);
+                  }
+                  if (data.message) {
+                    setLoadingMessage(data.message);
+                  }
+
+                  if (data.status === "completed") {
+                    eventSource.close();
+                    resolve();
+                  } else if (data.status === "failed") {
+                    eventSource.close();
+                    reject(new Error(data.message || "Analysis failed"));
+                  }
+                } catch (err) {
+                  eventSource.close();
+                  reject(err);
+                }
+              };
+
+              eventSource.onerror = () => {
+                eventSource.close();
+                reject(new Error("Connection error"));
+              };
+            });
+          } catch (sseErr) {
+            console.warn("SSE progress stream failed, falling back to polling...", sseErr);
+            // Fallback: poll until completed
+            let fallbackCompleted = false;
+            while (!fallbackCompleted) {
+              await new Promise((r) => setTimeout(r, 2000));
+              const statusRes = await getJobStatus(jobId);
+              setLoadingMessage(statusRes.message);
+
+              if (statusRes.status === "completed") {
+                fallbackCompleted = true;
+              } else if (statusRes.status.startsWith("failed")) {
+                throw new Error(statusRes.message);
+              }
+            }
           }
         }
 
@@ -79,6 +126,7 @@ export default function HomePage() {
       } finally {
         setLoading(false);
         setLoadingMessage("");
+        setProgress(undefined);
       }
     },
     [url]
@@ -108,6 +156,7 @@ export default function HomePage() {
     setResult(null);
     setUrl("");
     setError("");
+    setSelectedDate(null);
   }, []);
 
   const handleClearHistory = useCallback(async () => {
@@ -118,6 +167,15 @@ export default function HomePage() {
       console.error("Failed to clear history:", err);
       // Fallback to just clearing local if server fails
       setHistory([]);
+    }
+  }, []);
+
+  const handleDeleteVideo = useCallback(async (videoId: string) => {
+    try {
+      await deleteVideoFromServer(videoId);
+      setHistory((prev) => prev.filter((v) => v.videoId !== videoId));
+    } catch (err) {
+      console.error("Failed to delete video:", err);
     }
   }, []);
 
@@ -145,7 +203,20 @@ export default function HomePage() {
         <VideoDetails video={result.videoInfo} />
         <SentimentSummary result={result.sentimentResult} />
         <CommentCharts result={result.sentimentResult} />
-        <CommentSection comments={result.comments} />
+        <AiSummary
+          topicsPositive={result.sentimentResult.topicsPositive}
+          topicsNegative={result.sentimentResult.topicsNegative}
+        />
+        <SentimentTimeline
+          comments={result.comments}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
+        <CommentSection
+          comments={result.comments}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
       </motion.div>
     );
   }
@@ -278,13 +349,21 @@ export default function HomePage() {
         </motion.div>
 
         {/* Loading */}
-        <AnimatePresence>{loading && <LoadingSpinner message={loadingMessage || "Loading..."} />}</AnimatePresence>
+        <AnimatePresence>
+          {loading && (
+            <LoadingSpinner
+              message={loadingMessage || "Loading..."}
+              progress={progress}
+            />
+          )}
+        </AnimatePresence>
 
         {/* History */}
         <AnalyzedVideoList
           history={history}
           onSelect={handleHistorySelect}
           onClear={handleClearHistory}
+          onDelete={handleDeleteVideo}
         />
       </motion.div>
     </AnimatePresence>

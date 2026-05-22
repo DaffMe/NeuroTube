@@ -16,6 +16,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.crud import crud
+import redis.asyncio as aioredis
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -105,6 +107,25 @@ async def clear_history(db: AsyncSession = Depends(get_db)):
     """
     await crud.clear_all_data(db)
     return {"message": "All history cleared successfully"}
+
+
+@router.delete("/history/{video_id}")
+async def delete_history_item(video_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Delete a specific video and all its analysis results from history.
+    Also deletes its Redis cache.
+    """
+    await crud.delete_video_data(db, video_id)
+    
+    # Delete from Redis cache
+    try:
+        redis_client = aioredis.from_url(settings.REDIS_URL)
+        await redis_client.delete(f"neurotube:cache:{video_id}")
+        await redis_client.close()
+    except Exception as e:
+        pass
+        
+    return {"message": f"History for video {video_id} deleted successfully"}
 
 
 @router.get("/comments/{video_id}")
@@ -197,5 +218,7 @@ async def _build_analysis_response(
             "neutral": summary.neutral if summary else 0,
             "totalComments": summary.total_comments if summary else 0,
             "averageScore": summary.average_score if summary else 0.0,
+            "topicsPositive": summary.topics_positive if summary else None,
+            "topicsNegative": summary.topics_negative if summary else None,
         },
     }

@@ -7,8 +7,9 @@ const ML_API = (import.meta.env.VITE_ML_API_URL || "http://localhost:8000") + "/
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
-export async function submitAnalysisJob(url: string): Promise<{ jobId: string; status: string; message: string }> {
-  const response = await fetch(`${FETCHER_API}/analyze`, {
+export async function submitAnalysisJob(url: string, force = false): Promise<{ jobId: string; status: string; message: string }> {
+  const endpoint = force ? `${FETCHER_API}/analyze?force=true` : `${FETCHER_API}/analyze`;
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
@@ -26,6 +27,10 @@ export async function getJobStatus(jobId: string): Promise<{ status: string; mes
     throw new Error("Failed to get job status");
   }
   return response.json();
+}
+
+export function getJobStatusStreamUrl(jobId: string): string {
+  return `${FETCHER_API}/status/${jobId}/stream`;
 }
 
 export async function getAnalysisResults(jobId: string): Promise<AnalysisResponse> {
@@ -119,4 +124,24 @@ export async function deleteHistoryFromServer(): Promise<void> {
     throw new Error("Failed to clear history on server");
   }
   clearHistory();
+}
+
+export async function deleteVideoFromServer(videoId: string): Promise<void> {
+  const response = await fetch(`${ML_API}/history/${videoId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete video from server");
+  }
+  // Sync to local storage
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const history: AnalyzedVideo[] = JSON.parse(raw);
+      const updated = history.filter((v) => v.videoId !== videoId);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    }
+  } catch (err) {
+    console.error("Failed to update local storage after deletion", err);
+  }
 }

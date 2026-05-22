@@ -85,6 +85,25 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Quota Guard: Check Cache
+	force := r.URL.Query().Get("force") == "true"
+	if !force {
+		cachedJobID, err := h.publisher.GetCache(videoID)
+		if err == nil && cachedJobID != "" {
+			log.Printf("🛡️ [Quota Guard] Cache hit for video %s -> Job %s", videoID, cachedJobID)
+			// Refresh status key in Redis just in case status TTL expired
+			_ = h.publisher.SetStatus(cachedJobID, "completed")
+
+			writeJSON(w, http.StatusOK, AnalyzeResponse{
+				JobID:   cachedJobID,
+				VideoID: videoID,
+				Status:  "completed",
+				Message: "Analysis retrieved from cache (Quota Guard).",
+			})
+			return
+		}
+	}
+
 	// Generate a unique job ID
 	jobID := uuid.New().String()
 
@@ -96,6 +115,7 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 	// Fetch video info + comments asynchronously
 	go func() {
 		log.Printf("📥 [%s] Fetching video info for %s...", jobID, videoID)
+		_ = h.publisher.SetProgress(jobID, 5)
 
 		// 1. Fetch video metadata
 		videoInfo, err := h.ytClient.FetchVideoInfo(videoID)
@@ -105,18 +125,22 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		_ = h.publisher.SetProgress(jobID, 10)
 		totalComments, _ := strconv.Atoi(videoInfo.CommentCount)
 		log.Printf("📝 [%s] Video: %s | Total comments on YT: %d (Target: 10000)", jobID, videoInfo.Title, totalComments)
 
 		// 2. Fetch comments (sampled for speed)
 		// We pass the total count so the fetcher can decide to use 'time' order if count <= 10000
-		comments, err := h.ytClient.FetchComments(videoID, 10000)
+		comments, err := h.ytClient.FetchComments(videoID, 10000, func(percent int) {
+			_ = h.publisher.SetProgress(jobID, percent)
+		})
 		if err != nil {
 			log.Printf("⚠️ [%s] Error fetching comments (partial results): %v", jobID, err)
 			// Continue with partial results
 		}
 
 		log.Printf("✅ [%s] Fetched %d comments", jobID, len(comments))
+		_ = h.publisher.SetProgress(jobID, 50)
 
 		// 3. Publish to Redis queue for Python ML processing
 		err = h.publisher.PublishJob(jobID, videoID, videoInfo, comments)
@@ -160,6 +184,87 @@ func (h *Handler) Status(w http.ResponseWriter, r *http.Request) {
 		Status:  status,
 		Message: getStatusMessage(status),
 	})
+}
+
+// StatusStream streams the progress and status of a job using Server-Sent Events (SSE).
+func (h *Handler) StatusStream(w http.ResponseWriter, r *http.Request) {
+	jobID := chi.URLParam(r, "jobId")
+	if jobID == "" {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Missing jobId"})
+		return
+	}
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
+	// Flush headers immediately
+	flusher.Flush()
+
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-r.Context().Done():
+			log.Printf("🔌 SSE client disconnected for job %s", jobID)
+			return
+		case <-ticker.C:
+			status, err := h.publisher.GetJobStatus(jobID)
+			if err != nil {
+				// Job might not be in Redis yet or status expired
+				eventData := map[string]interface{}{
+					"progress": 0,
+					"status":   "unknown",
+					"message":  "Job not found or still in queue",
+				}
+				sendSSEEvent(w, flusher, eventData)
+				continue
+			}
+
+			progress, err := h.publisher.GetProgress(jobID)
+			if err != nil {
+				progress = 0
+			}
+
+			displayStatus := status
+			message := getStatusMessage(status)
+			if strings.HasPrefix(status, "failed") {
+				displayStatus = "failed"
+				message = strings.TrimPrefix(status, "failed:")
+			}
+
+			eventData := map[string]interface{}{
+				"progress": progress,
+				"status":   displayStatus,
+				"message":  message,
+			}
+
+			sendSSEEvent(w, flusher, eventData)
+
+			if displayStatus == "completed" || displayStatus == "failed" {
+				return
+			}
+		}
+	}
+}
+
+func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data interface{}) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Printf("Error marshaling SSE event data: %v", err)
+		return
+	}
+	fmt.Fprintf(w, "data: %s\n\n", jsonData)
+	flusher.Flush()
 }
 
 // ── Helpers ──────────────────────────────────────────────────────

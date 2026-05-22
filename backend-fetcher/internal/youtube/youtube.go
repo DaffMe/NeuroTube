@@ -181,7 +181,7 @@ func (c *Client) FetchVideoInfo(videoID string) (*VideoInfo, error) {
 }
 
 // FetchComments fetches up to 'limit' comments for a video using concurrent goroutines.
-func (c *Client) FetchComments(videoID string, limit int) ([]Comment, error) {
+func (c *Client) FetchComments(videoID string, limit int, onProgress func(int)) ([]Comment, error) {
 	// First, we need to know the total count
 	videoInfo, err := c.FetchVideoInfo(videoID)
 	if err != nil {
@@ -198,10 +198,10 @@ func (c *Client) FetchComments(videoID string, limit int) ([]Comment, error) {
 		strategies = []string{"time"}
 	}
 
-	return c.fetchCommentsConcurrent(videoID, limit, strategies)
+	return c.fetchCommentsConcurrent(videoID, limit, strategies, onProgress)
 }
 
-func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies []string) ([]Comment, error) {
+func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies []string, onProgress func(int)) ([]Comment, error) {
 	var (
 		mu          sync.Mutex
 		commentsMap = make(map[string]Comment)
@@ -229,7 +229,16 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 				commentsMap[cm.ID] = cm
 			}
 		}
+		currentCount := len(commentsMap)
 		mu.Unlock()
+
+		if onProgress != nil && limit > 0 {
+			percent := int(float64(currentCount) / float64(limit) * 45.0)
+			if percent > 45 {
+				percent = 45
+			}
+			onProgress(5 + percent)
+		}
 
 		if token == "" {
 			continue
@@ -259,8 +268,17 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 								commentsMap[cm.ID] = cm
 							}
 						}
+						currentCount := len(commentsMap)
 						full := (limit > 0 && len(commentsMap) >= limit)
 						mu.Unlock()
+
+						if onProgress != nil && limit > 0 {
+							percent := int(float64(currentCount) / float64(limit) * 45.0)
+							if percent > 45 {
+								percent = 45
+							}
+							onProgress(5 + percent)
+						}
 
 						if next != "" && !full {
 							tokenCh <- next

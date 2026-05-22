@@ -82,6 +82,20 @@ func (p *Publisher) PublishJob(jobID, videoID string, videoInfo *youtube.VideoIn
 	return nil
 }
 
+// GetCache retrieves the cached jobId for a video, if it exists.
+func (p *Publisher) GetCache(videoID string) (string, error) {
+	cacheKey := "neurotube:cache:" + videoID
+	result, err := p.client.Get(p.ctx, cacheKey).Result()
+	if err == redis.Nil {
+		return "", nil // Cache miss
+	}
+	if err != nil {
+		return "", err
+	}
+	return result, nil
+}
+
+
 // SetStatus updates the status of a job in Redis.
 func (p *Publisher) SetStatus(jobID, status string) error {
 	statusKey := StatusPrefix + jobID
@@ -105,6 +119,22 @@ func (p *Publisher) GetJobStatus(jobID string) (string, error) {
 		return "", err
 	}
 	return result, nil
+}
+
+// SetProgress updates the numeric progress percentage of a job in Redis.
+func (p *Publisher) SetProgress(jobID string, percent int) error {
+	progressKey := "neurotube:progress:" + jobID
+	return p.client.Set(p.ctx, progressKey, percent, StatusTTL).Err()
+}
+
+// GetProgress retrieves the numeric progress percentage of a job from Redis.
+func (p *Publisher) GetProgress(jobID string) (int, error) {
+	progressKey := "neurotube:progress:" + jobID
+	val, err := p.client.Get(p.ctx, progressKey).Int()
+	if err == redis.Nil {
+		return 0, nil
+	}
+	return val, err
 }
 
 // Close closes the Redis client connection.
