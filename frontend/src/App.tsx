@@ -25,63 +25,97 @@ import {
 } from "@/services/api";
 import type { AnalysisResponse, AnalyzedVideo } from "@/types";
 
+// -----------------------------------------------------------------------------
+// SPRING ANIMATION CONFIGURATION
+// -----------------------------------------------------------------------------
+// The 'spring' object controls how bouncy and smooth the UI transitions will be.
 const spring = { type: "spring" as const, stiffness: 400, damping: 18 };
 
 export default function HomePage() {
+  // ---------------------------------------------------------------------------
+  // STATE MANAGEMENT (TEMPORARY DATA STORAGE FOR THIS PAGE)
+  // ---------------------------------------------------------------------------
+  // url: Stores the YouTube link text typed by the user in the search box
   const [url, setUrl] = useState("");
+  // error: Stores warning messages if the link is invalid or the system fails
   const [error, setError] = useState("");
+  // loading: A boolean (True/False) flag indicating if the system is currently processing an analysis
   const [loading, setLoading] = useState(false);
+  // loadingMessage: Stores status messages like "Fetching...", "Analyzing..."
   const [loadingMessage, setLoadingMessage] = useState("");
+  // progress: Stores the progress percentage (0 to 100%) of the backend job
   const [progress, setProgress] = useState<number | undefined>(undefined);
+  // result: Stores all the final analysis data (statistics, charts, AI summary) upon success
   const [result, setResult] = useState<AnalysisResponse | null>(null);
+  // history: Stores the list of previously analyzed videos fetched from the database
   const [history, setHistory] = useState<AnalyzedVideo[]>(getLocalHistory());
+  // selectedDate: Stores the specific date filter if the user clicks a point on the timeline chart
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Fetch history from server on mount
+  // ---------------------------------------------------------------------------
+  // SIDE EFFECTS (RUNS WHEN THE APP FIRST LOADS)
+  // ---------------------------------------------------------------------------
   useEffect(() => {
+    // Contacts the server (backend) to request the list of previous analysis history
     fetchHistory().then(setHistory).catch(console.error);
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // MAIN FUNCTION: PROCESS THE ANALYZE BUTTON CLICK
+  // ---------------------------------------------------------------------------
   const handleAnalyze = useCallback(
     async (inputUrl?: string) => {
+      // Use the URL from the input box, OR a direct URL (if clicked from History)
       const target = inputUrl || url;
+      
+      // Stop the process if the provided link is not a valid YouTube URL
       if (!isValidYouTubeUrl(target)) {
-        setError("Please enter a valid YouTube URL");
+        setError("Please enter a valid YouTube URL!");
         return;
       }
+      
+      // Clear any previous error messages and activate the Loading mode
       setError("");
       setLoading(true);
-      setLoadingMessage("Submitting job...");
+      setLoadingMessage("Sending request to server...");
       setProgress(0);
 
       try {
-        // 1. Submit job
+        // 1. Send the video to the Backend Queue system. The server responds with a 'Job ID'
         const jobRes = await submitAnalysisJob(target);
         const jobId = jobRes.jobId;
 
-        // 2. Stream progress via SSE (if not already completed)
-        let completed = jobRes.status === "completed";
+        // 2. Check if the job happens to be completed immediately
+        // Using const because this value is set once and never reassigned afterward
+        const completed = jobRes.status === "completed";
+        
+        // If not finished yet, we will continuously monitor (Polling/Streaming) the progress
         if (!completed) {
           try {
             await new Promise<void>((resolve, reject) => {
+              // Establish a dedicated Server-Sent Events (SSE) connection to receive real-time progress updates
               const eventSource = new EventSource(getJobStatusStreamUrl(jobId));
 
+              // Every time the Backend sends a new progress message:
               eventSource.onmessage = (event) => {
                 try {
                   const data = JSON.parse(event.data);
+                  // Update the progress bar percentage in the UI
                   if (typeof data.progress === "number") {
                     setProgress(data.progress);
                   }
+                  // Update the loading text message in the UI
                   if (data.message) {
                     setLoadingMessage(data.message);
                   }
 
+                  // If the server says the process is "completed"
                   if (data.status === "completed") {
-                    eventSource.close();
-                    resolve();
+                    eventSource.close(); // Close the communication channel
+                    resolve();           // Proceed to the next step (fetching results)
                   } else if (data.status === "failed") {
                     eventSource.close();
-                    reject(new Error(data.message || "Analysis failed"));
+                    reject(new Error(data.message || "Analysis failed during processing"));
                   }
                 } catch (err) {
                   eventSource.close();
@@ -89,15 +123,18 @@ export default function HomePage() {
                 }
               };
 
+              // If the internet connection drops unexpectedly
               eventSource.onerror = () => {
                 eventSource.close();
-                reject(new Error("Connection error"));
+                reject(new Error("Connection lost"));
               };
             });
           } catch (sseErr) {
-            console.warn("SSE progress stream failed, falling back to polling...", sseErr);
-            // Fallback: poll until completed
+            // IF the dedicated SSE stream fails, fallback to manual Polling mode
+            console.warn("SSE stream connection failed, switching to manual polling...", sseErr);
             let fallbackCompleted = false;
+            
+            // The system will ask the server "Is it done yet?" every 2 seconds
             while (!fallbackCompleted) {
               await new Promise((r) => setTimeout(r, 2000));
               const statusRes = await getJobStatus(jobId);
@@ -106,24 +143,27 @@ export default function HomePage() {
               if (statusRes.status === "completed") {
                 fallbackCompleted = true;
               } else if (statusRes.status.startsWith("failed")) {
-                throw new Error(statusRes.message);
+                // Attach the original caught error (sseErr) as the 'cause' for proper error tracing
+                throw new Error(statusRes.message, { cause: sseErr });
               }
             }
           }
         }
 
-        // 3. Get results
-        setLoadingMessage("Fetching results...");
+        // 3. Fetch the Complete Results (Statistics Data & Comments) once 100% processed
+        setLoadingMessage("Downloading final results...");
         const data = await getAnalysisResults(jobId);
-        setResult(data);
+        setResult(data); // Save the results into the 'result' state so it renders on the screen
         
-        // Refresh history
+        // Refresh the history list because we just successfully analyzed a new video
         const newHistory = await fetchHistory();
         setHistory(newHistory);
 
       } catch (err) {
+        // Display red error text if the analysis fails
         setError(err instanceof Error ? err.message : "An error occurred during analysis");
       } finally {
+        // Regardless of success or failure, turn off the loading spinner
         setLoading(false);
         setLoadingMessage("");
         setProgress(undefined);
@@ -132,20 +172,26 @@ export default function HomePage() {
     [url]
   );
 
+  // ---------------------------------------------------------------------------
+  // HELPER FUNCTIONS
+  // ---------------------------------------------------------------------------
+
+  // Function for the "Sample" button (fills the box with a Rickroll link for testing)
   const handleSample = useCallback(async () => {
     setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     handleAnalyze("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   }, [handleAnalyze]);
 
+  // Function when a user clicks on a previously analyzed video from the history sidebar
   const handleHistorySelect = useCallback(async (video: AnalyzedVideo) => {
     setError("");
     setLoading(true);
-    setLoadingMessage("Loading analysis...");
+    setLoadingMessage("Loading results from database...");
     try {
       const data = await getAnalysisByVideo(video.videoId);
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load analysis");
+      setError(err instanceof Error ? err.message : "Failed to load that history record");
     } finally {
       setLoading(false);
       setLoadingMessage("");
@@ -268,7 +314,7 @@ export default function HomePage() {
 
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
             Youtube Comments{" "}
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Sentiment Analyzer
             </span>
           </h1>

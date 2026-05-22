@@ -1,58 +1,71 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ThumbsUp, ThumbsDown, Quote, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, ThumbsUp, ThumbsDown, Quote, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import type { TopicCluster } from "@/types";
 
+// Props accepted by the main AiSummary component
 interface Props {
-  topicsPositive?: TopicCluster[];
-  topicsNegative?: TopicCluster[];
+  topicsPositive?: TopicCluster[]; // List of positive AI conclusions
+  topicsNegative?: TopicCluster[]; // List of negative AI conclusions
 }
 
+// Spring animation config for smooth bounce transitions
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
+// -----------------------------------------------------------------------------
+// CHILD COMPONENT: TopicCard
+// Renders a single topic cluster card with expandable quotes section.
+// -----------------------------------------------------------------------------
 function TopicCard({ topic, type }: { topic: TopicCluster; type: "positive" | "negative" }) {
+  // State to track whether the card is expanded (clicked) to reveal quotes
   const [expanded, setExpanded] = useState(false);
 
+  // Determine color scheme based on the sentiment type
   const isPositive = type === "positive";
   const accentClass = isPositive ? "text-emerald-500" : "text-rose-500";
   const bgAccentClass = isPositive ? "bg-emerald-500/10 border-emerald-500/20" : "bg-rose-500/10 border-rose-500/20";
-  const pillClass = isPositive 
-    ? "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10 hover:bg-emerald-500/10" 
+  const pillClass = isPositive
+    ? "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10 hover:bg-emerald-500/10"
     : "bg-rose-500/5 text-rose-600 dark:text-rose-400 border-rose-500/10 hover:bg-rose-500/10";
 
+  // Safely access the quotes array from the topic object (may be undefined)
+  const quotes = topic.quotes ?? [];
+
   return (
+    // Card container with hover color transition
     <motion.div
       layout
       className={`rounded-2xl border bg-card/50 p-4 transition-colors hover:bg-card/75 backdrop-blur-sm ${
         isPositive ? "border-emerald-500/25" : "border-rose-500/25"
       }`}
     >
+      {/* Card Header: Title, Summary, and Expand/Collapse Toggle */}
       <div
         className="flex items-start justify-between gap-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="space-y-2 flex-1">
+          {/* AI Conclusion Title */}
           <div className="flex items-center gap-2">
             <span className={`text-sm font-black tracking-tight ${accentClass}`}>
               {topic.topic}
             </span>
           </div>
+          {/* Narrative Summary Paragraph */}
           <p className="text-xs text-foreground/90 font-medium leading-relaxed">
             {topic.summary}
           </p>
         </div>
+
+        {/* Expand/Collapse Arrow Icon */}
         <div className={`h-8 w-8 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
           isPositive ? "border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10" : "border-rose-500/30 text-rose-500 hover:bg-rose-500/10"
         }`}>
-          {expanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </div>
 
-      {/* Keywords */}
+      {/* Keywords/Theme Pills extracted by the AI */}
       <div className="mt-3 flex flex-wrap gap-1.5">
         {topic.keywords.map((kw, i) => (
           <span
@@ -64,23 +77,28 @@ function TopicCard({ topic, type }: { topic: TopicCluster; type: "positive" | "n
         ))}
       </div>
 
-      {/* Expanded Direct Quotes */}
+      {/* Expandable Quotes Section: Revealed when the card is clicked */}
       <AnimatePresence initial={false}>
-        {expanded && (
+        {expanded && quotes.length > 0 && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mt-4 space-y-3 pt-3 border-t border-border/50"
           >
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">
-              Representative Quotes
-            </p>
-            {topic.quotes.map((quote, i) => (
+            <div className="flex items-center gap-1.5 opacity-80">
+              <MessageSquare className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Representative Quotes
+              </span>
+            </div>
+            {/* Display each quote from the quotes array */}
+            {quotes.map((quote, i) => (
               <div
                 key={i}
                 className={`relative pl-7 pr-3 py-2.5 rounded-xl border text-xs leading-relaxed text-foreground/80 font-medium ${bgAccentClass}`}
               >
+                {/* Quote icon indicator */}
                 <Quote className={`absolute left-2.5 top-3 h-3.5 w-3.5 opacity-40 ${accentClass}`} />
                 <p className="italic">"{quote}"</p>
               </div>
@@ -92,19 +110,26 @@ function TopicCard({ topic, type }: { topic: TopicCluster; type: "positive" | "n
   );
 }
 
+// -----------------------------------------------------------------------------
+// MAIN COMPONENT: AI Summary & Topic Clustering Container
+// Displays positive and negative topic clusters side by side in a grid.
+// -----------------------------------------------------------------------------
 export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
   const hasPositive = topicsPositive.length > 0;
   const hasNegative = topicsNegative.length > 0;
 
+  // Don't render the AI box at all if there's no topic data
   if (!hasPositive && !hasNegative) return null;
 
   return (
+    // Main glass-morphism container with fade-in animation
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.38 }}
       className="rounded-[2.5rem] border border-border/40 bg-card/40 p-6 backdrop-blur-md shadow-2xl shadow-primary/5 space-y-6"
     >
+      {/* Component Header */}
       <div className="flex items-center gap-2">
         <div className="h-8 w-8 rounded-2xl bg-primary/10 flex items-center justify-center">
           <Sparkles className="h-4 w-4 text-primary animate-pulse" />
@@ -114,8 +139,9 @@ export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
         </h3>
       </div>
 
+      {/* Grid Layout: Positive on the left, Negative on the right */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Positive Topics Column */}
+        {/* Positive Themes Column */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-emerald-500/10 pb-2">
             <ThumbsUp className="h-4 w-4 text-emerald-500" />
@@ -123,6 +149,7 @@ export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
               Positive Themes
             </h4>
           </div>
+          {/* Render topic cards if data exists, otherwise show empty message */}
           {hasPositive ? (
             <div className="space-y-3">
               {topicsPositive.map((topic, i) => (
@@ -136,7 +163,7 @@ export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
           )}
         </div>
 
-        {/* Negative Topics Column */}
+        {/* Negative Themes Column */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-rose-500/10 pb-2">
             <ThumbsDown className="h-4 w-4 text-rose-500" />

@@ -18,16 +18,31 @@ from app.models.models import AnalysisJob, VideoData, CommentData, SentimentSumm
 
 
 async def create_job(db: AsyncSession, job_id: str, video_id: str) -> AnalysisJob:
-    """Create a new analysis job record."""
+    """
+    FUNCTION: Create a New Job Record
+    Every time a user submits a YouTube link, the system creates a new 'Job'
+    with an initial status of 'processing' before it starts fetching comments.
+    """
+    # 1. Create a new object/row to be inserted into the AnalysisJob table
     job = AnalysisJob(id=job_id, video_id=video_id, status="processing")
+    
+    # 2. Add the row to the database session queue
     db.add(job)
+    
+    # 3. Permanently save (commit) to the database
     await db.commit()
+    
+    # 4. Refresh the data to get the creation time (created_at) from the database
     await db.refresh(job)
     return job
 
 
 async def get_job(db: AsyncSession, job_id: str) -> Optional[AnalysisJob]:
-    """Get an analysis job by ID."""
+    """
+    FUNCTION: Check Job Status
+    The frontend constantly polls this function: "Is the video analysis complete yet?"
+    """
+    # Search for 1 row in the AnalysisJob table where the ID matches the requested job_id
     result = await db.execute(select(AnalysisJob).where(AnalysisJob.id == job_id))
     return result.scalars().first()
 
@@ -65,19 +80,26 @@ async def update_job_status(
 
 
 async def save_video(db: AsyncSession, video_info: dict) -> VideoData:
-    """Save or update video metadata."""
+    """
+    FUNCTION: Save Video Profile (Title, Thumbnail, etc.)
+    If the video has been analyzed before, we update the data (e.g., new view count).
+    If not, we create a new entry in the database.
+    """
+    # Check if this video exists in our database
     existing = await db.execute(
         select(VideoData).where(VideoData.id == video_info["id"])
     )
     video = existing.scalars().first()
 
     if video:
-        # Update existing
+        # If video ALREADY EXISTS: Update the data with the latest info from YouTube
         for key, value in video_info.items():
             if hasattr(video, key):
                 setattr(video, key, value)
     else:
-        # Create new — map camelCase from Go payload to snake_case DB columns
+        # If video DOES NOT EXIST: Create a new row in the VideoData table
+        # We map data from camelCase (e.g., channelTitle) to snake_case (e.g., channel_title)
+        # to match the database schema.
         video = VideoData(
             id=video_info["id"],
             title=video_info["title"],
@@ -91,6 +113,7 @@ async def save_video(db: AsyncSession, video_info: dict) -> VideoData:
         )
         db.add(video)
 
+    # Persist the changes to the database
     await db.commit()
     await db.refresh(video)
     return video
@@ -318,4 +341,3 @@ async def delete_video_data(db: AsyncSession, video_id: str):
     await db.execute(delete(AnalysisJob).where(AnalysisJob.video_id == video_id))
     await db.execute(delete(VideoData).where(VideoData.id == video_id))
     await db.commit()
-

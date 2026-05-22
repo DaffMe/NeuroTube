@@ -36,40 +36,52 @@ const config = {
   },
 };
 
+// The StatBlock component renders a single sentiment statistic card (Positive, Neutral, or Negative).
+// It receives props like label (title), value (specific count), and total (all comments).
 export function StatBlock({ label, value, total, type, delay = 0 }: Props) {
+  // Retrieve color and icon configuration based on type (Positive = Green, Neutral = Yellow, Negative = Red)
   const { icon: Icon, color, bg, bar, glow } = config[type];
+  
+  // Calculate the percentage of this value compared to the total number of comments.
+  // If total is greater than 0, compute the percentage; otherwise default to 0.
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
 
   return (
+    // motion.div creates a spring-bounce entrance animation
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ ...spring, delay }}
-      whileHover={{ scale: 1.04, y: -4 }}
+      initial={{ opacity: 0, y: 20, scale: 0.9 }} // Starting position before animation
+      animate={{ opacity: 1, y: 0, scale: 1 }}    // Final position after animation
+      transition={{ ...spring, delay }}           // Duration and delay settings
+      whileHover={{ scale: 1.04, y: -4 }}         // Hover effect when mouse hovers over
       className={`rounded-2xl border border-border/50 ${bg} p-4 shadow-lg ${glow} backdrop-blur-sm cursor-pointer`}
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
+          {/* Trend icon: arrow up, down, or flat */}
           <Icon className={`h-4 w-4 ${color}`} />
+          {/* Sentiment label (Positive / Neutral / Negative) */}
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
             {label}
           </span>
         </div>
+        {/* Display percentage in the top right corner of the card */}
         <span className={`text-xl font-black ${color} drop-shadow-sm`}>{percentage}%</span>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress bar section (percentage indicator) */}
       <div className="h-2.5 overflow-hidden rounded-full bg-muted/50">
         <motion.div
           className={`h-full rounded-full ${bar}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${percentage}%` }}
+          initial={{ width: 0 }}                    // Bar starts from 0%
+          animate={{ width: `${percentage}%` }}     // Bar animates to the calculated percentage
           transition={{ duration: 1, ease: "easeOut", delay: delay + 0.3 }}
         />
       </div>
 
-      <p className="mt-2 text-right text-[10px] font-bold text-foreground/60 uppercase tracking-tighter">
-        {label} count : {value}
+      {/* Specific count label at the bottom right */}
+      {/* Uses text-xs for a larger, more readable font size */}
+      <p className="mt-2 text-right text-xs font-bold text-foreground/70 uppercase tracking-tight">
+        Count: {value}
       </p>
     </motion.div>
   );

@@ -138,6 +138,12 @@ async def get_comments(
 ):
     """
     Get paginated comments for a video with optional sentiment filter.
+    
+    This endpoint retrieves video comments in pages (pagination).
+    'video_id': The YouTube video ID.
+    'sentiment': Optional, filter comments by sentiment (e.g., 'positive', 'negative').
+    'limit': Number of comments per page (default 100).
+    'offset': Starting index for data retrieval (for pagination).
     """
     comments = await crud.get_comments_by_video(
         db, video_id, sentiment_filter=sentiment, limit=limit, offset=offset
