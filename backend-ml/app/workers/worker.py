@@ -15,7 +15,7 @@ import logging
 import redis.asyncio as aioredis
 
 from app.core.config import settings
-from app.core.sentiment.sentiment import analyze_comment
+from app.core.sentiment.sentiment import analyze_comment, analyze_comment_async
 from app.crud import crud
 from app.db.session import AsyncSessionLocal
 
@@ -54,31 +54,44 @@ async def process_job(job_data: dict):
             await crud.save_video(db, video_info)
 
             # 3. Analyze sentiment for each comment
+            import httpx
+            
             analyzed_comments = []
             total_comments_to_analyze = len(raw_comments)
-            for idx, comment in enumerate(raw_comments):
-                # Use textOriginal for better formatting, fallback to textDisplay
-                text = comment.get("textOriginal") or comment.get("textDisplay", "")
+            
+            async with httpx.AsyncClient() as client:
+                semaphore = asyncio.Semaphore(5)
+                completed_count = 0
+                progress_lock = asyncio.Lock()
                 
-                if text.strip():
-                    sentiment_result = analyze_comment(text)
-                    comment["sentiment"] = sentiment_result["sentiment"]
-                    comment["sentimentScore"] = sentiment_result["sentimentScore"]
-                else:
-                    comment["sentiment"] = "neutral"
-                    comment["sentimentScore"] = 0.0
+                async def sem_analyze(comment_obj, index):
+                    nonlocal completed_count
+                    text = comment_obj.get("textOriginal") or comment_obj.get("textDisplay", "")
+                    
+                    if text.strip():
+                        async with semaphore:
+                            sentiment_result = await analyze_comment_async(text, client)
+                        comment_obj["sentiment"] = sentiment_result["sentiment"]
+                        comment_obj["sentimentScore"] = sentiment_result["sentimentScore"]
+                    else:
+                        comment_obj["sentiment"] = "neutral"
+                        comment_obj["sentimentScore"] = 0.0
+                        
+                    # Ensure fields match DB model naming (snake_case)
+                    comment_obj["text_original"] = comment_obj.get("textOriginal", "")
+                    comment_obj["is_reply"] = comment_obj.get("isReply", False)
+                    comment_obj["parent_id"] = comment_obj.get("parentId")
+                    
+                    async with progress_lock:
+                        completed_count += 1
+                        if (completed_count % 20 == 0 or completed_count == total_comments_to_analyze) and total_comments_to_analyze > 0:
+                            ml_percent = int(50 + (completed_count / total_comments_to_analyze) * 40)  # range 50% - 90%
+                            await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
+                            
+                    return comment_obj
 
-                # Ensure fields match DB model naming (snake_case)
-                comment["text_original"] = comment.get("textOriginal", "")
-                comment["is_reply"] = comment.get("isReply", False)
-                comment["parent_id"] = comment.get("parentId")
-                
-                analyzed_comments.append(comment)
-
-                # Update progress every 50 comments (or if it's the last one) to avoid spamming Redis
-                if (idx % 50 == 0 or idx == total_comments_to_analyze - 1) and total_comments_to_analyze > 0:
-                    ml_percent = int(50 + (idx / total_comments_to_analyze) * 40)  # range 50% - 90%
-                    await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
+                tasks = [sem_analyze(c, idx) for idx, c in enumerate(raw_comments)]
+                analyzed_comments = await asyncio.gather(*tasks)
 
             # 4. Save analyzed comments to DB
             saved_count = await crud.save_comments_batch(db, video_id, analyzed_comments)

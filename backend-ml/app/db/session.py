@@ -17,6 +17,8 @@ AsyncSessionLocal = sessionmaker(
 )
 
 
+from sqlalchemy import text
+
 async def init_db():
     """Create all tables defined by SQLModel metadata and perform automatic migrations."""
     async with engine.begin() as conn:
@@ -25,18 +27,18 @@ async def init_db():
         # Check and add new JSON columns if they don't exist
         try:
             result_pos = await conn.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'sentiment_summaries' AND column_name = 'topics_positive'"
+                text("SELECT column_name FROM information_schema.columns "
+                     "WHERE table_name = 'sentiment_summaries' AND column_name = 'topics_positive'")
             )
             if not result_pos.fetchone():
-                await conn.execute("ALTER TABLE sentiment_summaries ADD COLUMN topics_positive JSON DEFAULT NULL")
+                await conn.execute(text("ALTER TABLE sentiment_summaries ADD COLUMN topics_positive JSON DEFAULT NULL"))
                 
             result_neg = await conn.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'sentiment_summaries' AND column_name = 'topics_negative'"
+                text("SELECT column_name FROM information_schema.columns "
+                     "WHERE table_name = 'sentiment_summaries' AND column_name = 'topics_negative'")
             )
             if not result_neg.fetchone():
-                await conn.execute("ALTER TABLE sentiment_summaries ADD COLUMN topics_negative JSON DEFAULT NULL")
+                await conn.execute(text("ALTER TABLE sentiment_summaries ADD COLUMN topics_negative JSON DEFAULT NULL"))
         except Exception as e:
             import logging
             logging.getLogger("uvicorn").warning(f"⚠️ DB Migration warning: {e}")

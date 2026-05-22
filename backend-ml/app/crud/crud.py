@@ -112,17 +112,23 @@ async def save_comments_batch(
     Save a batch of comments with their sentiment analysis results.
     Skips duplicates. Returns the number of new comments saved.
     """
+    comment_ids = [c.get("id", "") for c in comments if c.get("id", "")]
+    if not comment_ids:
+        return 0
+
+    existing_ids = set()
+    # Chunk the query by 1000 to prevent hitting database parameters limits
+    for i in range(0, len(comment_ids), 1000):
+        chunk = comment_ids[i:i+1000]
+        result = await db.execute(
+            select(CommentData.id).where(CommentData.id.in_(chunk))
+        )
+        existing_ids.update(result.scalars().all())
+
     saved = 0
     for comment in comments:
         comment_id = comment.get("id", "")
-        if not comment_id:
-            continue
-
-        # Check if exists
-        existing = await db.execute(
-            select(CommentData).where(CommentData.id == comment_id)
-        )
-        if existing.scalars().first():
+        if not comment_id or comment_id in existing_ids:
             continue
 
         db_comment = CommentData(

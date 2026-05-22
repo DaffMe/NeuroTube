@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -245,6 +246,7 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 		}
 
 		// Concurrent pages
+		ctx, cancel := context.WithCancel(context.Background())
 		var wg sync.WaitGroup
 		tokenCh := make(chan string, 1000)
 		tokenCh <- token
@@ -256,15 +258,23 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 				defer wg.Done()
 				for {
 					select {
+					case <-ctx.Done():
+						return
 					case t, ok := <-tokenCh:
-						if !ok { return }
+						if !ok {
+							return
+						}
 						
 						p, next, err := c.fetchCommentPage(videoID, t, order)
-						if err != nil { return }
+						if err != nil {
+							log.Printf("⚠️ fetchCommentPage error for video %s: %v", videoID, err)
+							cancel()
+							return
+						}
 						
 						mu.Lock()
 						for _, cm := range p {
-							if (len(commentsMap) < limit || limit <= 0) {
+							if len(commentsMap) < limit || limit <= 0 {
 								commentsMap[cm.ID] = cm
 							}
 						}
@@ -281,17 +291,21 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 						}
 
 						if next != "" && !full {
-							tokenCh <- next
+							select {
+							case tokenCh <- next:
+							case <-ctx.Done():
+								return
+							}
 						} else {
-							return // Done with this worker
+							cancel()
+							return
 						}
-					case <-time.After(5 * time.Second): // Safety timeout
-						return
 					}
 				}
 			}()
 		}
 		wg.Wait()
+		cancel()
 		close(tokenCh)
 	}
 
@@ -360,30 +374,21 @@ func (c *Client) fetchCommentPage(videoID, pageToken, order string) ([]Comment, 
 		})
 
 		// Fetch ALL Replies
-		if item.Snippet.TotalReplyCount > 0 {
-			// Fetch all replies using comments.list endpoint
-			replies, err := c.fetchAllReplies(item.Snippet.TopLevelComment.ID)
-			if err == nil {
-				comments = append(comments, replies...)
-			} else {
-				log.Printf("⚠️ Failed to fetch all replies for %s: %v", item.ID, err)
-				// Fallback to what we have in the expansion if any
-				if item.Replies != nil {
-					for _, reply := range item.Replies.Comments {
-						rs := reply.Snippet
-						comments = append(comments, Comment{
-							ID:                    reply.ID,
-							AuthorDisplayName:     rs.AuthorDisplayName,
-							AuthorProfileImageURL: rs.AuthorProfileImageURL,
-							TextDisplay:           rs.TextDisplay,
-							TextOriginal:          rs.TextOriginal,
-							LikeCount:             rs.LikeCount,
-							PublishedAt:           rs.PublishedAt,
-							IsReply:               true,
-							ParentID:              item.Snippet.TopLevelComment.ID,
-						})
-					}
-				}
+		// Extract replies from the inline expansion if present to avoid extra API requests
+		if item.Replies != nil {
+			for _, reply := range item.Replies.Comments {
+				rs := reply.Snippet
+				comments = append(comments, Comment{
+					ID:                    reply.ID,
+					AuthorDisplayName:     rs.AuthorDisplayName,
+					AuthorProfileImageURL: rs.AuthorProfileImageURL,
+					TextDisplay:           rs.TextDisplay,
+					TextOriginal:          rs.TextOriginal,
+					LikeCount:             rs.LikeCount,
+					PublishedAt:           rs.PublishedAt,
+					IsReply:               true,
+					ParentID:              item.Snippet.TopLevelComment.ID,
+				})
 			}
 		}
 	}
@@ -391,73 +396,4 @@ func (c *Client) fetchCommentPage(videoID, pageToken, order string) ([]Comment, 
 	return comments, result.NextPageToken, nil
 }
 
-// fetchAllReplies uses the comments.list endpoint to get ALL replies for a specific parent comment.
-func (c *Client) fetchAllReplies(parentID string) ([]Comment, error) {
-	replies := []Comment{}
-	pageToken := ""
 
-	// Safety limit: don't fetch more than 100 replies per parent to prevent infinite loops or excessive quota use
-	const maxRepliesPerParent = 100
-
-	for len(replies) < maxRepliesPerParent {
-		params := url.Values{
-			"part":       {"snippet"},
-			"parentId":   {parentID},
-			"maxResults": {"100"},
-			"key":        {c.apiKey},
-		}
-		if pageToken != "" {
-			params.Set("pageToken", pageToken)
-		}
-
-		resp, err := c.httpClient.Get("https://www.googleapis.com/youtube/v3/comments?" + params.Encode())
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("YouTube API error: %d", resp.StatusCode)
-		}
-
-		var result struct {
-			NextPageToken string `json:"nextPageToken"`
-			Items         []struct {
-				ID      string `json:"id"`
-				Snippet struct {
-					AuthorDisplayName     string `json:"authorDisplayName"`
-					AuthorProfileImageURL string `json:"authorProfileImageUrl"`
-					TextDisplay           string `json:"textDisplay"`
-					TextOriginal          string `json:"textOriginal"`
-					LikeCount             int    `json:"likeCount"`
-					PublishedAt           string `json:"publishedAt"`
-				} `json:"snippet"`
-			} `json:"items"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return nil, err
-		}
-
-		for _, item := range result.Items {
-			replies = append(replies, Comment{
-				ID:                    item.ID,
-				AuthorDisplayName:     item.Snippet.AuthorDisplayName,
-				AuthorProfileImageURL: item.Snippet.AuthorProfileImageURL,
-				TextDisplay:           item.Snippet.TextDisplay,
-				TextOriginal:          item.Snippet.TextOriginal,
-				LikeCount:             item.Snippet.LikeCount,
-				PublishedAt:           item.Snippet.PublishedAt,
-				IsReply:               true,
-				ParentID:              parentID,
-			})
-		}
-
-		pageToken = result.NextPageToken
-		if pageToken == "" {
-			break
-		}
-	}
-
-	return replies, nil
-}

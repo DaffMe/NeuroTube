@@ -64,6 +64,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
       PORT: "8000"
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy

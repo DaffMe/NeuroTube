@@ -391,6 +391,40 @@ def analyze_with_gemini(text: str) -> str | None:
         pass
     return None
 
+
+async def analyze_with_gemini_async(text: str, client) -> str | None:
+    from app.core.config import settings
+    if not settings.GEMINI_API_KEY:
+        return None
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": (
+                        "Analyze the sentiment of the following comment. "
+                        "Respond with ONLY a single word: positive, negative, or neutral. "
+                        "Do not include punctuation or explain your reasoning.\n\n"
+                        f"Comment: \"{text}\""
+                    )
+                }]
+            }]
+        }
+        resp = await client.post(url, json=payload, timeout=3.0)
+        if resp.status_code == 200:
+            result = resp.json()
+            content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
+            if "positive" in content_text:
+                return "positive"
+            elif "negative" in content_text:
+                return "negative"
+            elif "neutral" in content_text:
+                return "neutral"
+    except Exception:
+        pass
+    return None
+
+
 def analyze_with_transformer(text: str) -> str | None:
     classifier = get_local_transformer()
     if not classifier:
@@ -408,6 +442,7 @@ def analyze_with_transformer(text: str) -> str | None:
     except Exception:
         pass
     return None
+
 
 def analyze_comment(text: str) -> dict:
     """
@@ -523,6 +558,120 @@ def analyze_comment(text: str) -> dict:
     }
 
 
+async def analyze_comment_async(text: str, client=None) -> dict:
+    """
+    Analyze the sentiment of a single comment asynchronously.
+    """
+    import re
+    # 1. Clean tracklists and timestamps
+    processed_text = preprocess_tracklist(text)
+    if not processed_text:
+        return {"sentiment": "neutral", "sentimentScore": 0.0}
+
+    clean_text = processed_text.lower()
+
+    # Pre-processing for specific tropes
+    if "cutting onions" in clean_text or "cut onions" in clean_text:
+        return {"sentiment": "positive", "sentimentScore": 0.8}
+
+    # 2. Rick Astley Special Quote Shield
+    lyric_matches = sum(1 for lyric in RICKROLL_LYRICS if lyric in clean_text)
+    if lyric_matches >= 2:
+        return {"sentiment": "positive", "sentimentScore": 0.8}
+
+    # 3. Timestamp shield: If any single timestamps remain, check if it's descriptive
+    if re.search(r'\d+:\d+', clean_text):
+        scores = _analyzer.polarity_scores(processed_text)
+        if -0.6 < scores["compound"] < 0.6:
+            return {"sentiment": "neutral", "sentimentScore": 0.0}
+
+    # 4. Pure questions: "Who is this?", "What song?"
+    if clean_text.endswith("?") and len(clean_text.split()) < 8:
+        return {"sentiment": "neutral", "sentimentScore": 0.0}
+
+    # 5. Apply Slang and Double-Negation Phrase Mapping
+    for original, replacement in SLANG_REPLACEMENTS.items():
+        if original in clean_text:
+            processed_text = re.sub(re.escape(original), replacement, processed_text, flags=re.IGNORECASE)
+
+    # 6. Sentence-by-sentence evaluation and aggregation to prevent negation leakage
+    sentences = [s.strip() for s in re.split(r'[.!?\n]', processed_text) if s.strip()]
+    
+    if len(sentences) <= 1:
+        scores = _analyzer.polarity_scores(processed_text)
+        compound = scores["compound"]
+    else:
+        sentence_scores = []
+        for s in sentences:
+            sentence_scores.append(_analyzer.polarity_scores(s)["compound"])
+        
+        min_score = min(sentence_scores)
+        if min_score <= -0.70:
+            compound = min_score
+        else:
+            weighted_sum = sum(c * abs(c) for c in sentence_scores)
+            abs_sum = sum(abs(c) for c in sentence_scores)
+            if abs_sum == 0:
+                compound = 0.0
+            else:
+                compound = weighted_sum / abs_sum
+
+    # Calibrated thresholds with async hybrid engine fallback
+    if -0.35 < compound < 0.15:
+        gemini_sentiment = None
+        if client:
+            gemini_sentiment = await analyze_with_gemini_async(processed_text, client)
+        else:
+            gemini_sentiment = analyze_with_gemini(processed_text)
+            
+        if gemini_sentiment:
+            if gemini_sentiment == "positive":
+                compound = 0.5
+            elif gemini_sentiment == "negative":
+                compound = -0.5
+            else:
+                compound = 0.0
+            label = gemini_sentiment
+        else:
+            transformer_sentiment = analyze_with_transformer(processed_text)
+            if transformer_sentiment:
+                if transformer_sentiment == "positive":
+                    compound = 0.5
+                elif transformer_sentiment == "negative":
+                    compound = -0.5
+                else:
+                    compound = 0.0
+                label = transformer_sentiment
+            else:
+                if compound >= 0.20:
+                    label = "positive"
+                elif compound <= -0.40:
+                    label = "negative"
+                else:
+                    label = "neutral"
+    else:
+        if compound >= 0.20:
+            label = "positive"
+        elif compound <= -0.40:
+            label = "negative"
+        else:
+            label = "neutral"
+
+    return {
+        "sentiment": label,
+        "sentimentScore": round(compound, 4),
+    }
+
+
 def analyze_batch(texts: list[str]) -> list[dict]:
     """Analyze a batch of comments and return sentiment results."""
     return [analyze_comment(text) for text in texts]
+
+
+async def analyze_batch_async(texts: list[str]) -> list[dict]:
+    """Analyze a batch of comments concurrently using httpx.AsyncClient."""
+    import httpx
+    import asyncio
+    async with httpx.AsyncClient() as client:
+        tasks = [analyze_comment_async(text, client) for text in texts]
+        return await asyncio.gather(*tasks)
