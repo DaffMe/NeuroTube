@@ -60,12 +60,16 @@ async def process_job(job_data: dict):
             total_comments_to_analyze = len(raw_comments)
             
             async with httpx.AsyncClient() as client:
-                semaphore = asyncio.Semaphore(5)
+                # Use a larger semaphore size if there's no API key to minimize async task switching overhead,
+                # or a moderate size if key is present to prevent concurrent API rate limits.
+                sem_size = 20 if settings.GEMINI_API_KEY else 200
+                semaphore = asyncio.Semaphore(sem_size)
                 completed_count = 0
+                last_percent = 50
                 progress_lock = asyncio.Lock()
                 
                 async def sem_analyze(comment_obj, index):
-                    nonlocal completed_count
+                    nonlocal completed_count, last_percent
                     text = comment_obj.get("textOriginal") or comment_obj.get("textDisplay", "")
                     
                     if text.strip():
@@ -84,9 +88,11 @@ async def process_job(job_data: dict):
                     
                     async with progress_lock:
                         completed_count += 1
-                        if (completed_count % 20 == 0 or completed_count == total_comments_to_analyze) and total_comments_to_analyze > 0:
+                        if total_comments_to_analyze > 0:
                             ml_percent = int(50 + (completed_count / total_comments_to_analyze) * 40)  # range 50% - 90%
-                            await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
+                            if ml_percent > last_percent or completed_count == total_comments_to_analyze:
+                                last_percent = ml_percent
+                                await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
                             
                     return comment_obj
 

@@ -36,6 +36,10 @@ def extract_topics_local(comments: list[str], max_topics: int = 3) -> list[dict]
     if not comments:
         return []
         
+    # Optimize by sampling comments to avoid heavy local CPU processing
+    if len(comments) > 500:
+        comments = comments[:500]
+        
     cleaned_comments = [clean_text(c) for c in comments]
     valid_comments = [(comments[i], cleaned_comments[i]) for i in range(len(comments)) if cleaned_comments[i]]
     
