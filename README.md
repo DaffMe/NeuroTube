@@ -29,7 +29,7 @@ The project uses a microservices architecture to separate the fast data ingestio
 ## ✨ Features
 
 - **Concurrent Data Fetching**: Uses a Go backend to rapidly fetch thousands of YouTube comments and their replies.
-- **Sentiment Analysis Engine**: A Python FastAPI backend that runs the VADER sentiment analysis model, customized to understand internet slang and gamer/pop-culture contexts.
+- **Sentiment Analysis Engine**: A Python FastAPI backend that runs a Dual-Engine Hugging Face Transformers setup (XLM-RoBERTa & Indo-RoBERTa) for highly accurate, multilingual sentiment classification.
 - **Interactive Dashboard**: A modern, responsive frontend built with React 19 and Tailwind CSS v4, featuring:
   - **Sentiment Timeline**: A chart showing how sentiments change over time.
   - **Keyword Cloud**: A dynamic visual representation of the most common topics.
@@ -44,7 +44,7 @@ The app is split into three main services:
 
 1. **Frontend (React + Vite)**: Handles the user interface and data visualization.
 2. **Fetcher Service (Go)**: Directly communicates with the YouTube Data API v3 to fetch comments as fast as possible and pushes them to Redis.
-3. **ML Service (Python + FastAPI)**: Pulls comments from Redis, calculates sentiment scores using VADER, and stores the results in PostgreSQL.
+3. **ML Service (Python + FastAPI)**: Pulls comments from Redis, calculates sentiment scores using Transformer models, and stores the results in PostgreSQL.
 
 ```mermaid
 graph TD
@@ -53,7 +53,7 @@ graph TD
     Fetcher -->|Parallel Page Fetch| YT_API[YouTube Data API v3]
     Fetcher -->|Push Job Task| Redis[(Redis Broker)]
     Redis -->|Worker Pull| MLEngine[Python Worker]
-    MLEngine -->|VADER Scoring| DB[(PostgreSQL)]
+    MLEngine -->|Transformer Scoring| DB[(PostgreSQL)]
     Frontend -->|Poll Results| MLEngine
     MLEngine -->|History & Summaries| Frontend
 ```
@@ -64,7 +64,7 @@ graph TD
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS v4, Framer Motion, Recharts.
 - **Backend Fetcher**: Go (Golang), Redis.
-- **Backend ML**: Python 3.11, FastAPI, SQLModel, PostgreSQL, NLTK/VADER.
+- **Backend ML**: Python 3.11, FastAPI, SQLModel, PostgreSQL, Hugging Face Transformers, PyTorch, Langdetect.
 - **Infrastructure**: Docker & Docker Compose.
 
 ---
