@@ -20,7 +20,7 @@
 
 ## 🌟 Overview
 
-NeuroTube is a web application that takes a YouTube video URL and analyzes the sentiments of its comments. It fetches comments directly from YouTube, processes them using Natural Language Processing (NLP) to determine their sentiment (Positive, Neutral, Negative), and visualizes the results on an interactive dashboard.
+NeuroTube is a web application that takes a YouTube video URL and analyzes the sentiments of its comments. It fetches comments directly from YouTube, processes them using Hugging Face Transformer models to determine their sentiment (Positive, Neutral, Negative), and visualizes the results on an interactive dashboard.
 
 The project uses a microservices architecture to separate the fast data ingestion from the heavier machine learning tasks.
 
@@ -137,7 +137,7 @@ npm run dev
 
 ## 📝 Acknowledgments
 
-- Built collaboratively with **Google Antigravity AI**.
+- Built collaboratively with **Google Antigravity AI Agent**.
 - Inspired by [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
 
 ---
