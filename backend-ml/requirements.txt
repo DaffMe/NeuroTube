@@ -5,7 +5,11 @@ sqlmodel==0.0.22
 sqlalchemy[asyncio]==2.0.35
 asyncpg==0.29.0
 psycopg2-binary==2.9.9
-vaderSentiment==3.3.2
+transformers
+torch
+sentencepiece
+protobuf
+langdetect
 python-dotenv==1.0.1
 pydantic==2.9.0
 httpx==0.27.0

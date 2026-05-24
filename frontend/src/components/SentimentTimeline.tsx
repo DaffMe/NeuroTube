@@ -60,8 +60,10 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
     // Get comments published on or after the cutoff date
     return comments.filter(c => new Date(c.publishedAt).getTime() >= cutoff.getTime());
   }, [comments, timeRange]);
+  // Get grouped bucket data from the timeline function, based on filtered comments and selected timeRange
+  const { data, bucketType } = getTimelineData(filteredComments, timeRange);
 
-  // Dynamic X-Axis Formatter based on the selected time range
+  // Dynamic X-Axis Formatter based on the actual data granularity (bucketType)
   const formatXAxis = (tickItem: string) => {
     if (!tickItem) return "";
 
@@ -93,29 +95,25 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
       return tickItem;
     }
     
-    // 2. Format the Date object based on the timeRange
-    switch (timeRange) {
-      case "1D":
+    // 2. Format the Date object based on the actual data granularity (bucketType)
+    switch (bucketType) {
+      case "hour":
         // Format: "16.00"
         return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", ".");
-      case "5D":
-      case "1M":
+      case "day":
         // Format: "19 May"
         return d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
-      case "6M":
-      case "YTD":
-      case "1Y":
+      case "month":
+        // If the user selected MAX, prefer showing just the Year (e.g. "2026") as requested
+        if (timeRange === "MAX") {
+          return d.getFullYear().toString();
+        }
         // Format: "Feb 2026"
         return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-      case "MAX":
       default:
-        // Format: "2026"
         return d.getFullYear().toString();
     }
   };
-
-  // Get grouped bucket data from the timeline function, based on filtered comments
-  const { data, bucketType } = getTimelineData(filteredComments);
 
   // If there's no data after filtering, do not render the chart
   if (data.length === 0) return null;
@@ -199,7 +197,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
       </div>
 
       <div className="h-70 w-full rounded-2xl border border-border/50 bg-card/50 p-4 backdrop-blur-sm">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
           <LineChart data={data} onClick={handleChartClick} className="cursor-pointer">
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.2} />
             <XAxis

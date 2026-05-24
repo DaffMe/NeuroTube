@@ -63,6 +63,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-neurotube}:${POSTGRES_PASSWORD:-neurotube_secret}@postgres:5432/${POSTGRES_DB:-neurotube}
       REDIS_URL: redis://redis:6379/0
       ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
+      HF_HUB_OFFLINE: "1"
       PORT: "8000"
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     depends_on:
@@ -70,6 +71,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
 
   # ─── Frontend Dev Server ───────────────────────────────────────
   frontend:

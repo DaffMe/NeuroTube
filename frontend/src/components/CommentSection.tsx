@@ -280,7 +280,7 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
                     variant="outline"
                     size="lg"
                     onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                    className="rounded-[2rem] px-8 py-6 text-xs font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all active:scale-95"
+                    className="rounded-4xl px-8 py-6 text-xs font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all active:scale-95"
                   >
                     Load more ({groupedComments.main.length - visibleCount} remaining)
                   </Button>

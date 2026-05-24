@@ -81,7 +81,7 @@ export function ExpandableText({
       <p 
         ref={textRef}
         style={lineClampStyle}
-        className={`${className} whitespace-pre-wrap break-words`}
+        className={`${className} whitespace-pre-wrap text-wrap`}
       >
         {displayedText}
       </p>

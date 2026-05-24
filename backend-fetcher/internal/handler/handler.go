@@ -127,11 +127,11 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 
 		_ = h.publisher.SetProgress(jobID, 10)
 		totalComments, _ := strconv.Atoi(videoInfo.CommentCount)
-		log.Printf("📝 [%s] Video: %s | Total comments on YT: %d (Target: 10000)", jobID, videoInfo.Title, totalComments)
+		log.Printf("📝 [%s] Video: %s | Total comments on YT: %d (Target: 5000)", jobID, videoInfo.Title, totalComments)
 
 		// 2. Fetch comments (sampled for speed)
-		// We pass the total count so the fetcher can decide to use 'time' order if count <= 10000
-		comments, err := h.ytClient.FetchComments(videoID, 10000, func(percent int) {
+		// We pass the total count so the fetcher can decide to use 'time' order if count <= 5000
+		comments, err := h.ytClient.FetchComments(videoID, 5000, func(percent int) {
 			_ = h.publisher.SetProgress(jobID, percent)
 		})
 		if err != nil {

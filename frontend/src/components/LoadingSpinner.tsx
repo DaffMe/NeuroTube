@@ -40,7 +40,7 @@ export function LoadingSpinner({ message = "Analyzing sentiments...", progress }
         <div className="w-full space-y-2">
           <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary/80">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-primary"
+              className="h-full rounded-full bg-linear-to-r from-primary via-accent to-primary"
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
               transition={{ duration: 0.3, ease: "easeOut" }}

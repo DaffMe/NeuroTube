@@ -8,7 +8,7 @@ export interface TimelineBucket {
   timestamp: number;
 }
 
-export function getTimelineData(comments: Comment[]) {
+export function getTimelineData(comments: Comment[], timeRange: string = "MAX") {
   if (!comments || comments.length === 0) return { data: [], bucketType: "day" as const, getBucketKey: () => "" };
 
   // Parse publish times
@@ -17,20 +17,24 @@ export function getTimelineData(comments: Comment[]) {
     .filter((t) => !isNaN(t));
   if (times.length === 0) return { data: [], bucketType: "day" as const, getBucketKey: () => "" };
 
-  const minTime = Math.min(...times);
-  const maxTime = Math.max(...times);
-  const diffMs = maxTime - minTime;
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-  let bucketType: "hour" | "day" | "week" | "month" = "day";
-  if (diffDays < 2) {
-    bucketType = "hour";
-  } else if (diffDays < 30) {
-    bucketType = "day";
-  } else if (diffDays < 180) {
-    bucketType = "week";
-  } else {
-    bucketType = "month";
+  let bucketType: "hour" | "day" | "month" | "year" = "day";
+  switch (timeRange) {
+    case "1D":
+      bucketType = "hour";
+      break;
+    case "5D":
+    case "1M":
+      bucketType = "day";
+      break;
+    case "6M":
+    case "YTD":
+    case "1Y":
+      bucketType = "month";
+      break;
+    case "MAX":
+    default:
+      bucketType = "year";
+      break;
   }
 
   // Get bucket key for a date
@@ -49,20 +53,12 @@ export function getTimelineData(comments: Comment[]) {
       const mo = String(d.getMonth() + 1).padStart(2, "0");
       const dy = String(d.getDate()).padStart(2, "0");
       return `${yr}-${mo}-${dy}`;
-    } else if (bucketType === "week") {
-      // Get the Monday of the week
-      const day = d.getDay();
-      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(d.getTime());
-      monday.setDate(diff);
-      const yr = monday.getFullYear();
-      const mo = String(monday.getMonth() + 1).padStart(2, "0");
-      const dy = String(monday.getDate()).padStart(2, "0");
-      return `Wk ${yr}-${mo}-${dy}`;
-    } else {
+    } else if (bucketType === "month") {
       const yr = d.getFullYear();
       const mo = String(d.getMonth() + 1).padStart(2, "0");
       return `${yr}-${mo}`;
+    } else {
+      return `${d.getFullYear()}`;
     }
   };
 
@@ -79,13 +75,11 @@ export function getTimelineData(comments: Comment[]) {
         bucketDate.setMinutes(0, 0, 0);
       } else if (bucketType === "day") {
         bucketDate.setHours(0, 0, 0, 0);
-      } else if (bucketType === "week") {
-        const day = bucketDate.getDay();
-        const diff = bucketDate.getDate() - day + (day === 0 ? -6 : 1);
-        bucketDate.setDate(diff);
+      } else if (bucketType === "month") {
+        bucketDate.setDate(1);
         bucketDate.setHours(0, 0, 0, 0);
       } else {
-        bucketDate.setDate(1);
+        bucketDate.setMonth(0, 1);
         bucketDate.setHours(0, 0, 0, 0);
       }
 

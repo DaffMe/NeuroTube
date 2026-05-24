@@ -37,9 +37,8 @@ export default function HomePage() {
   // ---------------------------------------------------------------------------
   // url: Stores the YouTube link text typed by the user in the search box
   const [url, setUrl] = useState("");
-  // error: Stores warning messages if the link is invalid or the system fails
   const [error, setError] = useState("");
-  // loading: A boolean (True/False) flag indicating if the system is currently processing an analysis
+  const [shake, setShake] = useState(false);
   const [loading, setLoading] = useState(false);
   // loadingMessage: Stores status messages like "Fetching...", "Analyzing..."
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -71,6 +70,8 @@ export default function HomePage() {
       // Stop the process if the provided link is not a valid YouTube URL
       if (!isValidYouTubeUrl(target)) {
         setError("Please enter a valid YouTube URL!");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
         return;
       }
       
@@ -329,10 +330,15 @@ export default function HomePage() {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ ...spring, delay: 0.25 }}
-          className="mt-10 w-full max-w-xl"
+          className="mt-10 w-full max-w-xl relative"
         >
           <div className="flex gap-2">
-            <motion.div className="flex-1" whileHover={{ scale: 1.01 }} transition={spring}>
+            <motion.div 
+              className="flex-1" 
+              whileHover={{ scale: 1.01 }} 
+              animate={shake ? { x: [-10, 10, -10, 10, -5, 5, 0] } : {}}
+              transition={shake ? { duration: 0.4 } : spring}
+            >
               <Input
                 id="youtube-url-input"
                 placeholder="Paste a YouTube link..."
@@ -342,7 +348,7 @@ export default function HomePage() {
                   setError("");
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-                className="h-12 rounded-2xl border-primary/20 bg-secondary/40 px-5 text-sm backdrop-blur-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary"
+                className={`h-12 rounded-2xl border-primary/20 bg-secondary/40 px-5 text-sm backdrop-blur-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary ${error ? 'border-rose-500/50 focus-visible:ring-rose-500/50' : ''}`}
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.92 }} transition={spring}>
@@ -360,14 +366,17 @@ export default function HomePage() {
 
           <AnimatePresence>
             {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mt-2 text-xs text-rose-400"
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="absolute top-full left-0 right-0 mt-3 flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-500 shadow-xl shadow-rose-500/5 backdrop-blur-md z-10"
               >
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500/20">
+                  <span className="text-xs font-bold text-rose-500">!</span>
+                </div>
                 {error}
-              </motion.p>
+              </motion.div>
             )}
           </AnimatePresence>
         </motion.div>

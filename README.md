@@ -1,79 +1,50 @@
-# <sup><img src="assets/favicon.png" width="30" height="30" align="absmiddle" /></sup> NeuroTube: High-Performance YouTube Sentiment Engine
+# NeuroTube: YouTube Comment Sentiment Analyzer
 
 <div align="center">
 
 ![NeuroTube Banner](https://img.shields.io/badge/NeuroTube-Sentiment_Analyzer-FF69B4?style=for-the-badge&logo=youtube&logoColor=white)
 
-**Distributed microservices architecture for massive-scale YouTube comment analysis**  
-*Powered by Google Antigravity AI*
+**A full-stack application to analyze YouTube comment sentiments at scale.**
 
 [![GitHub Stars](https://img.shields.io/github/stars/DaffMe/NeuroTube?style=for-the-badge&color=blue&logo=github)](https://github.com/DaffMe/NeuroTube)
 [![GitHub Forks](https://img.shields.io/github/forks/DaffMe/NeuroTube?style=for-the-badge&color=purple&logo=github)](https://github.com/DaffMe/NeuroTube)
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
-  <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" />
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white" />
-</p>
 
 </div>
 
 ---
 
-## 📖 Table of Contents
-- [🌟 Overview](#-overview)
-- [✨ Key Features](#-key-features)
-- [🖥️ User Interface Showcase](#-user-interface-showcase)
-- [🏗️ Architecture](#-architecture)
-- [🚀 Tech Stack](#-tech-stack)
-- [📁 Project Structure](#-project-structure)
-- [🚀 Quick Start (Docker)](#-quick-start-docker)
-- [🛠️ Development Guide (Local)](#-development-guide-local)
-- [📖 API Reference](#-api-reference)
-- [🧠 Sentiment Engine Deep Dive](#-sentiment-engine-deep-dive)
-- [📝 Acknowledgments](#-acknowledgments)
+> [!NOTE]
+> **Developer's Note:** This is my **first-ever project**! It was built entirely with the assistance of **Google Antigravity AI Agent**. Because this is my very first attempt at building a complex application, the code and architecture might not be 100% perfect. There might still be bugs or areas for optimization, but it's a huge learning milestone for me. Feedback and contributions are always welcome!
 
 ---
 
 ## 🌟 Overview
 
-**NeuroTube** is a sophisticated sentiment intelligence platform engineered to analyze high-volume audience engagement on YouTube. By leveraging a distributed microservices architecture, the system maintains high availability while processing complex NLP tasks at scale.
+NeuroTube is a web application that takes a YouTube video URL and analyzes the sentiments of its comments. It fetches comments directly from YouTube, processes them using Natural Language Processing (NLP) to determine their sentiment (Positive, Neutral, Negative), and visualizes the results on an interactive dashboard.
 
-The pipeline integrates a high-performance **Go** service for concurrent data ingestion and a **Python-based FastAPI** engine for deep sentiment scoring. This ensures that even videos with tens of thousands of comments are analyzed with minimal latency and high accuracy.
-
----
-
-## ✨ Key Features
-
-- **🚀 Scalable Microservices Architecture** - Orchestrated decoupling of high-speed data ingestion (Go) and compute-intensive NLP processing (Python).
-- **💬 Deep-Thread Ingestion** - Advanced pagination logic to ensure comprehensive retrieval of nested replies, bypassing standard endpoint limitations for full-context analysis.
-- **🧠 Domain-Specific NLP Engine** - A calibrated sentiment processor engineered for high-accuracy interpretation of digital subcultures:
-  - **Platform Vernacular**: Native recognition of emerging internet idioms and status-driven discourse.
-  - **Contextual Sentiment**: Differentiates high-arousal engagement (Gaming/Horror) and emotional resonance (Artistic/Music) from traditional negative polarity.
-  - **Multilingual Support**: Specialized processing for informal Indonesian dialects and regional intensifiers.
-- **📊 Dynamic Analytics Dashboard** - Real-time telemetry and data visualization for sentiment distribution and audience engagement metrics.
-- **🕒 Stateful Analysis History** - Persistent server-side storage via PostgreSQL, enabling longitudinal tracking and historical data management.
-- **🐳 Containerized Orchestration** - Streamlined deployment via Docker Compose, ensuring environment consistency and zero-config initialization.
+The project uses a microservices architecture to separate the fast data ingestion from the heavier machine learning tasks.
 
 ---
 
-## 🖥️ User Interface Showcase
+## ✨ Features
 
-### 🏠 Landing Page
-*A sleek, high-energy entrance for video submission.*
-![Home Page](assets/ui_home.png)
-
-### 📊 Analysis Dashboard
-*Detailed sentiment breakdown, charts, and filtered comment lists.*
-![Dashboard](assets/ui_dashboard.png)
+- **Concurrent Data Fetching**: Uses a Go backend to rapidly fetch thousands of YouTube comments and their replies.
+- **Sentiment Analysis Engine**: A Python FastAPI backend that runs the VADER sentiment analysis model, customized to understand internet slang and gamer/pop-culture contexts.
+- **Interactive Dashboard**: A modern, responsive frontend built with React 19 and Tailwind CSS v4, featuring:
+  - **Sentiment Timeline**: A chart showing how sentiments change over time.
+  - **Keyword Cloud**: A dynamic visual representation of the most common topics.
+  - **Deep-Thread Comments Filtering**: Filter through thousands of comments based on their sentiment score.
+- **Containerized**: Fully dockerized setup for easy local deployment.
 
 ---
 
 ## 🏗️ Architecture
 
-NeuroTube uses an event-driven microservices pattern to ensure that slow ML processing never blocks the high-speed YouTube API ingestion.
+The app is split into three main services:
+
+1. **Frontend (React + Vite)**: Handles the user interface and data visualization.
+2. **Fetcher Service (Go)**: Directly communicates with the YouTube Data API v3 to fetch comments as fast as possible and pushes them to Redis.
+3. **ML Service (Python + FastAPI)**: Pulls comments from Redis, calculates sentiment scores using VADER, and stores the results in PostgreSQL.
 
 ```mermaid
 graph TD
@@ -91,105 +62,64 @@ graph TD
 
 ## 🚀 Tech Stack
 
-### ⚡ Data Retrieval (Fetcher)
-- **Go (Golang)**: High-performance concurrency model for parallel API requests.
-- **YouTube API v3**: Optimized for deep-thread comment recovery.
-- **Redis**: Fast, persistent task queue for inter-service communication.
-
-### 🧠 Sentiment Engine (ML Service)
-- **Python 3.11 & FastAPI**: High-performance async Python framework.
-- **VADER Sentiment**: Enhanced with a custom lexicon for social media nuances.
-- **SQLModel (SQLAlchemy)**: Type-safe ORM for robust PostgreSQL interactions.
-- **PostgreSQL**: Reliable relational storage for video metadata and sentiment results.
-
-### 🎨 User Experience (Frontend)
-- **React 19 & TypeScript**: The latest in type-safe UI development.
-- **Tailwind CSS v4**: Cutting-edge utility-first styling.
-- **Framer Motion**: Premium micro-animations and smooth transitions.
-- **Recharts**: Responsive data visualization.
-- **Bun**: Ultra-fast runtime and package management.
+- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Framer Motion, Recharts.
+- **Backend Fetcher**: Go (Golang), Redis.
+- **Backend ML**: Python 3.11, FastAPI, SQLModel, PostgreSQL, NLTK/VADER.
+- **Infrastructure**: Docker & Docker Compose.
 
 ---
 
-## 📁 Project Structure
+## 🖥️ UI Showcase
 
-```bash
-NeuroTube/
-├── 🐳 docker-compose.yml           # Distributed service orchestration
-├── 🔧 .env.example                 # Environment configuration template
-├── 🌐 frontend/                    # React (TS) + Tailwind v4 Dashboard
-│   ├── 🐳 Dockerfile               # Production-optimized container
-│   ├── 📦 package.json             # Bun/NPM dependencies
-│   └── 📁 src/
-│       ├── 🎨 components/          # Reusable UI architecture
-│       │   ├── ui/                 # Shadcn/UI primitive components
-│       │   ├── VideoDetails.tsx    # Metadata & 'Read More' logic
-│       │   ├── CommentCharts.tsx   # Recharts visualization layer
-│       │   └── CommentSection.tsx  # Deep-thread sentiment filtering
-│       ├── 🚦 routes/              # Client-side routing logic
-│       ├── 🔗 services/            # Axios API integration layer
-│       └── 📝 types/               # Global TypeScript definitions
-├── 🐹 backend-fetcher/             # High-Speed Go Data Ingestor
-│   ├── 🐳 Dockerfile               # Multi-stage Go build config
-│   ├── 📁 cmd/                     # Application entry points
-│   └── 📁 internal/
-│       ├── 🎥 youtube/             # Parallel comment retrieval logic
-│       ├── 📨 queue/               # Redis producer (Job Dispatcher)
-│       └── 📡 handler/             # HTTP router & middleware
-├── 🐍 backend-ml/                  # Python FastAPI Intelligence Service
-│   ├── 🐳 Dockerfile               # Python runtime & ML dependencies
-│   ├── 📁 app/
-│   │   ├── 🚀 main.py              # FastAPI application gateway
-│   │   ├── 🌐 api/routes/          # Analysis & History endpoints
-│   │   ├── ⚙️ core/sentiment/       # VADER v2.0 Engine & Lexicons
-│   │   ├── 📊 models/              # SQLModel (Pydantic + SQLAlchemy)
-│   │   └── 🛠️ workers/             # Async Redis consumer (Analysis logic)
-│   └── 📋 requirements.txt         # Intelligence stack dependencies
-└── 🗄️ postgres_data/               # Persistent relational storage volume
-```
+### Landing Page
+![Home Page](assets/ui_home.png)
+
+### Dashboard
+![Dashboard](assets/ui_dashboard.png)
 
 ---
 
 ## 🚀 Quick Start (Docker)
 
-### 1. Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [YouTube API Key](https://console.cloud.google.com/)
+To run this project locally, you need Docker installed and a YouTube API Key.
 
-### 2. Setup
-```bash
-git clone https://github.com/DaffMe/NeuroTube.git
-cd NeuroTube
-cp .env.example .env
-# Edit .env and paste your YOUTUBE_API_KEY
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/DaffMe/NeuroTube.git
+   cd NeuroTube
+   ```
 
-### 3. Launch
-```bash
-docker compose up --build -d
-```
+2. **Configure Environment Variables**
+   ```bash
+   cp .env.example .env
+   ```
+   Open the `.env` file and insert your `YOUTUBE_API_KEY`.
 
-### 4. Access
-- **Frontend**: `http://localhost:5173`
-- **Go API Docs**: `http://localhost:8080/api/health`
-- **Python API Docs**: `http://localhost:8000/docs`
+3. **Run with Docker Compose**
+   ```bash
+   docker compose up --build -d
+   ```
+
+4. **Access the Application**
+   - **Frontend UI**: `http://localhost:5173`
+   - **Python API Docs**: `http://localhost:8000/docs`
 
 ---
 
-## 🛠️ Development Guide (Local)
+## 🛠️ Local Development (Without Docker)
 
-If you wish to run the services manually without Docker:
+If you prefer to run the services directly on your host machine:
 
-### 🐍 Backend ML (Python)
+### 🐍 ML Backend (Python)
 ```bash
 cd backend-ml
 python -m venv venv
-source venv/bin/activate # or venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 🐹 Backend Fetcher (Go)
+### 🐹 Fetcher Backend (Go)
 ```bash
 cd backend-fetcher
 go mod download
@@ -199,62 +129,19 @@ go run cmd/main.go
 ### 🎨 Frontend (React)
 ```bash
 cd frontend
-bun install # or npm install
-bun dev
+npm install
+npm run dev
 ```
-
----
-
-## 📖 API Reference
-
-### 🐹 Fetcher Service (Port 8080)
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/analyze` | Initiates a fetch job. Body: `{ "url": "..." }` |
-| `GET` | `/api/status/{jobId}` | Checks the fetch/queue status |
-
-### 🧠 ML Service (Port 8000)
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/analysis/{jobId}` | Returns the full analysis results |
-| `GET` | `/api/analysis/video/{id}` | Gets latest cached analysis for a video |
-| `GET` | `/api/history` | Lists previously analyzed videos |
-| `GET` | `/api/comments/{id}` | Paginated comments with optional `?sentiment=positive` filter |
-| `DELETE` | `/api/history` | Wipes all analysis data |
-
----
-
-## 🧠 Sentiment Engine Deep Dive
-
-Unlike generic sentiment analysis tools, NeuroTube utilizes a **Customized VADER Engine** specifically optimized for the nuances of modern digital discourse. The v2.0 algorithm implements several calibration layers to ensure high precision in complex social media environments.
-
-### 📈 Case Study: "solo meme - Shachimu"
-Validated against high-volume cultural data (10,000+ comments), the NeuroTube engine demonstrates superior parsing of dense community sentiment, maintaining robust classification performance:
-- **Positive (~38%)**: Captures nuanced aesthetic appreciation, artistic quality, animation fidelity, and high-intensity community praise.
-- **Neutral (~60%)**: Accurately categorizes descriptive contextual remarks, structural queries, and chronological (timestamped) discussion points, mitigating the typical emotional bias of generic classifiers.
-- **Negative (~2%)**: Systematically isolates genuine constructive criticism or toxicity, while filtering out linguistic paradoxes where superficially negative phrasing indicates high-arousal satisfaction (e.g., *"The only bad thing is it ends"*).
-
-### 🕹️ Context-Aware Heuristics
-- **High-Arousal Engagement**: Traditional NLP often misclassifies terms like *"scary"*, *"insane"*, or *"screaming"* as negative. NeuroTube’s engine recognizes these as indicators of high-arousal positive engagement in gaming and horror contexts.
-- **Linguistic Adaptability**: Our engine implements **Timestamp & Question Shields** to neutralize purely functional comments (e.g., "12:34 What is the song?"), preventing them from skewing emotional metrics.
-
-### 🌏 Multilingual & Slang Optimization
-- **Indonesian Lexicon (Bahasa Gaul)**: Calibrated mapping for informal Indonesian expressions, including hand-curated intensity coefficients for regional slang and colloquial modifiers.
-- **Platform-Specific Vernacular**: Comprehensive lexical support for internet subcultures and platform-specific idioms:
-  - **Engagement Polarity Modifiers**: Robust recognition of competitive community terminology and gaming-derived polarity shifters.
-  - **Dynamic Neologisms**: Specialized processing for emerging social media vocabulary, neologisms, and action-state metaphors.
-  - **Reputational & Status Indicators**: Accurate weightings for internet-culture honorifics and community-driven status indicators.
 
 ---
 
 ## 📝 Acknowledgments
 
-- **AI Development**: This project was built with the assistance of **Google Antigravity AI**.
-- **Inspiration**: System design and concept inspired by [00200200's youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
+- Built collaboratively with **Google Antigravity AI**.
+- Inspired by [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
 
 ---
 
 <div align="center">
-  <p>Built for the next generation of social media analysis.</p>
-  <b>Developed by [DaffMe](https://github.com/DaffMe)</b>
+  <b>Developed by <a href="https://github.com/DaffMe">DaffMe</a></b>
 </div>

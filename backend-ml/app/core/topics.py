@@ -110,7 +110,7 @@ def extract_topics_local(comments: list[str]) -> list[dict]:
 # GEMINI AI SUMMARIZATION (LLM)
 # ------------------------------------------------------------------------------
 # The primary function that calls Gemini AI to deeply read and summarize sentiments.
-def extract_topics_gemini(comments: list[str], sentiment: str) -> list[dict] | None:
+async def extract_topics_gemini(comments: list[str], sentiment: str) -> list[dict] | None:
     # Import settings to retrieve the Gemini API Key
     from app.core.config import settings
     
@@ -122,7 +122,7 @@ def extract_topics_gemini(comments: list[str], sentiment: str) -> list[dict] | N
     sampled_comments = comments[:50]
     comments_input = "\n".join([f"- {c}" for c in sampled_comments])
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
     
     # AI PROMPT: Instructions sent to Gemini.
     # We command it to read the comments and holistically summarize the overall sentiment in English.
@@ -160,22 +160,23 @@ def extract_topics_gemini(comments: list[str], sentiment: str) -> list[dict] | N
     }
     
     try:
-        resp = httpx.post(url, json=payload, timeout=8.0)
-        if resp.status_code == 200:
-            result = resp.json()
-            text_response = result["candidates"][0]["content"]["parts"][0]["text"].strip()
-            
-            if text_response.startswith("```"):
-                lines = text_response.splitlines()
-                if lines[0].startswith("```"):
-                    lines = lines[1:]
-                if lines[-1].startswith("```"):
-                    lines = lines[:-1]
-                text_response = "\n".join(lines).strip()
-            
-            data = json.loads(text_response)
-            if isinstance(data, list):
-                return data
+        async with httpx.AsyncClient(http2=False, timeout=60.0) as client:
+            resp = await client.post(url, json=payload)
+            if resp.status_code == 200:
+                result = resp.json()
+                text_response = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                
+                if text_response.startswith("```"):
+                    lines = text_response.splitlines()
+                    if lines[0].startswith("```"):
+                        lines = lines[1:]
+                    if lines[-1].startswith("```"):
+                        lines = lines[:-1]
+                    text_response = "\n".join(lines).strip()
+                
+                data = json.loads(text_response)
+                if isinstance(data, list):
+                    return data
     except Exception as e:
         import logging
         logging.getLogger("uvicorn").warning(f"Failed to extract topics with Gemini: {e}")
@@ -183,12 +184,12 @@ def extract_topics_gemini(comments: list[str], sentiment: str) -> list[dict] | N
     return None
 
 
-def extract_topics(comments: list[str], sentiment: str) -> list[dict]:
+async def extract_topics(comments: list[str], sentiment: str) -> list[dict]:
     """
     Extract topics from comments.
     Attempts Gemini API first, falls back to local statistics.
     """
-    topics = extract_topics_gemini(comments, sentiment)
+    topics = await extract_topics_gemini(comments, sentiment)
     if topics is not None:
         return topics
     return extract_topics_local(comments)

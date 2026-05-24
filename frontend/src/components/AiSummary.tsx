@@ -24,9 +24,6 @@ function TopicCard({ topic, type }: { topic: TopicCluster; type: "positive" | "n
   const isPositive = type === "positive";
   const accentClass = isPositive ? "text-emerald-500" : "text-rose-500";
   const bgAccentClass = isPositive ? "bg-emerald-500/10 border-emerald-500/20" : "bg-rose-500/10 border-rose-500/20";
-  const pillClass = isPositive
-    ? "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10 hover:bg-emerald-500/10"
-    : "bg-rose-500/5 text-rose-600 dark:text-rose-400 border-rose-500/10 hover:bg-rose-500/10";
 
   // Safely access the quotes array from the topic object (may be undefined)
   const quotes = topic.quotes ?? [];
@@ -65,14 +62,22 @@ function TopicCard({ topic, type }: { topic: TopicCluster; type: "positive" | "n
         </div>
       </div>
 
-      {/* Keywords/Theme Pills extracted by the AI */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {topic.keywords.map((kw, i) => (
-          <span
-            key={i}
-            className={`rounded-full border px-2 py-0.5 text-[10px] font-bold transition-all ${pillClass}`}
+      {/* Interactive Word Cloud Visualizer using Flexbox Pills (Crash-free) */}
+      <div className="mt-4 w-full rounded-xl bg-background/50 border border-border/30 overflow-hidden shadow-inner p-4 flex flex-wrap gap-2 items-center justify-center">
+        {topic.keywords.map((kw, idx) => (
+          <span 
+            key={idx}
+            className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-colors cursor-default ${
+              isPositive 
+                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" 
+                : "bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500/20"
+            }`}
+            style={{ 
+              fontSize: `${Math.max(0.75, 1.2 - (idx * 0.1))}rem`,
+              opacity: Math.max(0.6, 1 - (idx * 0.15))
+            }}
           >
-            #{kw}
+            {kw}
           </span>
         ))}
       </div>
@@ -127,7 +132,7 @@ export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.38 }}
-      className="rounded-[2.5rem] border border-border/40 bg-card/40 p-6 backdrop-blur-md shadow-2xl shadow-primary/5 space-y-6"
+      className="rounded-[2.5rem] border border-border/40 bg-card/40 p-6 backdrop-blur-md shadow-2xl shadow-primary/5 space-y-8"
     >
       {/* Component Header */}
       <div className="flex items-center gap-2">
@@ -139,6 +144,35 @@ export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
         </h3>
       </div>
 
+      {/* Interactive Keyword Cloud using Flexbox Pills */}
+      <div className="rounded-2xl border border-border/40 bg-card/20 p-6 overflow-hidden relative min-h-[200px]">
+        <h4 className="text-xs font-bold uppercase tracking-widest text-foreground/50 absolute top-4 left-4 z-10">
+          Keyword Cloud
+        </h4>
+        <div className="w-full h-full mt-6 flex flex-wrap gap-3 items-center justify-center opacity-90 hover:opacity-100 transition-opacity">
+          {[...topicsPositive, ...topicsNegative].flatMap((t, tIdx) => 
+            (t.keywords || []).map((kw, kwIdx) => {
+              const isPositiveTheme = tIdx < topicsPositive.length;
+              return (
+                <span 
+                  key={`${tIdx}-${kwIdx}`}
+                  className={`px-4 py-2 rounded-full font-black border transition-transform hover:scale-110 cursor-default shadow-sm ${
+                    isPositiveTheme 
+                      ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30 shadow-emerald-500/5" 
+                      : "bg-rose-500/15 text-rose-500 border-rose-500/30 shadow-rose-500/5"
+                  }`}
+                  style={{ 
+                    fontSize: `${Math.max(0.8, 1.5 - (kwIdx * 0.15))}rem`,
+                    opacity: Math.max(0.6, 1 - (kwIdx * 0.1))
+                  }}
+                >
+                  {kw}
+                </span>
+              );
+            })
+          )}
+        </div>
+      </div>
       {/* Grid Layout: Positive on the left, Negative on the right */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Positive Themes Column */}

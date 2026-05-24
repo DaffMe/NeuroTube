@@ -60,23 +60,28 @@ async def process_job(job_data: dict):
             total_comments_to_analyze = len(raw_comments)
             
             async with httpx.AsyncClient() as client:
-                # Use a larger semaphore size if there's no API key to minimize async task switching overhead,
-                # or a moderate size if key is present to prevent concurrent API rate limits.
-                sem_size = 20 if settings.GEMINI_API_KEY else 200
+                # Use a larger semaphore size to maximize local GPU utilization
+                # We want to feed as many comments concurrently as possible to hit 90%+ GPU load
+                sem_size = 200
                 semaphore = asyncio.Semaphore(sem_size)
                 completed_count = 0
                 last_percent = 50
                 progress_lock = asyncio.Lock()
+                from app.core.sentiment.spam import is_spam
                 
                 async def sem_analyze(comment_obj, index):
                     nonlocal completed_count, last_percent
                     text = comment_obj.get("textOriginal") or comment_obj.get("textDisplay", "")
                     
                     if text.strip():
-                        async with semaphore:
-                            sentiment_result = await analyze_comment_async(text, client)
-                        comment_obj["sentiment"] = sentiment_result["sentiment"]
-                        comment_obj["sentimentScore"] = sentiment_result["sentimentScore"]
+                        if is_spam(text):
+                            comment_obj["sentiment"] = "spam"
+                            comment_obj["sentimentScore"] = 0.0
+                        else:
+                            async with semaphore:
+                                sentiment_result = await analyze_comment_async(text, client)
+                            comment_obj["sentiment"] = sentiment_result["sentiment"]
+                            comment_obj["sentimentScore"] = sentiment_result["sentimentScore"]
                     else:
                         comment_obj["sentiment"] = "neutral"
                         comment_obj["sentimentScore"] = 0.0
@@ -99,6 +104,9 @@ async def process_job(job_data: dict):
                 tasks = [sem_analyze(c, idx) for idx, c in enumerate(raw_comments)]
                 analyzed_comments = await asyncio.gather(*tasks)
 
+            # Eliminate spam/bot comments so they don't pollute the DB or statistics
+            analyzed_comments = [c for c in analyzed_comments if c.get("sentiment") != "spam"]
+
             # 4. Save analyzed comments to DB
             saved_count = await crud.save_comments_batch(db, video_id, analyzed_comments)
             logger.info(f"💾 [{job_id}] Saved {saved_count} new comments to DB")
@@ -119,8 +127,8 @@ async def process_job(job_data: dict):
             neg_comment_texts = [t for t in neg_comment_texts if t.strip()]
 
             from app.core.topics import extract_topics
-            topics_positive = extract_topics(pos_comment_texts, "positive")
-            topics_negative = extract_topics(neg_comment_texts, "negative")
+            topics_positive = await extract_topics(pos_comment_texts, "positive")
+            topics_negative = await extract_topics(neg_comment_texts, "negative")
             await redis_client.set(f"neurotube:progress:{job_id}", 95, ex=3600)
 
             # 5. Compute and save sentiment summary

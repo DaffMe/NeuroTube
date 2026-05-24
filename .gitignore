@@ -8,6 +8,16 @@ pgdata/
 *.log
 .vscode/
 frontend/node_modules/
+.env
+node_modules/
+__pycache__/
+.venv/
+dist/
+.DS_Store
+pgdata/
+*.log
+.vscode/
+frontend/node_modules/
 backend-fetcher/bin/
 backend-ml/venv/
 # Development Files
@@ -15,3 +25,4 @@ ADMIN_GUIDE.md
 implementation_plan.md
 task.md
 walkthrough.md
+hf_cache/
