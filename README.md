@@ -1,6 +1,6 @@
-# NeuroTube: YouTube Comment Sentiment Analyzer
-
 <div align="center">
+
+# NeuroTube: YouTube Comment Sentiment Analyzer
 
 ![NeuroTube Banner](https://img.shields.io/badge/NeuroTube-Sentiment_Analyzer-FF69B4?style=for-the-badge&logo=youtube&logoColor=white)
 
