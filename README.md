@@ -13,6 +13,11 @@
 
 ---
 
+> [!NOTE]
+> **Developer's Note:** This is my **first-ever project**! Built from scratch with the assistance of **Google Antigravity AI Agent** and **Claude Code (Anthropic)** as my coding companions. As a beginner, the code and architecture may not be 100% perfect — but it's a huge milestone in my learning journey. Feedback and contributions are always welcome!
+
+---
+
 ## 🌟 Overview
 
 NeuroTube is a web application that takes a YouTube video URL and analyzes the sentiments of its comments. It fetches comments directly from YouTube, processes them using Hugging Face Transformer models to determine their sentiment (Positive, Neutral, Negative), and visualizes the results on an interactive dashboard.
