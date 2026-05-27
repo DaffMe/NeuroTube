@@ -13,11 +13,6 @@
 
 ---
 
-> [!NOTE]
-> **Developer's Note:** This is my **first-ever project**! It was built entirely with the assistance of **Google Antigravity AI Agent**. Because this is my very first attempt at building a complex application, the code and architecture might not be 100% perfect. There might still be bugs or areas for optimization, but it's a huge learning milestone for me. Feedback and contributions are always welcome!
-
----
-
 ## 🌟 Overview
 
 NeuroTube is a web application that takes a YouTube video URL and analyzes the sentiments of its comments. It fetches comments directly from YouTube, processes them using Hugging Face Transformer models to determine their sentiment (Positive, Neutral, Negative), and visualizes the results on an interactive dashboard.
@@ -28,13 +23,16 @@ The project uses a microservices architecture to separate the fast data ingestio
 
 ## ✨ Features
 
-- **Concurrent Data Fetching**: Uses a Go backend to rapidly fetch thousands of YouTube comments and their replies.
-- **Sentiment Analysis Engine**: A Python FastAPI backend that runs a Dual-Engine Hugging Face Transformers setup (XLM-RoBERTa & Indo-RoBERTa) for highly accurate, multilingual sentiment classification.
+- **Concurrent Data Fetching**: Uses a Go backend with semaphore-controlled concurrency to rapidly fetch thousands of YouTube comments and their replies without hitting rate limits.
+- **Dual-Engine Sentiment Analysis**: A Python FastAPI backend that routes comments to specialized models — Indonesian RoBERTa for Indonesian text and XLM-RoBERTa for other languages — providing highly accurate, multilingual sentiment classification.
+- **AI-Powered Topic Extraction**: Automatically identifies trending topics within positive and negative comment clusters using Gemini AI.
+- **Real-Time Progress Streaming**: Server-Sent Events (SSE) provide live progress updates during the analysis pipeline.
+- **Quotas-Aware Caching**: Redis-backed intelligent caching prevents redundant API calls within a 24-hour window.
 - **Interactive Dashboard**: A modern, responsive frontend built with React 19 and Tailwind CSS v4, featuring:
   - **Sentiment Timeline**: A chart showing how sentiments change over time.
-  - **Keyword Cloud**: A dynamic visual representation of the most common topics.
-  - **Deep-Thread Comments Filtering**: Filter through thousands of comments based on their sentiment score.
-- **Containerized**: Fully dockerized setup for easy local deployment.
+  - **Topic Summaries**: AI-generated summaries of common themes in positive and negative comments.
+  - **Deep-Thread Comments Filtering**: Filter through thousands of comments by sentiment or date range.
+- **Containerized**: Fully Dockerized setup for easy local deployment.
 
 ---
 
@@ -42,30 +40,33 @@ The project uses a microservices architecture to separate the fast data ingestio
 
 The app is split into three main services:
 
-1. **Frontend (React + Vite)**: Handles the user interface and data visualization.
-2. **Fetcher Service (Go)**: Directly communicates with the YouTube Data API v3 to fetch comments as fast as possible and pushes them to Redis.
-3. **ML Service (Python + FastAPI)**: Pulls comments from Redis, calculates sentiment scores using Transformer models, and stores the results in PostgreSQL.
-
 ```mermaid
 graph TD
     User((User)) -->|YouTube URL| Frontend[React + Vite]
     Frontend -->|POST /api/analyze| Fetcher[Go Fetcher Service]
     Fetcher -->|Parallel Page Fetch| YT_API[YouTube Data API v3]
     Fetcher -->|Push Job Task| Redis[(Redis Broker)]
-    Redis -->|Worker Pull| MLEngine[Python Worker]
-    MLEngine -->|Transformer Scoring| DB[(PostgreSQL)]
-    Frontend -->|Poll Results| MLEngine
-    MLEngine -->|History & Summaries| Frontend
+    Redis -->|Worker Pull| MLEngine[Python ML Worker]
+    MLEngine -->|Sentiment Scoring| DB[(PostgreSQL)]
+    Frontend -->|SSE Progress Stream| Fetcher
+    Frontend -->|GET /api/analysis| MLEngine
+    MLEngine -->|History & Results| Frontend
 ```
+
+| Service | Technology | Purpose |
+|---------|------------|---------|
+| **Frontend** | React 19, TypeScript, Tailwind CSS v4 | User interface and data visualization |
+| **Fetcher** | Go (Gin router) | YouTube API integration, job queuing, SSE progress |
+| **ML Worker** | Python 3.11, FastAPI, SQLModel | Sentiment analysis, topic extraction, data persistence |
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Framer Motion, Recharts.
-- **Backend Fetcher**: Go (Golang), Redis.
-- **Backend ML**: Python 3.11, FastAPI, SQLModel, PostgreSQL, Hugging Face Transformers, PyTorch, Langdetect.
-- **Infrastructure**: Docker & Docker Compose.
+- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Framer Motion, Recharts, Lucide Icons
+- **Backend Fetcher**: Go 1.21+, Chi router, Redis (go-redis/v9)
+- **Backend ML**: Python 3.11, FastAPI, SQLModel, PostgreSQL, HuggingFace Transformers, PyTorch, Langdetect
+- **Infrastructure**: Docker & Docker Compose, NVIDIA GPU support (optional)
 
 ---
 
@@ -81,7 +82,7 @@ graph TD
 
 ## 🚀 Quick Start (Docker)
 
-To run this project locally, you need Docker installed and a YouTube API Key.
+To run this project locally, you need Docker installed, a YouTube Data API Key, and optionally a Gemini API Key.
 
 1. **Clone the repository**
    ```bash
@@ -93,7 +94,9 @@ To run this project locally, you need Docker installed and a YouTube API Key.
    ```bash
    cp .env.example .env
    ```
-   Open the `.env` file and insert your `YOUTUBE_API_KEY`.
+   Open the `.env` file and fill in:
+   - `YOUTUBE_API_KEY` — Get from [Google Cloud Console](https://console.cloud.google.com/)
+   - `GEMINI_API_KEY` — Get from [Google AI Studio](https://makersuite.google.com/app/apikey) (optional, for AI topic summaries)
 
 3. **Run with Docker Compose**
    ```bash
@@ -103,6 +106,7 @@ To run this project locally, you need Docker installed and a YouTube API Key.
 4. **Access the Application**
    - **Frontend UI**: `http://localhost:5173`
    - **Python API Docs**: `http://localhost:8000/docs`
+   - **Go API Docs**: `http://localhost:8080` (health check)
 
 ---
 
@@ -114,7 +118,11 @@ If you prefer to run the services directly on your host machine:
 ```bash
 cd backend-ml
 python -m venv venv
-source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+# source venv/bin/activate
+
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
@@ -135,10 +143,26 @@ npm run dev
 
 ---
 
+## 🔧 Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `YOUTUBE_API_KEY` | Yes | YouTube Data API v3 key from Google Cloud Console |
+| `GEMINI_API_KEY` | No | Gemini API key for AI topic summaries. Without this, topic extraction uses local keyword analysis. |
+| `POSTGRES_USER` | No | PostgreSQL username (default: `neurotube`) |
+| `POSTGRES_PASSWORD` | No | PostgreSQL password (default: `neurotube_secret`) |
+| `POSTGRES_DB` | No | PostgreSQL database name (default: `neurotube`) |
+| `FETCHER_PORT` | No | Go fetcher port (default: `8080`) |
+| `ML_PORT` | No | Python ML backend port (default: `8000`) |
+| `FRONTEND_PORT` | No | Frontend dev server port (default: `5173`) |
+
+---
+
 ## 📝 Acknowledgments
 
-- Built collaboratively with **Google Antigravity AI Agent**.
+- Built with assistance from AI development tools.
 - Inspired by [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
+- Sentiment analysis powered by [cardiffnlp/twitter-xlm-roberta-base-sentiment](https://huggingface.co/cardiffnlp/twitter-xlm-roberta-base-sentiment) and [w11wo/indonesian-roberta-base-sentiment-classifier](https://huggingface.co/w11wo/indonesian-roberta-base-sentiment-classifier).
 
 ---
 
