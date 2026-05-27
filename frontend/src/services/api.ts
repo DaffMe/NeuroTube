@@ -88,8 +88,13 @@ export async function fetchHistory(limit = 20): Promise<AnalyzedVideo[]> {
         
         return data;
     } catch (err) {
-        console.warn("Failed to fetch history from server, falling back to local storage", err);
-        return getLocalHistory();
+        // Only fall back to localStorage on network errors (offline, DNS failure).
+        // Server errors (500, etc.) are re-thrown so the caller can show an error.
+        if (err instanceof TypeError) {
+            console.warn("Network error fetching history, falling back to local storage", err);
+            return getLocalHistory();
+        }
+        throw err;
     }
 }
 

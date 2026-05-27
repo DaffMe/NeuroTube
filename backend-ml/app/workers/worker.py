@@ -42,13 +42,13 @@ async def process_job(job_data: dict):
     logger.info(f"🔬 [{job_id}] Processing {len(raw_comments)} comments for video {video_id}")
 
     async with AsyncSessionLocal() as db:
+        # Redis client created once; try/finally below guarantees cleanup
+        redis_client = aioredis.from_url(settings.REDIS_URL)
         try:
+            await redis_client.set(STATUS_PREFIX + job_id, "analyzing", ex=3600)
+
             # 1. Create job record
             await crud.create_job(db, job_id, video_id)
-
-            # Update status to analyzing
-            redis_client = aioredis.from_url(settings.REDIS_URL)
-            await redis_client.set(STATUS_PREFIX + job_id, "analyzing", ex=3600)
 
             # 2. Save video metadata
             await crud.save_video(db, video_info)
@@ -167,17 +167,17 @@ async def process_job(job_data: dict):
                 f"+{positive} / -{negative} / ~{neutral} ({total} total)"
             )
 
-            await redis_client.close()
+        finally:
+            # Always close the Redis client to prevent connection leaks
+            await redis_client.aclose()
 
         except Exception as e:
             logger.exception(f"❌ [{job_id}] Failed to process job: {e}")
-            try:
-                await crud.update_job_status(db, job_id, "failed", str(e))
-                redis_client = aioredis.from_url(settings.REDIS_URL)
-                await redis_client.set(STATUS_PREFIX + job_id, f"failed:{e}", ex=3600)
-                await redis_client.close()
-            except Exception:
-                pass
+            await crud.update_job_status(db, job_id, "failed", str(e))
+            # Reuse the same redis_client (still open in failed state)
+            await redis_client.set(STATUS_PREFIX + job_id, f"failed:{e}", ex=3600)
+            await redis_client.aclose()
+            raise  # Re-raise so worker_loop can continue processing
 
 
 async def worker_loop():

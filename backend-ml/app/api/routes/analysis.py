@@ -116,15 +116,13 @@ async def delete_history_item(video_id: str, db: AsyncSession = Depends(get_db))
     Also deletes its Redis cache.
     """
     await crud.delete_video_data(db, video_id)
-    
-    # Delete from Redis cache
+
+    redis_client = aioredis.from_url(settings.REDIS_URL)
     try:
-        redis_client = aioredis.from_url(settings.REDIS_URL)
         await redis_client.delete(f"neurotube:cache:{video_id}")
-        await redis_client.close()
-    except Exception as e:
-        pass
-        
+    finally:
+        await redis_client.aclose()
+
     return {"message": f"History for video {video_id} deleted successfully"}
 
 

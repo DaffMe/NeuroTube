@@ -92,10 +92,16 @@ async def save_video(db: AsyncSession, video_info: dict) -> VideoData:
     video = existing.scalars().first()
 
     if video:
-        # If video ALREADY EXISTS: Update the data with the latest info from YouTube
-        for key, value in video_info.items():
-            if hasattr(video, key):
-                setattr(video, key, value)
+        # Explicit snake_case mapping for the update branch.
+        # Go's VideoInfo sends camelCase keys, but VideoData uses snake_case.
+        video.title = video_info.get("title", video.title)
+        video.channel_title = video_info.get("channelTitle", video.channel_title)
+        video.thumbnail = video_info.get("thumbnail", video.thumbnail)
+        video.published_at = video_info.get("publishedAt", video.published_at)
+        video.view_count = video_info.get("viewCount", video.view_count)
+        video.like_count = video_info.get("likeCount", video.like_count)
+        video.comment_count = video_info.get("commentCount", video.comment_count)
+        video.description = video_info.get("description", video.description)
     else:
         # If video DOES NOT EXIST: Create a new row in the VideoData table
         # We map data from camelCase (e.g., channelTitle) to snake_case (e.g., channel_title)
@@ -278,12 +284,12 @@ async def get_analysis_history(
     query = (
         select(VideoData, SentimentSummary, AnalysisJob)
         .outerjoin(SentimentSummary, VideoData.id == SentimentSummary.video_id)
-        .outerjoin(
-            AnalysisJob,
-            (VideoData.id == AnalysisJob.video_id)
-            & (AnalysisJob.status == "completed"),
+        .outerjoin(AnalysisJob, VideoData.id == AnalysisJob.video_id)
+        .where(
+            # Only show videos that have at least one completed job.
+            # Videos with no job row or only non-completed jobs are excluded.
+            AnalysisJob.status == "completed"
         )
-        .where(AnalysisJob.status == "completed")
         .order_by(AnalysisJob.completed_at.desc())
         .offset(offset)
         .limit(limit)

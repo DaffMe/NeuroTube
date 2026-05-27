@@ -7,6 +7,7 @@ This module uses a routing strategy:
 3. If any other language, routes to a multilingual XLM-RoBERTa model.
 """
 import asyncio
+import asyncio
 import logging
 import re
 import torch
@@ -25,6 +26,7 @@ INDO_MODEL_NAME = "w11wo/indonesian-roberta-base-sentiment-classifier"
 
 multi_pipeline = None
 indo_pipeline = None
+models_loaded = False
 
 logger.info(f"Loading Dual NLP Models...")
 try:
@@ -35,14 +37,16 @@ try:
     logger.info(f"Loading Indo-RoBERTa: {INDO_MODEL_NAME}")
     indo_tokenizer = AutoTokenizer.from_pretrained(INDO_MODEL_NAME, use_fast=False)
     indo_pipeline = pipeline("sentiment-analysis", model=INDO_MODEL_NAME, tokenizer=indo_tokenizer, truncation=True, max_length=512, device=device_id)
-    
+
     logger.info(f"Loading XLM-RoBERTa: {MULTI_MODEL_NAME}")
     multi_tokenizer = AutoTokenizer.from_pretrained(MULTI_MODEL_NAME, use_fast=False)
     multi_pipeline = pipeline("sentiment-analysis", model=MULTI_MODEL_NAME, tokenizer=multi_tokenizer, truncation=True, max_length=512, device=device_id)
-    
+
+    models_loaded = True
     logger.info(f"✅ Models loaded successfully on {device_name.upper()}")
 except Exception as e:
     logger.error(f"Failed to load NLP models: {e}")
+    models_loaded = False
 
 _LABEL_MAP = {
     "LABEL_0": "negative",
@@ -90,8 +94,8 @@ def analyze_comment(text: str) -> dict:
     if is_spam_or_bot(str(text)):
         return {"sentiment": "spam", "sentimentScore": 0.0}
 
-    # Fallback if models failed to load
-    if indo_pipeline is None or multi_pipeline is None:
+    if not models_loaded:
+        logger.error("NLP models failed to load — cannot analyze sentiment")
         return {"sentiment": "neutral", "sentimentScore": 0.0}
 
     try:
@@ -139,10 +143,15 @@ def analyze_batch(texts: list[str]) -> list[dict]:
     return [analyze_comment(text) for text in texts]
 
 
+# Lock to prevent concurrent pipeline calls on GPU (not thread-safe)
+pipeline_lock = asyncio.Lock()
+
 async def analyze_comment_async(text: str, client=None) -> dict:
-    """Async wrapper for compatibility."""
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, analyze_comment, text)
+    """Async wrapper for compatibility. Uses a lock to ensure only one
+    pipeline call runs at a time to avoid CUDA race conditions."""
+    async with pipeline_lock:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, analyze_comment, text)
 
 
 async def analyze_batch_async(texts: list[str]) -> list[dict]:

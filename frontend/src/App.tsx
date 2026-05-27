@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Sparkles, ArrowRight } from "lucide-react";
@@ -28,34 +30,26 @@ import type { AnalysisResponse, AnalyzedVideo } from "@/types";
 // -----------------------------------------------------------------------------
 // SPRING ANIMATION CONFIGURATION
 // -----------------------------------------------------------------------------
-// The 'spring' object controls how bouncy and smooth the UI transitions will be.
 const spring = { type: "spring" as const, stiffness: 400, damping: 18 };
 
 export default function HomePage() {
   // ---------------------------------------------------------------------------
   // STATE MANAGEMENT (TEMPORARY DATA STORAGE FOR THIS PAGE)
   // ---------------------------------------------------------------------------
-  // url: Stores the YouTube link text typed by the user in the search box
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [loading, setLoading] = useState(false);
-  // loadingMessage: Stores status messages like "Fetching...", "Analyzing..."
   const [loadingMessage, setLoadingMessage] = useState("");
-  // progress: Stores the progress percentage (0 to 100%) of the backend job
   const [progress, setProgress] = useState<number | undefined>(undefined);
-  // result: Stores all the final analysis data (statistics, charts, AI summary) upon success
   const [result, setResult] = useState<AnalysisResponse | null>(null);
-  // history: Stores the list of previously analyzed videos fetched from the database
   const [history, setHistory] = useState<AnalyzedVideo[]>(getLocalHistory());
-  // selectedDate: Stores the specific date filter if the user clicks a point on the timeline chart
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
   // SIDE EFFECTS (RUNS WHEN THE APP FIRST LOADS)
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    // Contacts the server (backend) to request the list of previous analysis history
     fetchHistory().then(setHistory).catch(console.error);
   }, []);
 
@@ -64,56 +58,44 @@ export default function HomePage() {
   // ---------------------------------------------------------------------------
   const handleAnalyze = useCallback(
     async (inputUrl?: string) => {
-      // Use the URL from the input box, OR a direct URL (if clicked from History)
       const target = inputUrl || url;
-      
-      // Stop the process if the provided link is not a valid YouTube URL
+
       if (!isValidYouTubeUrl(target)) {
         setError("Please enter a valid YouTube URL!");
         setShake(true);
         setTimeout(() => setShake(false), 500);
         return;
       }
-      
-      // Clear any previous error messages and activate the Loading mode
+
       setError("");
       setLoading(true);
       setLoadingMessage("Sending request to server...");
       setProgress(0);
 
       try {
-        // 1. Send the video to the Backend Queue system. The server responds with a 'Job ID'
         const jobRes = await submitAnalysisJob(target);
         const jobId = jobRes.jobId;
 
-        // 2. Check if the job happens to be completed immediately
-        // Using const because this value is set once and never reassigned afterward
         const completed = jobRes.status === "completed";
-        
-        // If not finished yet, we will continuously monitor (Polling/Streaming) the progress
+
         if (!completed) {
           try {
             await new Promise<void>((resolve, reject) => {
-              // Establish a dedicated Server-Sent Events (SSE) connection to receive real-time progress updates
               const eventSource = new EventSource(getJobStatusStreamUrl(jobId));
 
-              // Every time the Backend sends a new progress message:
               eventSource.onmessage = (event) => {
                 try {
                   const data = JSON.parse(event.data);
-                  // Update the progress bar percentage in the UI
                   if (typeof data.progress === "number") {
                     setProgress(data.progress);
                   }
-                  // Update the loading text message in the UI
                   if (data.message) {
                     setLoadingMessage(data.message);
                   }
 
-                  // If the server says the process is "completed"
                   if (data.status === "completed") {
-                    eventSource.close(); // Close the communication channel
-                    resolve();           // Proceed to the next step (fetching results)
+                    eventSource.close();
+                    resolve();
                   } else if (data.status === "failed") {
                     eventSource.close();
                     reject(new Error(data.message || "Analysis failed during processing"));
@@ -124,47 +106,46 @@ export default function HomePage() {
                 }
               };
 
-              // If the internet connection drops unexpectedly
               eventSource.onerror = () => {
                 eventSource.close();
                 reject(new Error("Connection lost"));
               };
             });
           } catch (sseErr) {
-            // IF the dedicated SSE stream fails, fallback to manual Polling mode
             console.warn("SSE stream connection failed, switching to manual polling...", sseErr);
             let fallbackCompleted = false;
-            
-            // The system will ask the server "Is it done yet?" every 2 seconds
-            while (!fallbackCompleted) {
+            let pollAttempts = 0;
+            const MAX_POLL_ATTEMPTS = 60; // 2 minutes at 2s intervals
+
+            while (!fallbackCompleted && pollAttempts < MAX_POLL_ATTEMPTS) {
               await new Promise((r) => setTimeout(r, 2000));
               const statusRes = await getJobStatus(jobId);
               setLoadingMessage(statusRes.message);
+              pollAttempts++;
 
               if (statusRes.status === "completed") {
                 fallbackCompleted = true;
-              } else if (statusRes.status.startsWith("failed")) {
-                // Attach the original caught error (sseErr) as the 'cause' for proper error tracing
-                throw new Error(statusRes.message, { cause: sseErr });
+              } else if (statusRes.status.startsWith("failed") || statusRes.status === "unknown") {
+                throw new Error(statusRes.message || "Analysis failed", { cause: sseErr as Error });
               }
+            }
+
+            if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+              throw new Error("Analysis timed out after 2 minutes", { cause: sseErr as Error });
             }
           }
         }
 
-        // 3. Fetch the Complete Results (Statistics Data & Comments) once 100% processed
         setLoadingMessage("Downloading final results...");
         const data = await getAnalysisResults(jobId);
-        setResult(data); // Save the results into the 'result' state so it renders on the screen
-        
-        // Refresh the history list because we just successfully analyzed a new video
+        setResult(data);
+
         const newHistory = await fetchHistory();
         setHistory(newHistory);
 
       } catch (err) {
-        // Display red error text if the analysis fails
         setError(err instanceof Error ? err.message : "An error occurred during analysis");
       } finally {
-        // Regardless of success or failure, turn off the loading spinner
         setLoading(false);
         setLoadingMessage("");
         setProgress(undefined);
@@ -177,13 +158,11 @@ export default function HomePage() {
   // HELPER FUNCTIONS
   // ---------------------------------------------------------------------------
 
-  // Function for the "Sample" button (fills the box with a Rickroll link for testing)
   const handleSample = useCallback(async () => {
     setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     handleAnalyze("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   }, [handleAnalyze]);
 
-  // Function when a user clicks on a previously analyzed video from the history sidebar
   const handleHistorySelect = useCallback(async (video: AnalyzedVideo) => {
     setError("");
     setLoading(true);
@@ -212,7 +191,6 @@ export default function HomePage() {
       setHistory([]);
     } catch (err) {
       console.error("Failed to clear history:", err);
-      // Fallback to just clearing local if server fails
       setHistory([]);
     }
   }, []);
@@ -236,7 +214,6 @@ export default function HomePage() {
         exit={{ opacity: 0 }}
         className="mx-auto max-w-4xl space-y-6 px-4 py-8"
       >
-        {/* Back button */}
         <motion.button
           onClick={handleBack}
           whileHover={{ scale: 1.05, x: -4 }}
@@ -278,7 +255,6 @@ export default function HomePage() {
         exit={{ opacity: 0 }}
         className="flex flex-col items-center px-4 py-16"
       >
-        {/* Decorative background blobs */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <motion.div
             className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-primary/8 blur-3xl"
@@ -297,7 +273,6 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Hero */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -325,7 +300,6 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        {/* Input bar */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -333,9 +307,9 @@ export default function HomePage() {
           className="mt-10 w-full max-w-xl relative"
         >
           <div className="flex gap-2">
-            <motion.div 
-              className="flex-1" 
-              whileHover={{ scale: 1.01 }} 
+            <motion.div
+              className="flex-1"
+              whileHover={{ scale: 1.01 }}
               animate={shake ? { x: [-10, 10, -10, 10, -5, 5, 0] } : {}}
               transition={shake ? { duration: 0.4 } : spring}
             >
@@ -381,7 +355,6 @@ export default function HomePage() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Sample button */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -403,7 +376,6 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
 
-        {/* Loading */}
         <AnimatePresence>
           {loading && (
             <LoadingSpinner
@@ -413,7 +385,6 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* History */}
         <AnalyzedVideoList
           history={history}
           onSelect={handleHistorySelect}

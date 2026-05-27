@@ -189,7 +189,11 @@ func (c *Client) FetchComments(videoID string, limit int, onProgress func(int)) 
 		return nil, err
 	}
 
-	totalCommentsOnYT, _ := strconv.Atoi(videoInfo.CommentCount)
+	totalCommentsOnYT, err := strconv.Atoi(videoInfo.CommentCount)
+	if err != nil {
+		log.Printf("⚠️ Could not parse comment count %q: %v — defaulting to 0", videoInfo.CommentCount, err)
+		totalCommentsOnYT = 0
+	}
 	log.Printf("🔍 Video %s has %d total comments on YouTube. Target: %d", videoID, totalCommentsOnYT, limit)
 
 	// We use two strategies if needed: first 'relevance' (for top comments), then 'time' (to fill the quota)
@@ -245,12 +249,14 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 			continue
 		}
 
-		// Concurrent pages
+		// Concurrent pages — use semaphore to cap concurrent API calls
 		ctx, cancel := context.WithCancel(context.Background())
 		var wg sync.WaitGroup
 		tokenCh := make(chan string, 1000)
 		tokenCh <- token
 
+		// Limit to 5 concurrent API requests to avoid quota exhaustion
+		sem := make(chan struct{}, 5)
 		// Start 10 workers
 		for i := 0; i < 10; i++ {
 			wg.Add(1)
@@ -265,7 +271,9 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 							return
 						}
 						
+						sem <- struct{}{}
 						p, next, err := c.fetchCommentPage(videoID, t, order)
+						<-sem
 						if err != nil {
 							log.Printf("⚠️ fetchCommentPage error for video %s: %v", videoID, err)
 							cancel()

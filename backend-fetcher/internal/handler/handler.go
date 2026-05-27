@@ -69,6 +69,8 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 // Analyze accepts a YouTube URL, fetches video data + comments,
 // and publishes a job to Redis for the ML engine.
 func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
+	// Enforce 1MB request body limit to prevent OOM from oversized payloads
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 	var req AnalyzeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Invalid request body"})
@@ -81,6 +83,15 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid YouTube URL",
 			Details: fmt.Sprintf("Could not extract video ID from: %s", req.URL),
+		})
+		return
+	}
+
+	// Validate that the API key is configured before accepting the job
+	if h.ytClient.apiKey == "" {
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{
+			Error:   "YouTube API key not configured",
+			Details: "Set YOUTUBE_API_KEY in your environment",
 		})
 		return
 	}
