@@ -88,7 +88,7 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate that the API key is configured before accepting the job
-	if h.ytClient.apiKey == "" {
+	if !h.ytClient.HasAPIKey() {
 		writeJSON(w, http.StatusInternalServerError, ErrorResponse{
 			Error:   "YouTube API key not configured",
 			Details: "Set YOUTUBE_API_KEY in your environment",

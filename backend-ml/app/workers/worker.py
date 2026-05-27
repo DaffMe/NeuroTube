@@ -42,7 +42,6 @@ async def process_job(job_data: dict):
     logger.info(f"🔬 [{job_id}] Processing {len(raw_comments)} comments for video {video_id}")
 
     async with AsyncSessionLocal() as db:
-        # Redis client created once; try/finally below guarantees cleanup
         redis_client = aioredis.from_url(settings.REDIS_URL)
         try:
             await redis_client.set(STATUS_PREFIX + job_id, "analyzing", ex=3600)
@@ -55,10 +54,10 @@ async def process_job(job_data: dict):
 
             # 3. Analyze sentiment for each comment
             import httpx
-            
+
             analyzed_comments = []
             total_comments_to_analyze = len(raw_comments)
-            
+
             async with httpx.AsyncClient() as client:
                 # Use a larger semaphore size to maximize local GPU utilization
                 # We want to feed as many comments concurrently as possible to hit 90%+ GPU load
@@ -68,11 +67,11 @@ async def process_job(job_data: dict):
                 last_percent = 50
                 progress_lock = asyncio.Lock()
                 from app.core.sentiment.spam import is_spam
-                
+
                 async def sem_analyze(comment_obj, index):
                     nonlocal completed_count, last_percent
                     text = comment_obj.get("textOriginal") or comment_obj.get("textDisplay", "")
-                    
+
                     if text.strip():
                         if is_spam(text):
                             comment_obj["sentiment"] = "spam"
@@ -85,12 +84,12 @@ async def process_job(job_data: dict):
                     else:
                         comment_obj["sentiment"] = "neutral"
                         comment_obj["sentimentScore"] = 0.0
-                        
+
                     # Ensure fields match DB model naming (snake_case)
                     comment_obj["text_original"] = comment_obj.get("textOriginal", "")
                     comment_obj["is_reply"] = comment_obj.get("isReply", False)
                     comment_obj["parent_id"] = comment_obj.get("parentId")
-                    
+
                     async with progress_lock:
                         completed_count += 1
                         if total_comments_to_analyze > 0:
@@ -98,7 +97,7 @@ async def process_job(job_data: dict):
                             if ml_percent > last_percent or completed_count == total_comments_to_analyze:
                                 last_percent = ml_percent
                                 await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
-                            
+
                     return comment_obj
 
                 tasks = [sem_analyze(c, idx) for idx, c in enumerate(raw_comments)]
@@ -109,7 +108,6 @@ async def process_job(job_data: dict):
 
             # 4. Save analyzed comments to DB
             saved_count = await crud.save_comments_batch(db, video_id, analyzed_comments)
-            logger.info(f"💾 [{job_id}] Saved {saved_count} new comments to DB")
             await redis_client.set(f"neurotube:progress:{job_id}", 90, ex=3600)
 
             # Extract topics for positive and negative comments
@@ -158,26 +156,21 @@ async def process_job(job_data: dict):
             await crud.update_job_status(db, job_id, "completed")
             await redis_client.set(STATUS_PREFIX + job_id, "completed", ex=3600)
             await redis_client.set(f"neurotube:progress:{job_id}", 100, ex=3600)
-            
-            # Save cache entry with 24 hour TTL (Quota Guard)
             await redis_client.set(f"neurotube:cache:{video_id}", job_id, ex=86400)
 
             logger.info(
-                f"✅ [{job_id}] Analysis complete: "
-                f"+{positive} / -{negative} / ~{neutral} ({total} total)"
+                f"ANALYSIS COMPLETE: +{positive} / -{negative} / ~{neutral} ({total} total)"
             )
+
+        except Exception as e:
+            logger.exception(f"Failed to process job {job_id}: {e}")
+            await crud.update_job_status(db, job_id, "failed", str(e))
+            await redis_client.set(STATUS_PREFIX + job_id, f"failed:{e}", ex=3600)
+            raise  # Re-raise so worker_loop can continue after logging
 
         finally:
             # Always close the Redis client to prevent connection leaks
             await redis_client.aclose()
-
-        except Exception as e:
-            logger.exception(f"❌ [{job_id}] Failed to process job: {e}")
-            await crud.update_job_status(db, job_id, "failed", str(e))
-            # Reuse the same redis_client (still open in failed state)
-            await redis_client.set(STATUS_PREFIX + job_id, f"failed:{e}", ex=3600)
-            await redis_client.aclose()
-            raise  # Re-raise so worker_loop can continue processing
 
 
 async def worker_loop():

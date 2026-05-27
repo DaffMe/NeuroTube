@@ -30,6 +30,11 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
+// HasAPIKey returns true if the client has a non-empty API key.
+func (c *Client) HasAPIKey() bool {
+	return c.apiKey != ""
+}
+
 // ── Data types (camelCase JSON for frontend compatibility) ────────
 
 // VideoInfo represents YouTube video metadata.
