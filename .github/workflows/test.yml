@@ -1,0 +1,80 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  # ── Python ML Backend ──────────────────────────────────────────
+  python-tests:
+    name: Python tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-ml
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -q pytest pytest-asyncio aiosqlite
+          pip install -q -e .
+
+      - name: Run Python tests
+        run: pytest tests/ -v --tb=short
+
+  # ── Go Fetcher ─────────────────────────────────────────────────
+  go-tests:
+    name: Go tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-fetcher
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Run Go tests
+        run: go test ./... -v -count=1
+
+  # ── Frontend ───────────────────────────────────────────────────
+  frontend-tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vitest
+        run: npm add -D vitest @testing-library/react @testing-library/dom
+
+      - name: Run Frontend tests
+        run: npm run test -- --run
