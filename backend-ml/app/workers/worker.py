@@ -12,12 +12,10 @@ For each job:
 import asyncio
 import json
 import logging
-import redis.asyncio as aioredis
 
-from app.core.config import settings
 from app.core.sentiment.sentiment import analyze_comment, analyze_comment_async
 from app.crud import crud
-from app.db.session import AsyncSessionLocal
+from app.db.session import AsyncSessionLocal, get_redis
 
 logger = logging.getLogger(__name__)
 
@@ -42,66 +40,60 @@ async def process_job(job_data: dict):
     logger.info(f"🔬 [{job_id}] Processing {len(raw_comments)} comments for video {video_id}")
 
     async with AsyncSessionLocal() as db:
-        redis_client = aioredis.from_url(settings.REDIS_URL)
+        redis_client = await get_redis()
         try:
-            await redis_client.set(STATUS_PREFIX + job_id, "analyzing", ex=3600)
-
-            # 1. Create job record
+            # 1. Create job record in DB first (source of truth)
             await crud.create_job(db, job_id, video_id)
 
-            # 2. Save video metadata
+            # 2. Mark job as analyzing in Redis - only after DB record exists,
+            #    so we never have a zombie 'analyzing' status with no DB row.
+            await redis_client.set(STATUS_PREFIX + job_id, "analyzing", ex=3600)
+
+            # 3. Save video metadata
             await crud.save_video(db, video_info)
 
-            # 3. Analyze sentiment for each comment
-            import httpx
-
+            # 4. Analyze sentiment for each comment
             analyzed_comments = []
             total_comments_to_analyze = len(raw_comments)
 
-            async with httpx.AsyncClient() as client:
-                # Use a larger semaphore size to maximize local GPU utilization
-                # We want to feed as many comments concurrently as possible to hit 90%+ GPU load
-                sem_size = 200
-                semaphore = asyncio.Semaphore(sem_size)
-                completed_count = 0
-                last_percent = 50
-                progress_lock = asyncio.Lock()
-                from app.core.sentiment.spam import is_spam
+            progress_lock = asyncio.Lock()
+            from app.core.sentiment.spam import is_spam
 
-                async def sem_analyze(comment_obj, index):
-                    nonlocal completed_count, last_percent
-                    text = comment_obj.get("textOriginal") or comment_obj.get("textDisplay", "")
+            async def sem_analyze(comment_obj, index):
+                nonlocal completed_count, last_percent
+                text = comment_obj.get("textOriginal") or comment_obj.get("textDisplay", "")
 
-                    if text.strip():
-                        if is_spam(text):
-                            comment_obj["sentiment"] = "spam"
-                            comment_obj["sentimentScore"] = 0.0
-                        else:
-                            async with semaphore:
-                                sentiment_result = await analyze_comment_async(text, client)
-                            comment_obj["sentiment"] = sentiment_result["sentiment"]
-                            comment_obj["sentimentScore"] = sentiment_result["sentimentScore"]
-                    else:
-                        comment_obj["sentiment"] = "neutral"
+                if text.strip():
+                    if is_spam(text):
+                        comment_obj["sentiment"] = "spam"
                         comment_obj["sentimentScore"] = 0.0
+                    else:
+                        # pipeline_lock inside analyze_comment_async serializes all
+                        # pipeline calls; no additional semaphore is needed.
+                        sentiment_result = await analyze_comment_async(text)
+                        comment_obj["sentiment"] = sentiment_result["sentiment"]
+                        comment_obj["sentimentScore"] = sentiment_result["sentimentScore"]
+                else:
+                    comment_obj["sentiment"] = "neutral"
+                    comment_obj["sentimentScore"] = 0.0
 
-                    # Ensure fields match DB model naming (snake_case)
-                    comment_obj["text_original"] = comment_obj.get("textOriginal", "")
-                    comment_obj["is_reply"] = comment_obj.get("isReply", False)
-                    comment_obj["parent_id"] = comment_obj.get("parentId")
+                # Ensure fields match DB model naming (snake_case)
+                comment_obj["text_original"] = comment_obj.get("textOriginal", "")
+                comment_obj["is_reply"] = comment_obj.get("isReply", False)
+                comment_obj["parent_id"] = comment_obj.get("parentId")
 
-                    async with progress_lock:
-                        completed_count += 1
-                        if total_comments_to_analyze > 0:
-                            ml_percent = int(50 + (completed_count / total_comments_to_analyze) * 40)  # range 50% - 90%
-                            if ml_percent > last_percent or completed_count == total_comments_to_analyze:
-                                last_percent = ml_percent
-                                await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
+                async with progress_lock:
+                    completed_count += 1
+                    if total_comments_to_analyze > 0:
+                        ml_percent = int(50 + (completed_count / total_comments_to_analyze) * 40)  # range 50% - 90%
+                        if ml_percent > last_percent or completed_count == total_comments_to_analyze:
+                            last_percent = ml_percent
+                            await redis_client.set(f"neurotube:progress:{job_id}", ml_percent, ex=3600)
 
-                    return comment_obj
+                return comment_obj
 
-                tasks = [sem_analyze(c, idx) for idx, c in enumerate(raw_comments)]
-                analyzed_comments = await asyncio.gather(*tasks)
+            tasks = [sem_analyze(c, idx) for idx, c in enumerate(raw_comments)]
+            analyzed_comments = await asyncio.gather(*tasks)
 
             # Eliminate spam/bot comments so they don't pollute the DB or statistics
             analyzed_comments = [c for c in analyzed_comments if c.get("sentiment") != "spam"]
@@ -169,8 +161,9 @@ async def process_job(job_data: dict):
             raise  # Re-raise so worker_loop can continue after logging
 
         finally:
-            # Always close the Redis client to prevent connection leaks
-            await redis_client.aclose()
+            # Do NOT close the shared Redis client here — it is managed by
+            # get_redis() as a long-lived singleton. Closing it would break
+            # worker_loop() which reuses the same client for BRPOP.
 
 
 async def worker_loop():
@@ -178,9 +171,9 @@ async def worker_loop():
     Main worker loop. Uses BRPOP to block-wait for new jobs from Redis.
     Runs in a background asyncio task.
     """
-    logger.info("🔄 Redis worker started — waiting for jobs...")
+    logger.info("🔄 Redis worker started - waiting for jobs...")
 
-    redis_client = aioredis.from_url(settings.REDIS_URL)
+    redis_client = await get_redis()
 
     while True:
         try:

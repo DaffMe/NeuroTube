@@ -14,7 +14,7 @@
 ---
 
 > [!NOTE]
-> **Developer's Note:** This is my **first-ever project**! Built from scratch with the assistance of **Google Antigravity AI Agent** and **Claude Code (Anthropic)** as my coding companions. As a beginner, the code and architecture may not be 100% perfect — but it's a huge milestone in my learning journey. Feedback and contributions are always welcome!
+> **Developer's Note:** This project was built from scratch with the assistance of **Google Antigravity AI Agent** and **Claude Code (Anthropic)** as coding companions. Regular code reviews and bug fixes have been applied to keep the codebase healthy and production-ready.
 
 ---
 

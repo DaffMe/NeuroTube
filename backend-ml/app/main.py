@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.db.session import init_db
+from app.db.session import init_db, get_redis
 from app.api.routes.analysis import router as analysis_router
 from app.workers.worker import worker_loop
 
@@ -52,6 +52,11 @@ async def lifespan(app: FastAPI):
         await worker_task
     except asyncio.CancelledError:
         pass
+
+    # Close the shared Redis client singleton
+    redis_client = await get_redis()
+    await redis_client.aclose()
+    logger.info("✅ Redis client closed")
 
 
 # ── App ───────────────────────────────────────────────────────────

@@ -48,3 +48,24 @@ async def get_db():
     """FastAPI dependency that yields an async database session."""
     async with AsyncSessionLocal() as session:
         yield session
+
+
+# ── Redis client ──────────────────────────────────────────────────────────────
+
+_redis_client: "redis.asyncio.Redis | None" = None
+
+
+async def get_redis() -> "redis.asyncio.Redis":
+    """
+    Returns a shared Redis client instance.
+    Uses a lazy singleton: the client is created on first call and reused
+    for all subsequent calls. Call .aclose() only at application shutdown,
+    never after individual operations.
+    """
+    global _redis_client
+    if _redis_client is None:
+        import redis.asyncio as redis_asyncio
+        from app.core.config import settings
+
+        _redis_client = redis_asyncio.from_url(settings.REDIS_URL)
+    return _redis_client

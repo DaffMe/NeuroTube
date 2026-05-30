@@ -78,6 +78,29 @@ async def update_job_status(
 
 # ── Video Data ────────────────────────────────────────────────────
 
+# Canonical mapping from camelCase keys (Go VideoInfo) to snake_case field names.
+# Both the update and create branches of save_video use the same mapping.
+_VIDEO_FIELD_MAP = {
+    "title": "title",
+    "channelTitle": "channel_title",
+    "thumbnail": "thumbnail",
+    "publishedAt": "published_at",
+    "viewCount": "view_count",
+    "likeCount": "like_count",
+    "commentCount": "comment_count",
+    "description": "description",
+}
+
+
+def _apply_video_fields(video: "VideoData", video_info: dict) -> None:
+    """Apply camelCase fields from video_info to a VideoData model instance."""
+    for camel_key, snake_key in _VIDEO_FIELD_MAP.items():
+        # For updates, keep the existing DB value as the fallback.
+        # For creates, use the defaults defined in VideoData model.
+        current = getattr(video, snake_key, None)
+        new_val = video_info.get(camel_key, current)
+        setattr(video, snake_key, new_val)
+
 
 async def save_video(db: AsyncSession, video_info: dict) -> VideoData:
     """
@@ -92,30 +115,15 @@ async def save_video(db: AsyncSession, video_info: dict) -> VideoData:
     video = existing.scalars().first()
 
     if video:
-        # Explicit snake_case mapping for the update branch.
-        # Go's VideoInfo sends camelCase keys, but VideoData uses snake_case.
-        video.title = video_info.get("title", video.title)
-        video.channel_title = video_info.get("channelTitle", video.channel_title)
-        video.thumbnail = video_info.get("thumbnail", video.thumbnail)
-        video.published_at = video_info.get("publishedAt", video.published_at)
-        video.view_count = video_info.get("viewCount", video.view_count)
-        video.like_count = video_info.get("likeCount", video.like_count)
-        video.comment_count = video_info.get("commentCount", video.comment_count)
-        video.description = video_info.get("description", video.description)
+        # Update existing row: apply fields from YouTube, preserving any
+        # DB values that are not present in the incoming video_info.
+        _apply_video_fields(video, video_info)
     else:
-        # If video DOES NOT EXIST: Create a new row in the VideoData table
-        # We map data from camelCase (e.g., channelTitle) to snake_case (e.g., channel_title)
-        # to match the database schema.
+        # Create new row: build from video_info with snake_case field names.
         video = VideoData(
             id=video_info["id"],
-            title=video_info["title"],
-            channel_title=video_info.get("channelTitle", ""),
-            thumbnail=video_info.get("thumbnail", ""),
-            published_at=video_info.get("publishedAt", ""),
-            view_count=video_info.get("viewCount", "0"),
-            like_count=video_info.get("likeCount", "0"),
-            comment_count=video_info.get("commentCount", "0"),
-            description=video_info.get("description", ""),
+            **{snake_key: video_info.get(camel_key, "")
+               for camel_key, snake_key in _VIDEO_FIELD_MAP.items()},
         )
         db.add(video)
 
@@ -284,11 +292,9 @@ async def get_analysis_history(
     query = (
         select(VideoData, SentimentSummary, AnalysisJob)
         .outerjoin(SentimentSummary, VideoData.id == SentimentSummary.video_id)
-        .outerjoin(AnalysisJob, VideoData.id == AnalysisJob.video_id)
-        .where(
-            # Only show videos that have at least one completed job.
-            # Videos with no job row or only non-completed jobs are excluded.
-            AnalysisJob.status == "completed"
+        .outerjoin(
+            AnalysisJob,
+            (VideoData.id == AnalysisJob.video_id) & (AnalysisJob.status == "completed"),
         )
         .order_by(AnalysisJob.completed_at.desc())
         .offset(offset)

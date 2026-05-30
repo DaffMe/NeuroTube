@@ -14,10 +14,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
+from app.db.session import get_db, get_redis
 from app.crud import crud
-import redis.asyncio as aioredis
-from app.core.config import settings
 
 router = APIRouter()
 
@@ -117,7 +115,7 @@ async def delete_history_item(video_id: str, db: AsyncSession = Depends(get_db))
     """
     await crud.delete_video_data(db, video_id)
 
-    redis_client = aioredis.from_url(settings.REDIS_URL)
+    redis_client = await get_redis()
     try:
         await redis_client.delete(f"neurotube:cache:{video_id}")
     finally:

@@ -1,0 +1,1643 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "NeuroTube",
+    "languages": [
+      "typescript",
+      "go",
+      "python",
+      "javascript",
+      "dockerfile",
+      "yaml",
+      "markdown",
+      "json",
+      "html",
+      "css"
+    ],
+    "frameworks": [
+      "React 19",
+      "Vite",
+      "Tailwind CSS v4",
+      "FastAPI",
+      "SQLModel",
+      "Transformers",
+      "Chi router",
+      "Docker Compose"
+    ],
+    "description": "YouTube Comment Sentiment Analyzer - A full-stack application to analyze YouTube comment sentiments at scale, featuring concurrent data fetching, dual-engine sentiment analysis, AI-powered topic extraction, real-time progress streaming, and quotas-aware caching.",
+    "analyzedAt": "2026-05-28T09:49:12.502Z",
+    "gitCommitHash": "14004697f3f571cca066baea1024e306d15ff2a7"
+  },
+  "nodes": [
+    {
+      "id": "file:backend-fetcher/Dockerfile",
+      "name": "Dockerfile — backend-fetcher",
+      "type": "file",
+      "summary": "Multi-stage Dockerfile that compiles the Go fetcher service into a minimal Alpine Linux container.",
+      "tags": [
+        "docker",
+        "multi-stage-build",
+        "container",
+        "golang",
+        "alpine",
+        "backend"
+      ],
+      "filePath": "backend-fetcher/Dockerfile",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-fetcher/.dockerignore",
+      "name": ".dockerignore — backend-fetcher",
+      "type": "file",
+      "summary": "Docker build context ignore rules that prevent compiled binaries, executables, and secrets from being sent to the Docker daemon.",
+      "tags": [
+        "dockerignore",
+        "docker",
+        "build-optimization",
+        "secrets"
+      ],
+      "filePath": "backend-fetcher/.dockerignore",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/.dockerignore",
+      "name": "neurotube.backend-ml.dockerignore",
+      "type": "config",
+      "summary": "Docker build context ignore patterns for Python/ML backend",
+      "tags": [
+        "docker",
+        "ignore-patterns",
+        "python",
+        "ml"
+      ],
+      "filePath": "backend-ml/.dockerignore",
+      "metadata": {
+        "patterns": [
+          "__pycache__",
+          "*.pyc",
+          ".venv",
+          "venv",
+          ".env*",
+          "!.env.example"
+        ],
+        "purpose": "Optimize Docker build context size and prevent sensitive data exposure"
+      }
+    },
+    {
+      "id": "file:backend-ml/Dockerfile",
+      "name": "neurotube.backend-ml.dockerfile",
+      "type": "service",
+      "summary": "Container definition for Python 3.11 ML backend service with PostgreSQL support",
+      "tags": [
+        "docker",
+        "container",
+        "python",
+        "uvicorn",
+        "api",
+        "ml-backend"
+      ],
+      "filePath": "backend-ml/Dockerfile",
+      "metadata": {
+        "baseImage": "python:3.11-slim",
+        "systemDependencies": [
+          "gcc",
+          "libpq-dev"
+        ],
+        "exposedPort": 8000,
+        "entrypoint": "uvicorn app.main:app --host 0.0.0.0 --port 8000",
+        "workingDirectory": "/app"
+      }
+    },
+    {
+      "id": "file:frontend/.dockerignore",
+      "name": ".dockerignore",
+      "type": "config",
+      "summary": "Docker build context exclusion file that specifies which files and directories should be ignored when building the Docker image. Prevents sensitive and unnecessary files (node_modules, build artifacts, git data, env files) from being included in the Docker context.",
+      "tags": [
+        "docker",
+        "config",
+        "ignore-patterns",
+        "build-optimization"
+      ],
+      "filePath": "frontend/.dockerignore",
+      "metadata": {
+        "fileCategory": "config",
+        "fileType": "dockerignore",
+        "patterns": [
+          "node_modules",
+          "dist",
+          ".git",
+          ".env*",
+          "!.env.example"
+        ],
+        "purpose": "Exclude files from Docker build context"
+      }
+    },
+    {
+      "id": "file:frontend/Dockerfile",
+      "name": "Dockerfile",
+      "type": "container",
+      "summary": "Multi-stage Docker container configuration for the NeuroTube frontend React application. Uses Node.js Alpine base image for compact size, installs dependencies with npm, and configures the development server on port 5173.",
+      "tags": [
+        "docker",
+        "container",
+        "frontend",
+        "nodejs",
+        "react",
+        "vite",
+        "dev-server",
+        "infrastructure"
+      ],
+      "filePath": "frontend/Dockerfile",
+      "metadata": {
+        "fileCategory": "infra",
+        "fileType": "dockerfile",
+        "baseImage": "node:20-alpine",
+        "exposedPort": 5173,
+        "packageManager": "npm",
+        "installFlags": "--legacy-peer-deps",
+        "purpose": "Containerize frontend application for development/deployment",
+        "buildSteps": [
+          "Base: node:20-alpine",
+          "Workdir: /app",
+          "Copy package*.json",
+          "npm install --legacy-peer-deps",
+          "Copy application source",
+          "Expose port 5173",
+          "Start dev server with --host 0.0.0.0"
+        ]
+      }
+    },
+    {
+      "id": "file:.env",
+      "name": ".env",
+      "type": "file",
+      "summary": "Configuration file containing sensitive credentials and API keys for the NeuroTube application. Stores YouTube API key, PostgreSQL database credentials (user: neurotube, password: neurotube_secret), Redis port (6379), service ports (fetcher: 8080, ml: 8000, frontend: 5173), and Gemini API key for AI topic summaries.",
+      "tags": [
+        "config",
+        "environment",
+        "credentials",
+        "api-keys",
+        "secrets"
+      ],
+      "filePath": ".env",
+      "metadata": {}
+    },
+    {
+      "id": "file:.env.example",
+      "name": ".env.example",
+      "type": "file",
+      "summary": "Template environment configuration file for NeuroTube. Contains placeholder values and comments explaining each environment variable. Includes sections for YouTube API, PostgreSQL (database: neurotube_db), Redis, service ports, and frontend configuration. The VITE_API_BASE_URL points to the Go fetcher service at http://localhost:8080.",
+      "tags": [
+        "config",
+        "environment",
+        "template",
+        "example"
+      ],
+      "filePath": ".env.example",
+      "metadata": {}
+    },
+    {
+      "id": "file:.gitignore",
+      "name": ".gitignore",
+      "type": "file",
+      "summary": "Git ignore patterns for the NeuroTube project. Excludes build artifacts (dist/, bin/), dependency folders (node_modules/, __pycache__/, .venv/), IDE settings (.vscode/, .DS_Store), PostgreSQL data (pgdata/), logs (*.log), and development documentation files (ADMIN_GUIDE.md, implementation_plan.md, task.md, walkthrough.md) from version control. Also excludes frontend node_modules and ML venv.",
+      "tags": [
+        "config",
+        "git",
+        "ignore",
+        "development"
+      ],
+      "filePath": ".gitignore",
+      "metadata": {}
+    },
+    {
+      "id": "file:ADMIN_GUIDE.md",
+      "name": "ADMIN_GUIDE.md",
+      "type": "file",
+      "summary": "Comprehensive administration guide for the NeuroTube microservices ecosystem. Covers Docker Compose commands for starting/stopping/restarting services, container health monitoring, log viewing per service, and direct access to PostgreSQL and Redis CLIs. Documents configuration variables (YOUTUBE_API_KEY, POSTGRES_PASSWORD, service ports) and troubleshooting steps for common issues: job status failures (404), empty responses, long analysis times, and YouTube API quota errors (403/429).",
+      "tags": [
+        "documentation",
+        "admin",
+        "docker",
+        "troubleshooting",
+        "infrastructure"
+      ],
+      "filePath": "ADMIN_GUIDE.md",
+      "metadata": {}
+    },
+    {
+      "id": "file:README.md",
+      "name": "README.md",
+      "type": "file",
+      "summary": "Main project documentation for NeuroTube, a YouTube comment sentiment analyzer. Details six key features: concurrent data fetching, dual-engine sentiment analysis (Indonesian RoBERTa + XLM-RoBERTa), AI-powered topic extraction via Gemini, real-time SSE progress streaming, Redis-backed quota-aware caching (24-hour window), and an interactive React dashboard with sentiment timeline and topic summaries. Documents the microservices architecture (Frontend/React, Fetcher/Go, ML Engine/Python FastAPI) and provides Docker and local development setup instructions.",
+      "tags": [
+        "documentation",
+        "readme",
+        "features",
+        "architecture",
+        "setup"
+      ],
+      "filePath": "README.md",
+      "metadata": {}
+    },
+    {
+      "id": "file:docker-compose.yml",
+      "name": "docker-compose.yml",
+      "type": "file",
+      "summary": "Docker Compose orchestration file defining four services: postgres (PostgreSQL 16 Alpine for persistent data storage), redis (Redis 7 Alpine for job queuing and caching), backend-fetcher (Go fetcher service on port 8080 for YouTube API integration), backend-ml (Python ML engine on port 8000 for sentiment analysis), and frontend (React development server on port 5173). The ML service includes NVIDIA GPU support configuration and HuggingFace cache volume mounting. All services restart automatically unless stopped.",
+      "tags": [
+        "docker",
+        "orchestration",
+        "microservices",
+        "infrastructure",
+        "yaml"
+      ],
+      "filePath": "docker-compose.yml",
+      "metadata": {}
+    },
+    {
+      "id": "file:implementation_plan.md",
+      "name": "implementation_plan.md",
+      "type": "file",
+      "summary": "Implementation plan for building the NeuroTube frontend using Stitch MCP. Details a two-step approach: first scaffolding a Vite React TypeScript project in the frontend directory with dependencies (Tailwind CSS, Framer Motion, Lucide React, TanStack Router, Shadcn UI), then building core components including a home/landing page with URL validation and sample results, an analytics results page with animations, and loading state animations. References the PRD for the 'Pink Mem Form' aesthetic theme.",
+      "tags": [
+        "documentation",
+        "implementation",
+        "frontend",
+        "plan",
+        "react"
+      ],
+      "filePath": "implementation_plan.md",
+      "metadata": {}
+    },
+    {
+      "id": "file:task.md",
+      "name": "task.md",
+      "type": "file",
+      "summary": "Task checklist document covering the initial project setup. Tracks completion of scaffolding a Vite React TS project, installing dependencies (Tailwind CSS, Framer Motion, TanStack Router, Lucide React, Shadcn UI), configuring the 'Pink Mem Form' aesthetic theme, setting up routing, and building UI components. Also includes Feature 4 (Hybrid Sentiment Engine) implementation with VADER and secondary model evaluation, plus custom lexicon updates for Gaming/Horror/Indonesian content.",
+      "tags": [
+        "documentation",
+        "tasks",
+        "checklist",
+        "frontend"
+      ],
+      "filePath": "task.md",
+      "metadata": {}
+    },
+    {
+      "id": "file:walkthrough.md",
+      "name": "walkthrough.md",
+      "type": "file",
+      "summary": "Comprehensive walkthrough of six experimental features implemented on the development branch. Covers: (1) Sentiment Timeline line chart with dynamic time grouping, (2) AI Summary with Gemini API fallback to TF-IDF/N-gram, (3) Real-time SSE progress streaming via Redis, (4) Hybrid Sentiment Engine using VADER with ambiguous range fallback (-0.35 to 0.15), (5) Quota Guard with 24-hour Redis caching and force=true bypass, and (6) Video deletion from history via DELETE /api/history/{videoId}. Documents modified and new frontend/backend files including timeline.ts, SentimentTimeline.tsx, AiSummary.tsx, App.tsx, CommentSection.tsx, worker.py, crud.py, and analysis.py.",
+      "tags": [
+        "documentation",
+        "walkthrough",
+        "features",
+        "experimental",
+        "development"
+      ],
+      "filePath": "walkthrough.md",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/.gitignore",
+      "name": ".gitignore",
+      "type": "file",
+      "summary": "Git ignore configuration for the frontend project. Excludes common development artifacts including logs, node_modules, build outputs (dist), and editor-specific files (.vscode, .idea, .DS_Store). Ensures clean version control by ignoring compiled, cached, and environment-specific files.",
+      "tags": [
+        "git",
+        "configuration",
+        "development",
+        "build"
+      ],
+      "filePath": "frontend/.gitignore",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/README.md",
+      "name": "NeuroTube Frontend README",
+      "type": "file",
+      "summary": "Documentation for the NeuroTube frontend application. Built with React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion for animations, Recharts for data visualization, and Lucide React for icons. Provides setup instructions for local development including npm install, dev server startup, and production build. Notes that the frontend connects to Go Fetcher Service and Python ML Service backends.",
+      "tags": [
+        "documentation",
+        "react",
+        "frontend",
+        "setup",
+        "architecture"
+      ],
+      "filePath": "frontend/README.md",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/components.json",
+      "name": "shadcn/ui Configuration",
+      "type": "file",
+      "summary": "shadcn/ui component library configuration. Uses 'new-york' style preset, disabled RSC (React Server Components), enabled TSX. Configures Tailwind CSS v4 with slate base color and CSS variables. Defines path aliases for components (@/components), utilities (@/lib/utils), UI components (@/components/ui), lib (@/lib), and hooks (@/hooks). Uses Lucide icon library. This configuration enables seamless importing of UI components across the codebase using standardized path aliases.",
+      "tags": [
+        "shadcn",
+        "ui",
+        "components",
+        "tailwind",
+        "configuration",
+        "aliases"
+      ],
+      "filePath": "frontend/components.json",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/index.html",
+      "name": "NeuroTube Entry HTML",
+      "type": "file",
+      "summary": "Main HTML entry point for the NeuroTube application. Sets up the document with UTF-8 encoding, favicon, responsive viewport meta tag, and SEO-friendly meta description 'NeuroTube — Instantly analyze the sentiment of thousands of YouTube comments. Cute, bouncy, and fast.' Loads Inter and Outfit fonts from Google Fonts for typography. Mounts the React application to the 'root' div element and loads the main TypeScript entry module from /src/main.tsx.",
+      "tags": [
+        "html",
+        "entry-point",
+        "seo",
+        "fonts",
+        "react"
+      ],
+      "filePath": "frontend/index.html",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/package-lock.json",
+      "name": "NPM Lock File",
+      "type": "file",
+      "summary": "NPM package lock file recording the exact dependency tree for the frontend project. Contains resolved versions of all packages including React 19.2.5, Vite 8.0.10, Tailwind CSS 4.3.0, TanStack Router 1.169.2, Framer Motion 12.38.0, Recharts 3.8.1, Lucide React 1.14.0, and development dependencies. This file ensures reproducible builds across different environments.",
+      "tags": [
+        "npm",
+        "dependencies",
+        "lock-file",
+        "reproducibility"
+      ],
+      "filePath": "frontend/package-lock.json",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/package.json",
+      "name": "Package Configuration",
+      "type": "file",
+      "summary": "NPM package configuration defining the frontend application metadata and scripts. Defines four npm scripts: 'dev' for Vite development server, 'build' for TypeScript compilation and Vite production build, 'lint' for ESLint code quality checks, and 'preview' for previewing the production build. Core dependencies include React 19, Radix UI slot component, TanStack React Router, Framer Motion animations, Recharts data visualization, and Lucide icons. Dev dependencies include TypeScript 6, Vite build tool, Tailwind CSS v4, and ESLint with React hooks plugin.",
+      "tags": [
+        "npm",
+        "package",
+        "scripts",
+        "dependencies",
+        "react",
+        "vite"
+      ],
+      "filePath": "frontend/package.json",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/tsconfig.app.json",
+      "name": "TypeScript App Configuration",
+      "type": "file",
+      "summary": "TypeScript compiler configuration for the application source code. Targets ES2023 with ESNext modules, uses bundler module resolution, and enables verbatimModuleSyntax. Includes DOM types for client-side development. Configures path aliases mapping @/* to ./src/* for clean imports. Enables strict linting options including noUnusedLocals, noUnusedParameters, and noFallthroughCasesInSwitch. Uses React JSX transform for JSX support.",
+      "tags": [
+        "typescript",
+        "configuration",
+        "react",
+        "paths",
+        "strict"
+      ],
+      "filePath": "frontend/tsconfig.app.json",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/tsconfig.json",
+      "name": "Main TypeScript Configuration",
+      "type": "file",
+      "summary": "Root TypeScript configuration that references the app and node-specific TypeScript configurations. This composite configuration structure allows separation of concerns: tsconfig.app.json handles the main application source code (src), while tsconfig.node.json handles build tooling (vite.config.ts). Using project references ensures TypeScript is correctly configured for both the application and the build process.",
+      "tags": [
+        "typescript",
+        "configuration",
+        "references",
+        "composite"
+      ],
+      "filePath": "frontend/tsconfig.json",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/tsconfig.node.json",
+      "name": "TypeScript Node Configuration",
+      "type": "file",
+      "summary": "TypeScript compiler configuration for Node.js environment (build tooling). Targets ES2023, uses ESNext modules with bundler resolution mode, and includes Node types. Configured for Vite build tool support (vite.config.ts). Enables verbatimModuleSyntax and strict linting rules. The noEmit option prevents TypeScript from outputting files, as Vite handles the transpilation. This configuration is separate from the app configuration to handle build-related TypeScript code.",
+      "tags": [
+        "typescript",
+        "configuration",
+        "node",
+        "vite",
+        "build-tool"
+      ],
+      "filePath": "frontend/tsconfig.node.json",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-fetcher/cmd/main.go",
+      "name": "backend-fetcher/cmd/main.go",
+      "type": "file",
+      "summary": "Entry point for the Go fetcher service. Initializes Redis publisher, YouTube API handler, Chi router with CORS and middleware, and starts an HTTP server on port 8080. Handles graceful shutdown via OS signals.",
+      "tags": [
+        "entrypoint",
+        "server",
+        "http",
+        "chi-router",
+        "redis",
+        "cors",
+        "graceful-shutdown"
+      ],
+      "filePath": "backend-fetcher/cmd/main.go",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-fetcher/go.mod",
+      "name": "backend-fetcher/go.mod",
+      "type": "file",
+      "summary": "Go module definition declaring module path, Go version 1.22, and dependencies: chi/v5 for HTTP routing, go-chi/cors for CORS middleware, google/uuid for job ID generation, and go-redis/v9 for Redis client.",
+      "tags": [
+        "module",
+        "dependencies",
+        "go-modules"
+      ],
+      "filePath": "backend-fetcher/go.mod",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-fetcher/internal/handler/handler.go",
+      "name": "backend-fetcher/internal/handler/handler.go",
+      "type": "file",
+      "summary": "HTTP request handlers for the Go fetcher. Provides Health, Analyze, Status, and StatusStream (SSE) endpoints. Extracts YouTube video IDs from URLs, checks Redis cache before queuing (quota guard), and publishes JobPayload messages to Redis for Python ML consumption.",
+      "tags": [
+        "http-handlers",
+        "sse",
+        "rest-api",
+        "youtube",
+        "redis-queue",
+        "quota-guard"
+      ],
+      "filePath": "backend-fetcher/internal/handler/handler.go",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-fetcher/internal/queue/queue.go",
+      "name": "backend-fetcher/internal/queue/queue.go",
+      "type": "file",
+      "summary": "Redis-based job queue publisher. Manages JobPayload serialization, status tracking, progress percentage, and caching of video-to-job mappings. Uses LPUSH for FIFO queuing consumed by Python BRPOP.",
+      "tags": [
+        "redis",
+        "queue",
+        "job-publisher",
+        "caching",
+        "progress-tracking"
+      ],
+      "filePath": "backend-fetcher/internal/queue/queue.go",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-fetcher/internal/youtube/youtube.go",
+      "name": "backend-fetcher/internal/youtube/youtube.go",
+      "type": "file",
+      "summary": "YouTube Data API v3 client. Fetches video metadata and comments with concurrent pagination using goroutines and semaphore-based rate limiting. Processes top-level comments and all inline replies. Sorts results by like count and publish date.",
+      "tags": [
+        "youtube-api",
+        "api-client",
+        "concurrent-fetching",
+        "rate-limiting",
+        "pagination"
+      ],
+      "filePath": "backend-fetcher/internal/youtube/youtube.go",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/main.py",
+      "name": "backend-ml/app/main.py",
+      "type": "file",
+      "summary": "FastAPI application entry point for the ML backend service. Initializes database tables on startup, starts a Redis worker loop in the background, and serves REST API routes under /api prefix with CORS middleware.",
+      "tags": [
+        "fastapi",
+        "entrypoint",
+        "cors",
+        "lifespan",
+        "database-init",
+        "redis-worker"
+      ],
+      "filePath": "backend-ml/app/main.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/core/config.py",
+      "name": "backend-ml/app/core/config.py",
+      "type": "file",
+      "summary": "Configuration settings class using pydantic-style environment variable loading via python-dotenv. Configures PostgreSQL DATABASE_URL, Redis URL, CORS allowed origins, server PORT, and Gemini API key for topic extraction.",
+      "tags": [
+        "config",
+        "environment-variables",
+        "settings"
+      ],
+      "filePath": "backend-ml/app/core/config.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/core/sentiment/sentiment.py",
+      "name": "backend-ml/app/core/sentiment/sentiment.py",
+      "type": "file",
+      "summary": "Dual-engine sentiment analysis using Hugging Face Transformers. Routes Indonesian comments to w11wo/indonesian-roberta-base-sentiment-classifier and all other languages to cardiffnlp/twitter-xlm-roberta-base-sentiment. Includes a lightweight regex spam filter before GPU inference.",
+      "tags": [
+        "sentiment-analysis",
+        "transformers",
+        "huggingface",
+        "dual-model",
+        "indonesian",
+        "multilingual",
+        "gpu",
+        "spam-detection"
+      ],
+      "filePath": "backend-ml/app/core/sentiment/sentiment.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/core/sentiment/spam.py",
+      "name": "backend-ml/app/core/sentiment/spam.py",
+      "type": "file",
+      "summary": "Regex-based spam detection for YouTube comments. Detects URL-only spam, Sub4Sub promotions, crypto/investment scams, giveaway scams, gibberish (repeating characters), and excessive word repetition.",
+      "tags": [
+        "spam-detection",
+        "regex",
+        "heuristic-filter",
+        "youtube-comments"
+      ],
+      "filePath": "backend-ml/app/core/sentiment/spam.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/core/topics.py",
+      "name": "backend-ml/app/core/topics.py",
+      "type": "file",
+      "summary": "Topic extraction and summarization for YouTube comments. Attempts Gemini AI summarization first with structured prompts and JSON schema output. Falls back to local extractive summarization using word frequency scoring and TF-IDF-style ranking when API key is unavailable or request fails.",
+      "tags": [
+        "topic-extraction",
+        "gemini-api",
+        "summarization",
+        "extractive-summarization",
+        "nlp",
+        "crowd-consensus"
+      ],
+      "filePath": "backend-ml/app/core/topics.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/crud/crud.py",
+      "name": "backend-ml/app/crud/crud.py",
+      "type": "file",
+      "summary": "Async CRUD operations layer for the NeuroTube database. Handles AnalysisJob lifecycle, VideoData upserts, CommentData batch saves with deduplication, and SentimentSummary aggregations. Provides history queries with joined video/summary/job data shaped for frontend consumption.",
+      "tags": [
+        "crud",
+        "database",
+        "async",
+        "postgresql",
+        "sqlalchemy",
+        "sqlmodel",
+        "data-access-layer"
+      ],
+      "filePath": "backend-ml/app/crud/crud.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/db/session.py",
+      "name": "backend-ml/app/db/session.py",
+      "type": "file",
+      "summary": "Async PostgreSQL session factory using SQLAlchemy 2.0 async engine and sessionmaker. Provides init_db() for table creation and automatic migration of JSON columns, and get_db() as a FastAPI dependency for request-scoped sessions.",
+      "tags": [
+        "database",
+        "async",
+        "postgresql",
+        "sqlalchemy",
+        "session",
+        "migration",
+        "fastapi-dependency"
+      ],
+      "filePath": "backend-ml/app/db/session.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/models/models.py",
+      "name": "models",
+      "type": "file",
+      "summary": "SQLAlchemy ORM model definitions for NeuroTube's PostgreSQL database. Defines four core tables: AnalysisJob for job lifecycle tracking, VideoData for YouTube video metadata, CommentData for sentiment-annotated comments, and SentimentSummary for aggregated results per video.",
+      "tags": [
+        "database",
+        "sqlmodel",
+        "orm",
+        "postgresql",
+        "schema"
+      ],
+      "filePath": "backend-ml/app/models/models.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/reanalyze_video.py",
+      "name": "reanalyze_video",
+      "type": "file",
+      "summary": "Command-line utility script that re-runs sentiment analysis on existing comments in the database for a given video ID. Fetches all comments, re-analyzes each with VADER, updates sentiment fields, and recalculates the SentimentSummary. Used for reprocessing when the ML model is updated.",
+      "tags": [
+        "cli",
+        "sentiment-analysis",
+        "vader",
+        "reanalysis"
+      ],
+      "filePath": "backend-ml/app/reanalyze_video.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/workers/worker.py",
+      "name": "worker",
+      "type": "file",
+      "summary": "Async Redis worker that consumes jobs from the 'neurotube:jobs' queue (BRPOP). For each job: saves video metadata, runs VADER sentiment analysis on comments with spam filtering, extracts positive/negative topic clusters via Gemini, saves all results to PostgreSQL, and updates job status in Redis. Contains spam detection, progress reporting, and error handling.",
+      "tags": [
+        "redis",
+        "worker",
+        "async",
+        "queue",
+        "sentiment-analysis",
+        "spam-filter"
+      ],
+      "filePath": "backend-ml/app/workers/worker.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:e2e_test_3.py",
+      "name": "e2e_test_3",
+      "type": "file",
+      "summary": "Integration test script that validates the complete NeuroTube pipeline: submits a job to the Go fetcher, waits for ML processing (sentiment analysis + spam filter), verifies sentiment counts and spam filtering statistics, and checks Gemini AI topic extraction. Tests full system from fetcher through ML to API response with 5-minute timeout.",
+      "tags": [
+        "e2e",
+        "integration-test",
+        "sentiment-analysis",
+        "spam-filter",
+        "api-validation"
+      ],
+      "filePath": "e2e_test_3.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/App.tsx",
+      "name": "App",
+      "type": "file",
+      "summary": "Root React + Vite page component for the NeuroTube sentiment analysis dashboard. Manages the full analysis lifecycle: URL input validation, job submission via SSE or polling, progress tracking, result rendering with charts and AI summaries. Handles both the landing/search view and the results detail view. Integrates all child components for a complete user flow from URL input to animated results display.",
+      "tags": [
+        "next.js",
+        "page",
+        "dashboard",
+        "sentiment-analysis",
+        "sse",
+        "state-management"
+      ],
+      "filePath": "frontend/src/App.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/AiSummary.tsx",
+      "name": "AiSummary",
+      "type": "file",
+      "summary": "React component that displays AI-generated topic clusters from Gemini analysis of positive and negative comments. Shows a keyword cloud overlay, topic cards with expandable representative quotes, and a two-column grid layout separating positive and negative themes. Supports smooth expand/collapse animations for quote sections and interactive hover effects on keyword pills.",
+      "tags": [
+        "react",
+        "topic-clustering",
+        "ai-summary",
+        "gemini",
+        "keyword-cloud",
+        "animation"
+      ],
+      "filePath": "frontend/src/components/AiSummary.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/AnalyzedVideoList.tsx",
+      "name": "AnalyzedVideoList",
+      "type": "file",
+      "summary": "React component that displays a list of previously analyzed YouTube videos as clickable cards with thumbnails and comment counts. Supports batch clear-all functionality via API and per-video deletion. Uses staggered entrance animations via Framer Motion and hover/tap scale effects for an interactive history browsing experience.",
+      "tags": [
+        "react",
+        "history",
+        "video-list",
+        "local-storage",
+        "animation"
+      ],
+      "filePath": "frontend/src/components/AnalyzedVideoList.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/CommentCharts.tsx",
+      "name": "CommentCharts",
+      "type": "file",
+      "summary": "React component rendering two Recharts visualizations for sentiment distribution: a donut pie chart showing proportions (positive/neutral/negative) and a bar chart showing absolute counts. Both charts share the same color scheme (emerald/amber/rose), custom tooltips with glassmorphism styling, and animated entrance effects. Used to provide quick visual insight into comment sentiment breakdown.",
+      "tags": [
+        "react",
+        "recharts",
+        "pie-chart",
+        "bar-chart",
+        "sentiment-visualization"
+      ],
+      "filePath": "frontend/src/components/CommentCharts.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/CommentSection.tsx",
+      "name": "CommentSection",
+      "type": "file",
+      "summary": "React component that renders a scrollable, filterable list of YouTube comments with sentiment badges. Features include: deterministic avatar colors from username hash, expandable nested reply threads, sentiment filter tabs (All/Positive/Neutral/Negative), date-based filtering when a timeline date is selected, and infinite-style 'Load more' pagination. Uses Framer Motion for animated filtering transitions.",
+      "tags": [
+        "react",
+        "comments",
+        "pagination",
+        "filtering",
+        "nested-replies",
+        "sentiment-badge"
+      ],
+      "filePath": "frontend/src/components/CommentSection.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/ExpandableText.tsx",
+      "name": "ExpandableText",
+      "type": "file",
+      "summary": "Lightweight React utility component for truncating long text with a 'Read more' / 'Show less' toggle button. Supports both character-based and line-based (line clamp) truncation. Uses ResizeObserver to detect overflow after fonts/animations settle, preventing layout jumps during render. Uses deterministic initialization for overflow state to ensure smooth SSR and initial paint.",
+      "tags": [
+        "react",
+        "text-truncation",
+        "expandable",
+        "resize-observer"
+      ],
+      "filePath": "frontend/src/components/ExpandableText.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/Header.tsx",
+      "name": "Header",
+      "type": "file",
+      "summary": "Top-level sticky navigation header with animated logo, NeuroTube branding, and a dark/light theme toggle button. Uses the theme-context hook for theme state management. Includes a gentle logo animation on idle and smooth hover/tap scale transitions.",
+      "tags": [
+        "react",
+        "header",
+        "theme-toggle",
+        "navigation",
+        "animation"
+      ],
+      "filePath": "frontend/src/components/Header.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/LoadingSpinner.tsx",
+      "name": "LoadingSpinner",
+      "type": "file",
+      "summary": "Animated loading spinner component shown during analysis. Displays a bouncing animated logo icon with either a progress bar (when progress is available) or bouncing dot animation. Includes pulsing status message text. Used during the submission and polling phase of video analysis.",
+      "tags": [
+        "react",
+        "loading",
+        "animation",
+        "progress",
+        "spinner"
+      ],
+      "filePath": "frontend/src/components/LoadingSpinner.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/SentimentTimeline.tsx",
+      "name": "SentimentTimeline",
+      "type": "file",
+      "summary": "React component rendering a Recharts LineChart showing sentiment trends (positive/neutral/negative) over time. Features include: time range filters (1D/5D/1M/6M/YTD/1Y/MAX) styled like Google Finance, dynamic X-axis formatting based on bucket granularity (hour/day/month), clickable data points that filter the CommentSection to show comments from that specific time period, and a clear filter button. Integrates with getTimelineData from the timeline utility.",
+      "tags": [
+        "react",
+        "recharts",
+        "line-chart",
+        "timeline",
+        "time-filter",
+        "sentiment-trend"
+      ],
+      "filePath": "frontend/src/components/SentimentTimeline.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/StatBlock.tsx",
+      "name": "StatBlock, SentimentSummary",
+      "type": "file",
+      "summary": "React component with two exports: StatBlock renders an animated individual statistic card (positive/neutral/negative) with an animated progress bar, percentage display, and trend icon. SentimentSummary renders an overall mood badge (emoji + label) and a 3-column grid of StatBlock cards showing positive, neutral, and negative counts with their percentages against total comments.",
+      "tags": [
+        "react",
+        "stat-cards",
+        "sentiment-summary",
+        "progress-bar",
+        "animation"
+      ],
+      "filePath": "frontend/src/components/StatBlock.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/VideoDetails.tsx",
+      "name": "VideoDetails",
+      "type": "file",
+      "summary": "React component that displays YouTube video metadata in a card layout with a thumbnail, title, channel link, stat pills (views, likes, comments, publish date), and an expandable video description. The thumbnail uses a gradient overlay for visual polish, and all elements have staggered entrance animations.",
+      "tags": [
+        "react",
+        "video-info",
+        "card",
+        "thumbnail",
+        "stats"
+      ],
+      "filePath": "frontend/src/components/VideoDetails.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/index.css",
+      "name": "index.css",
+      "type": "file",
+      "summary": "Global CSS stylesheet with Tailwind CSS configuration, custom theme variables for light/dark mode, and CSS animations. Defines color palette, border radius values, and custom chart styling variables.",
+      "tags": [
+        "css",
+        "tailwind",
+        "theme",
+        "dark-mode",
+        "animation",
+        "styling"
+      ],
+      "filePath": "frontend/src/index.css",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/lib/timeline.ts",
+      "name": "timeline.ts",
+      "type": "module",
+      "summary": "Timeline data transformation library that aggregates comment sentiment data into time buckets (hour/day/month/year) for charting. Exports getTimelineData function and TimelineBucket type.",
+      "tags": [
+        "timeline",
+        "aggregation",
+        "bucketing",
+        "sentiment",
+        "chart-data",
+        "data-transformation"
+      ],
+      "filePath": "frontend/src/lib/timeline.ts",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/lib/utils.ts",
+      "name": "utils.ts",
+      "type": "module",
+      "summary": "Utility module providing the cn (className merger) function that combines clsx and tailwind-merge for efficient Tailwind class merging with conflict resolution.",
+      "tags": [
+        "utility",
+        "classname-merging",
+        "tailwind",
+        "clsx"
+      ],
+      "filePath": "frontend/src/lib/utils.ts",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/main.tsx",
+      "name": "main.tsx",
+      "type": "module",
+      "summary": "React application entry point that bootstraps the app with StrictMode, initializes the ThemeProvider with dark theme default, renders Header component, and mounts the App component.",
+      "tags": [
+        "react",
+        "entry-point",
+        "bootstrapping",
+        "theme-provider"
+      ],
+      "filePath": "frontend/src/main.tsx",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/services/api.ts",
+      "name": "api.ts",
+      "type": "module",
+      "summary": "API service layer for communicating with backend services: Go fetcher (port 8080) for YouTube data fetching and Python ML backend (port 8000) for sentiment analysis. Provides functions for job submission, status polling, result retrieval, video history management, and YouTube URL validation.",
+      "tags": [
+        "api",
+        "fetch",
+        "backend-integration",
+        "job-management",
+        "history",
+        "youtube"
+      ],
+      "filePath": "frontend/src/services/api.ts",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/types.ts",
+      "name": "frontend/src/types.ts",
+      "type": "module",
+      "summary": "Central TypeScript type definitions for the NeuroTube application. Defines interfaces for video info, comments with sentiment, topic clusters, sentiment results, analyzed video records, and analysis responses.",
+      "tags": [
+        "types",
+        "interfaces",
+        "sentiment",
+        "video",
+        "comments",
+        "topic-cluster"
+      ],
+      "filePath": "frontend/src/types.ts",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/vite.config.ts",
+      "name": "vite.config.ts",
+      "type": "module",
+      "summary": "Vite build configuration file that sets up React plugin, Tailwind CSS plugin, and path alias resolution (@ -> ./src) for cleaner imports.",
+      "tags": [
+        "vite",
+        "build-config",
+        "react",
+        "tailwind",
+        "path-alias"
+      ],
+      "filePath": "frontend/vite.config.ts",
+      "metadata": {}
+    },
+    {
+      "id": "file:backend-ml/app/api/routes/analysis.py",
+      "name": "API Analysis Routes",
+      "type": "file",
+      "summary": "FastAPI route handlers for analysis endpoints. Provides health check, job status retrieval, video analysis queries, history management, and comment retrieval. Routes include: /health, /job/{job_id}, /video/{video_id}, /history, /history/{id}, /comments/{job_id}.",
+      "tags": [
+        "fastapi",
+        "routes",
+        "api",
+        "analysis",
+        "endpoints"
+      ],
+      "filePath": "backend-ml/app/api/routes/analysis.py",
+      "metadata": {}
+    },
+    {
+      "id": "file:frontend/src/components/theme-context.ts",
+      "name": "Theme Context",
+      "type": "file",
+      "summary": "Theme context provider for dark/light mode support in the NeuroTube frontend.",
+      "tags": [
+        "react",
+        "context",
+        "theme",
+        "dark-mode"
+      ],
+      "filePath": "frontend/src/components/theme-context.ts",
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "id": ".env.example-to-.env",
+      "source": "file:.env.example",
+      "target": "file:.env",
+      "type": "template-reference",
+      "weight": 0.5,
+      "description": ".env.example is the template that developers copy to create .env file with actual credentials."
+    },
+    {
+      "id": ".gitignore-to-docker-compose.yml",
+      "source": "file:.gitignore",
+      "target": "file:docker-compose.yml",
+      "type": "ignores-related",
+      "weight": 0.5,
+      "description": ".gitignore excludes the pgdata directory which is defined as a Docker named volume in docker-compose.yml."
+    },
+    {
+      "id": "README.md-to-docker-compose.yml",
+      "source": "file:README.md",
+      "target": "file:docker-compose.yml",
+      "type": "documents",
+      "weight": 0.5,
+      "description": "README.md documents how to run the project using docker-compose.yml and provides quick start instructions."
+    },
+    {
+      "id": "ADMIN_GUIDE.md-to-docker-compose.yml",
+      "source": "file:ADMIN_GUIDE.md",
+      "target": "file:docker-compose.yml",
+      "type": "documents",
+      "weight": 0.5,
+      "description": "Admin Guide provides operational commands (docker compose up/down/restart) that reference the docker-compose.yml file."
+    },
+    {
+      "id": ".env-to-docker-compose.yml",
+      "source": "file:.env",
+      "target": "file:docker-compose.yml",
+      "type": "configures",
+      "weight": 0.5,
+      "description": ".env file provides environment variables (YOUTUBE_API_KEY, POSTGRES_USER/PASSWORD, service ports, GEMINI_API_KEY) consumed by docker-compose.yml services."
+    },
+    {
+      "id": ".env.example-to-docker-compose.yml",
+      "source": "file:.env.example",
+      "target": "file:docker-compose.yml",
+      "type": "template-configures",
+      "weight": 0.5,
+      "description": ".env.example provides template variables (${POSTGRES_USER:-default}) used throughout docker-compose.yml."
+    },
+    {
+      "id": "walkthrough.md-to-task.md",
+      "source": "file:walkthrough.md",
+      "target": "file:task.md",
+      "type": "references",
+      "weight": 0.5,
+      "description": "walkthrough.md documents experimental features that extend beyond the initial task.md checklist items."
+    },
+    {
+      "id": "implementation_plan.md-to-task.md",
+      "source": "file:implementation_plan.md",
+      "target": "file:task.md",
+      "type": "references",
+      "weight": 0.5,
+      "description": "Both documentation files cover frontend implementation tasks and overlap in scope."
+    },
+    {
+      "id": "README.md-to-.env.example",
+      "source": "file:README.md",
+      "target": "file:.env.example",
+      "type": "documents",
+      "weight": 0.5,
+      "description": "README.md explicitly instructs developers to 'cp .env.example .env' and fill in YOUTUBE_API_KEY and GEMINI_API_KEY."
+    },
+    {
+      "id": "README.md-to-ADMIN_GUIDE.md",
+      "source": "file:README.md",
+      "target": "file:ADMIN_GUIDE.md",
+      "type": "complements",
+      "weight": 0.5,
+      "description": "README.md covers initial setup while Admin Guide provides ongoing operations and troubleshooting guidance."
+    },
+    {
+      "id": ".env-to-.env.example",
+      "source": "file:.env",
+      "target": "file:.env.example",
+      "type": "variant",
+      "weight": 0.5,
+      "description": ".env contains actual API keys (YouTube, Gemini) while .env.example contains placeholder values; both share the same structure."
+    },
+    {
+      "id": "docker-compose.yml-to-.env.example",
+      "source": "file:docker-compose.yml",
+      "target": "file:.env.example",
+      "type": "references-env-template",
+      "weight": 0.5,
+      "description": "docker-compose.yml uses ${VARIABLE:-default} syntax that maps to variables defined in .env.example."
+    },
+    {
+      "id": "edge_xcdcir5ow",
+      "source": "file:backend-fetcher/cmd/main.go",
+      "target": "file:backend-fetcher/internal/handler/handler.go",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_4njnnvld7",
+      "source": "file:backend-fetcher/cmd/main.go",
+      "target": "file:backend-fetcher/internal/queue/queue.go",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_cg1wnbirl",
+      "source": "file:backend-fetcher/internal/handler/handler.go",
+      "target": "file:backend-fetcher/internal/queue/queue.go",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_txk2tyegt",
+      "source": "file:backend-fetcher/internal/handler/handler.go",
+      "target": "file:backend-fetcher/internal/youtube/youtube.go",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_xvpcdfwqe",
+      "source": "file:backend-fetcher/internal/queue/queue.go",
+      "target": "file:backend-fetcher/internal/youtube/youtube.go",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_el9qnm68u",
+      "source": "file:backend-fetcher/internal/youtube/youtube.go",
+      "target": "file:backend-fetcher/internal/youtube/youtube.go",
+      "type": "internal-calls",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_rpxkyyex3",
+      "source": "file:backend-ml/app/main.py",
+      "target": "file:backend-ml/app/core/config.py",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_eskjtzwn6",
+      "source": "file:backend-ml/app/main.py",
+      "target": "file:backend-ml/app/db/session.py",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_tvnxmgia1",
+      "source": "file:backend-ml/app/main.py",
+      "target": "file:backend-ml/app/api/routes/analysis.py",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_v4w7x37yf",
+      "source": "file:backend-ml/app/main.py",
+      "target": "file:backend-ml/app/workers/worker.py",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_44h28ssgn",
+      "source": "file:backend-ml/app/core/config.py",
+      "target": "file:backend-ml/app/db/session.py",
+      "type": "configures",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_2srvvcaey",
+      "source": "file:backend-ml/app/core/config.py",
+      "target": "file:backend-ml/app/core/topics.py",
+      "type": "configures",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_ievhup03f",
+      "source": "file:backend-ml/app/core/sentiment/spam.py",
+      "target": "file:backend-ml/app/core/sentiment/sentiment.py",
+      "type": "used-by",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_axkr9vqff",
+      "source": "file:backend-ml/app/core/sentiment/sentiment.py",
+      "target": "file:backend-ml/app/core/sentiment/spam.py",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_q947e9ki7",
+      "source": "file:backend-ml/app/core/topics.py",
+      "target": "file:backend-ml/app/core/config.py",
+      "type": "imports",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_wcjg1yxgt",
+      "source": "file:backend-ml/app/db/session.py",
+      "target": "file:backend-ml/app/core/config.py",
+      "type": "uses",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_qbfxvuz9r",
+      "source": "file:backend-fetcher/internal/queue/queue.go",
+      "target": "file:backend-fetcher/internal/youtube/youtube.go",
+      "type": "uses",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_ogisgzs1x",
+      "source": "file:frontend/src/types/index.ts",
+      "target": "file:frontend/src/lib/timeline.ts",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_5xj1d9vq5",
+      "source": "file:frontend/src/types/index.ts",
+      "target": "file:frontend/src/services/api.ts",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_d5zxiesvb",
+      "source": "file:frontend/src/main.tsx",
+      "target": "file:frontend/src/App.tsx",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_mx0n95vql",
+      "source": "file:frontend/src/main.tsx",
+      "target": "file:frontend/src/components/Header.tsx",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_9pqwk28mh",
+      "source": "file:frontend/src/main.tsx",
+      "target": "file:frontend/src/index.css",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_w3h4letb0",
+      "source": "file:frontend/src/services/api.ts",
+      "target": "file:frontend/src/App.tsx",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_iz7d39g6v",
+      "source": "file:frontend/src/services/api.ts",
+      "target": "file:frontend/src/components/AnalyzedVideoList.tsx",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_sj6m70v40",
+      "source": "file:frontend/src/lib/timeline.ts",
+      "target": "file:frontend/src/components/CommentSection.tsx",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    },
+    {
+      "id": "edge_xl5pdzg25",
+      "source": "file:frontend/src/lib/timeline.ts",
+      "target": "file:frontend/src/components/SentimentTimeline.tsx",
+      "type": "dependency",
+      "weight": 0.5,
+      "description": ""
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:presentation-layer",
+      "name": "Presentation Layer",
+      "description": "React UI components, pages, and styles. Contains the frontend application built with React 19, Vite, and Tailwind CSS v4. All visualization components (charts, timelines), input components (forms, buttons), and layout components belong here.",
+      "nodeIds": [
+        "file:frontend/src/App.tsx",
+        "file:frontend/src/main.tsx",
+        "file:frontend/src/index.css",
+        "file:frontend/src/components/AiSummary.tsx",
+        "file:frontend/src/components/AnalyzedVideoList.tsx",
+        "file:frontend/src/components/CommentCharts.tsx",
+        "file:frontend/src/components/CommentSection.tsx",
+        "file:frontend/src/components/ExpandableText.tsx",
+        "file:frontend/src/components/Header.tsx",
+        "file:frontend/src/components/LoadingSpinner.tsx",
+        "file:frontend/src/components/SentimentTimeline.tsx",
+        "file:frontend/src/components/StatBlock.tsx",
+        "file:frontend/src/components/VideoDetails.tsx",
+        "file:frontend/src/components/theme-context.ts",
+        "file:frontend/index.html",
+        "file:frontend/README.md"
+      ]
+    },
+    {
+      "id": "layer:frontend-service",
+      "name": "Frontend Service & Tooling",
+      "description": "Frontend build configuration, API client layer, utility libraries, type definitions, and component orchestration logic. Handles job submission, SSE progress streaming, API integration with backend services, and data transformation utilities.",
+      "nodeIds": [
+        "file:frontend/src/services/api.ts",
+        "file:frontend/src/lib/timeline.ts",
+        "file:frontend/src/lib/utils.ts",
+        "file:frontend/src/types.ts",
+        "file:frontend/vite.config.ts",
+        "file:frontend/tsconfig.json",
+        "file:frontend/tsconfig.app.json",
+        "file:frontend/tsconfig.node.json",
+        "file:frontend/package.json",
+        "file:frontend/package-lock.json",
+        "file:frontend/components.json",
+        "file:frontend/.gitignore"
+      ]
+    },
+    {
+      "id": "layer:fetcher-service",
+      "name": "Fetcher Service (Go)",
+      "description": "Go-based YouTube data fetching service. Handles YouTube API integration, concurrent comment pagination, Redis job queuing, quota-aware caching, and HTTP API with SSE progress streaming. Built with Chi router and go-redis client.",
+      "nodeIds": [
+        "file:backend-fetcher/cmd/main.go",
+        "file:backend-fetcher/internal/handler/handler.go",
+        "file:backend-fetcher/internal/queue/queue.go",
+        "file:backend-fetcher/internal/youtube/youtube.go",
+        "file:backend-fetcher/go.mod"
+      ]
+    },
+    {
+      "id": "layer:ml-engine",
+      "name": "ML Engine (Python)",
+      "description": "Python-based sentiment analysis and topic extraction service. Runs FastAPI on port 8000 with async PostgreSQL and Redis. Performs dual-engine sentiment analysis (Indonesian RoBERTa + XLM-RoBERTa), spam detection, topic extraction via Gemini API, and Redis worker for job consumption. Includes database ORM models and CRUD operations for PostgreSQL persistence.",
+      "nodeIds": [
+        "file:backend-ml/app/main.py",
+        "file:backend-ml/app/core/config.py",
+        "file:backend-ml/app/core/sentiment/sentiment.py",
+        "file:backend-ml/app/core/sentiment/spam.py",
+        "file:backend-ml/app/core/topics.py",
+        "file:backend-ml/app/crud/crud.py",
+        "file:backend-ml/app/db/session.py",
+        "file:backend-ml/app/models/models.py",
+        "file:backend-ml/app/api/routes/analysis.py",
+        "file:backend-ml/app/workers/worker.py",
+        "file:backend-ml/app/reanalyze_video.py"
+      ]
+    },
+    {
+      "id": "layer:infrastructure",
+      "name": "Infrastructure & Deployment",
+      "description": "Container definitions, orchestration configuration, and environment management. Contains all Docker and Docker Compose files, environment configuration templates, and deployment setup. Defines the complete microservices deployment topology.",
+      "nodeIds": [
+        "file:docker-compose.yml",
+        "file:backend-fetcher/Dockerfile",
+        "file:backend-ml/Dockerfile",
+        "file:frontend/Dockerfile",
+        "file:backend-fetcher/.dockerignore",
+        "file:backend-ml/.dockerignore",
+        "file:frontend/.dockerignore",
+        "file:.env",
+        "file:.env.example",
+        "file:.gitignore"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Project documentation, guides, and references. Contains main README, admin guide, implementation plan, task tracking, and feature walkthroughs. Provides onboarding guidance and operational documentation for the microservices application.",
+      "nodeIds": [
+        "file:README.md",
+        "file:ADMIN_GUIDE.md",
+        "file:implementation_plan.md",
+        "file:task.md",
+        "file:walkthrough.md"
+      ]
+    },
+    {
+      "id": "layer:testing",
+      "name": "Testing & Verification",
+      "description": "End-to-end and integration test scripts. Contains test scripts that validate the complete NeuroTube pipeline from job submission through sentiment analysis and AI topic extraction.",
+      "nodeIds": [
+        "file:e2e_test_3.py"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "id": "stop-1",
+      "title": "Start Here — Three Entry Points",
+      "nodeIds": [
+        "file:frontend/src/main.tsx",
+        "file:backend-fetcher/cmd/main.go",
+        "file:backend-ml/app/main.py"
+      ],
+      "description": "NeuroTube is a microservices application with three independent entry points, one per service. The frontend runs as a Vite dev server, the Go fetcher starts an HTTP server on port 8080, and the Python ML engine runs as a FastAPI application on port 8000. All three can be started with `docker compose up`, or run locally for development.",
+      "overview": "Three services, three entry points. Understanding which file starts which service is the first step to navigating this codebase.",
+      "layer": "entry-points",
+      "tags": [
+        "entrypoint",
+        "microservices",
+        "architecture"
+      ],
+      "languageLesson": "In TypeScript (frontend), the entry point bootstraps React with StrictMode and a ThemeProvider. In Go, `main.go` initializes all dependencies and starts the Chi HTTP router. In Python, `main.py` registers FastAPI routes and starts the background Redis worker loop. All three follow a similar pattern: load config → set up dependencies → start the server/loop.",
+      "order": 1
+    },
+    {
+      "id": "stop-2",
+      "title": "Frontend — From URL to Job Submission",
+      "nodeIds": [
+        "file:frontend/src/App.tsx",
+        "file:frontend/src/main.tsx",
+        "file:frontend/src/services/api.ts",
+        "file:frontend/src/types.ts"
+      ],
+      "description": "The user flow begins in App.tsx — the root React page component. It manages the complete analysis lifecycle: validating YouTube URLs, submitting jobs via `api.ts`, tracking progress through SSE or polling, and rendering results. The types.ts file defines all the TypeScript interfaces (VideoInfo, CommentWithSentiment, TopicCluster, SentimentResult) that shape data throughout the frontend. The api.ts service layer communicates with both the Go fetcher (job submission, status) and the Python ML backend (result retrieval, history).",
+      "overview": "The frontend is a React 19 + Vite app with TypeScript. The main App component orchestrates the entire user flow. It validates a YouTube URL, submits a job, listens for progress events, and renders the results. All HTTP communication goes through api.ts, and all data shapes are defined in types.ts.",
+      "layer": "layer:presentation-layer",
+      "tags": [
+        "frontend",
+        "react",
+        "job-submission",
+        "api-client",
+        "type-definitions"
+      ],
+      "languageLesson": "TypeScript interfaces in types.ts (VideoInfo, CommentWithSentiment, TopicCluster, SentimentResult) describe the shape of data flowing between components. App.tsx uses these types to ensure data consistency. The api.ts service uses `fetch` with typed responses — note how the return types in api.ts must match the interfaces in types.ts.",
+      "order": 2
+    },
+    {
+      "id": "stop-3",
+      "title": "Frontend — Interactive Visualization Components",
+      "nodeIds": [
+        "file:frontend/src/components/CommentCharts.tsx",
+        "file:frontend/src/components/SentimentTimeline.tsx",
+        "file:frontend/src/components/StatBlock.tsx",
+        "file:frontend/src/components/AiSummary.tsx",
+        "file:frontend/src/lib/timeline.ts"
+      ],
+      "description": "Results are displayed through a suite of specialized components. CommentCharts renders a donut pie chart and bar chart for sentiment distribution using Recharts. SentimentTimeline draws a line chart with time-range filters (1D/5D/1M/6M/YTD/1Y/MAX) styled like Google Finance — when users click a data point, it filters the CommentSection to show comments from that period. StatBlock shows individual stat cards with animated progress bars; SentimentSummary composes three StatBlocks into a mood display. AiSummary displays AI-generated topic clusters from Gemini with keyword clouds and expandable quote sections. All of these receive data from App.tsx after the job completes.",
+      "overview": "The frontend has dedicated visualization components for each type of output: pie/bar charts for sentiment distribution, a line chart for timeline trends, stat cards for aggregated counts, and AI topic cards for topic extraction. The timeline.ts utility module handles the bucketing logic that powers the timeline chart.",
+      "layer": "layer:presentation-layer",
+      "tags": [
+        "visualization",
+        "recharts",
+        "timeline",
+        "charts",
+        "ai-summary",
+        "sentiment"
+      ],
+      "languageLesson": "Recharts components (PieChart, BarChart, LineChart) are declarative — you pass data and config props, and they render SVG-based charts. The timeline.ts module aggregates raw comment data into time buckets (hour/day/month/year), which the SentimentTimeline component then renders. The bucketing logic is a pure transformation function that could be unit tested in isolation.",
+      "order": 3
+    },
+    {
+      "id": "stop-4",
+      "title": "Go Fetcher — YouTube API Integration & Concurrent Fetching",
+      "nodeIds": [
+        "file:backend-fetcher/internal/youtube/youtube.go",
+        "file:backend-fetcher/internal/queue/queue.go",
+        "file:backend-fetcher/internal/handler/handler.go",
+        "file:backend-fetcher/cmd/main.go"
+      ],
+      "description": "The Go fetcher service handles YouTube API integration and is where the README's 'concurrent data fetching' feature lives. The youtube.go file implements the YouTube Data API v3 client — it fetches video metadata and comments using goroutines and semaphore-controlled concurrency to respect rate limits while maximizing throughput. It processes top-level comments and all nested replies. The queue.go file implements a Redis-backed job queue using LPUSH for FIFO publishing — jobs are consumed by the Python backend's BRPOP. The handler.go file exposes the HTTP API endpoints: Health, Analyze, Status, and StatusStream (SSE for real-time progress). It extracts YouTube video IDs from URLs, checks the Redis cache before queuing (quota guard), and publishes JobPayload messages to Redis.",
+      "overview": "The Go fetcher is the bridge between the user's URL request and the YouTube API. It uses concurrent goroutines with semaphore-based rate limiting to fetch thousands of comments fast. Jobs are queued in Redis for the Python backend to consume, and progress is streamed back to the frontend via SSE.",
+      "layer": "layer:fetcher-service",
+      "tags": [
+        "youtube-api",
+        "concurrent-fetching",
+        "rate-limiting",
+        "redis-queue",
+        "sse",
+        "chi-router",
+        "goroutines"
+      ],
+      "languageLesson": "The Go fetcher demonstrates idiomatic Go patterns: goroutines for concurrent operations, a semaphore (channel with buffered capacity) to limit concurrency, and structured logging with contextual fields. The Chi router is a lightweight HTTP router — routes are defined inline and middleware (CORS, logging) wraps the router. The Redis queue uses the go-redis/v9 client for pub/sub and list operations.",
+      "order": 4
+    },
+    {
+      "id": "stop-5",
+      "title": "Python ML Engine — Dual-Engine Sentiment Analysis",
+      "nodeIds": [
+        "file:backend-ml/app/core/sentiment/sentiment.py",
+        "file:backend-ml/app/core/sentiment/spam.py",
+        "file:backend-ml/app/workers/worker.py",
+        "file:backend-ml/app/main.py"
+      ],
+      "description": "The Python ML engine is where the README's 'dual-engine sentiment analysis' happens. The sentiment.py module routes comments to specialized models: Indonesian comments go to w11wo/indonesian-roberta-base-sentiment-classifier, and all other languages go to cardiffnlp/twitter-xlm-roberta-base-sentiment. Before GPU inference, a lightweight regex spam filter (spam.py) catches URL-only spam, Sub4Sub promotions, crypto scams, giveaway scams, gibberish, and excessive repetition. The worker.py file consumes jobs from the Redis 'neurotube:jobs' queue via BRPOP, runs sentiment analysis on each comment, extracts topic clusters via Gemini, saves all results to PostgreSQL, and updates job status in Redis. The main.py entry point initializes the database tables and starts the background worker loop alongside the FastAPI server.",
+      "overview": "The ML engine runs a dual-model sentiment pipeline: Indonesian RoBERTa for Indonesian comments, XLM-RoBERTa for everything else. A regex spam filter runs before model inference to skip obvious spam. A Redis worker loop processes jobs from the queue, and a FastAPI REST API exposes results.",
+      "layer": "layer:ml-engine",
+      "tags": [
+        "sentiment-analysis",
+        "dual-model",
+        "huggingface",
+        "transformers",
+        "spam-detection",
+        "redis-worker",
+        "fastapi",
+        "async"
+      ],
+      "languageLesson": "The sentiment module uses Hugging Face Transformers' pipeline API with device mapping to automatically use GPU when available. The worker uses asyncio with aiohttp/redis for non-blocking operations. FastAPI's dependency injection pattern is used in the routes — `get_db` is a dependency that provides a request-scoped SQLAlchemy session.",
+      "order": 5
+    },
+    {
+      "id": "stop-6",
+      "title": "Python ML Engine — AI Topic Extraction & Database",
+      "nodeIds": [
+        "file:backend-ml/app/core/topics.py",
+        "file:backend-ml/app/core/config.py",
+        "file:backend-ml/app/models/models.py",
+        "file:backend-ml/app/crud/crud.py",
+        "file:backend-ml/app/db/session.py"
+      ],
+      "description": "The topics.py module handles AI-powered topic extraction, which is the README's 'Gemini AI' feature. It attempts Gemini API summarization first with structured prompts and JSON schema output, and falls back to local extractive summarization (word frequency scoring + TF-IDF ranking) when the API key is unavailable. The models.py defines the SQLAlchemy ORM schema: AnalysisJob (job lifecycle), VideoData (YouTube metadata), CommentData (sentiment-annotated comments), and SentimentSummary (aggregated per-video results). The crud.py provides async CRUD operations for all four tables — batch inserts with deduplication, history queries with joined data, and upsert logic for video metadata. The session.py provides an async SQLAlchemy engine and init_db() for automatic table migration.",
+      "overview": "The topic extraction module first tries Gemini AI, then falls back to a local TF-IDF + word frequency approach. All data is persisted in PostgreSQL through SQLAlchemy models (AnalysisJob, VideoData, CommentData, SentimentSummary). The CRUD layer shapes data for frontend consumption.",
+      "layer": "layer:ml-engine",
+      "tags": [
+        "gemini-api",
+        "topic-extraction",
+        "fallback",
+        "tfidf",
+        "sqlalchemy",
+        "postgresql",
+        "orm",
+        "async",
+        "crud"
+      ],
+      "languageLesson": "The topics module shows a graceful degradation pattern — it attempts the preferred API (Gemini) first, catches exceptions or missing keys, and falls back to a local algorithm. This makes the system resilient without requiring API keys in all environments. SQLAlchemy's async engine and sessionmaker pattern (in session.py) is the modern way to do async database access in Python.",
+      "order": 6
+    },
+    {
+      "id": "stop-7",
+      "title": "Frontend — UI Components & State Management",
+      "nodeIds": [
+        "file:frontend/src/components/CommentSection.tsx",
+        "file:frontend/src/components/VideoDetails.tsx",
+        "file:frontend/src/components/Header.tsx",
+        "file:frontend/src/components/AnalyzedVideoList.tsx",
+        "file:frontend/src/components/theme-context.ts"
+      ],
+      "description": "Supporting the main dashboard, several components handle specific UI concerns. CommentSection renders a scrollable, filterable comment list with sentiment badges, deterministic avatar colors, nested reply threads, filter tabs (All/Positive/Neutral/Negative), and date-based filtering from the timeline. VideoDetails shows video metadata in a card layout with thumbnail, stats pills, and expandable description. AnalyzedVideoList shows previously analyzed videos with batch clear and per-video deletion. Header provides sticky navigation with animated logo and a dark/light theme toggle. The theme-context.ts React Context provider manages theme state across the entire app — light/dark mode is implemented as CSS variables in index.css.",
+      "overview": "Beyond the main visualization components, a suite of supporting components handles the details: comment browsing, video metadata display, navigation, history management, and theme switching. All use Framer Motion for entrance animations and interactive effects.",
+      "layer": "layer:presentation-layer",
+      "tags": [
+        "react-components",
+        "comment-list",
+        "filtering",
+        "nested-replies",
+        "theme-context",
+        "dark-mode",
+        "animation"
+      ],
+      "languageLesson": "React Context (theme-context.ts) is used for global state (theme) that doesn't need a state management library. The CommentSection component demonstrates advanced React patterns: multiple filter criteria (sentiment + date), deterministic hashing for avatar colors, and Framer Motion's layout animations for filtered transitions.",
+      "order": 7
+    },
+    {
+      "id": "stop-8",
+      "title": "Infrastructure — Docker Compose & Environment Configuration",
+      "nodeIds": [
+        "file:docker-compose.yml",
+        "file:.env.example",
+        "file:.env",
+        "file:frontend/Dockerfile",
+        "file:backend-fetcher/Dockerfile",
+        "file:backend-ml/Dockerfile"
+      ],
+      "description": "The entire system is orchestrated through Docker Compose. The docker-compose.yml defines four services: postgres (PostgreSQL 16 Alpine for persistent data), redis (Redis 7 Alpine for job queuing), backend-fetcher (Go service on port 8080), backend-ml (Python ML engine on port 8000), and frontend (React dev server on port 5173). The ML service includes NVIDIA GPU support and HuggingFace cache volume mounting. Environment variables are defined in .env.example as a template — developers copy it to .env and fill in YOUTUBE_API_KEY, GEMINI_API_KEY, and PostgreSQL credentials. Each service has a multi-stage Dockerfile optimized for its language: Go uses Alpine for a minimal image, Python uses python:3.11-slim with gcc for native extensions, and Node uses node:20-alpine.",
+      "overview": "The infrastructure is Docker-based with four services. Each service has a purpose-built Dockerfile. Environment configuration is centralized in .env files. The Docker Compose file defines the complete deployment topology including GPU support, volume mounts, and restart policies.",
+      "layer": "layer:infrastructure",
+      "tags": [
+        "docker",
+        "docker-compose",
+        "environment-variables",
+        "multi-stage-build",
+        "gpu",
+        "orchestration"
+      ],
+      "languageLesson": "Docker multi-stage builds (Go and frontend Dockerfiles) separate the build environment from the runtime image, keeping final images minimal. The docker-compose.yml uses ${VARIABLE:-default} syntax for environment variable substitution — values come from .env files loaded by docker compose. GPU support in the ML service is configured via the `deploy.resources.reservations.devices` block.",
+      "order": 8
+    },
+    {
+      "id": "stop-9",
+      "title": "Testing & Observability",
+      "nodeIds": [
+        "file:e2e_test_3.py",
+        "file:walkthrough.md"
+      ],
+      "description": "End-to-end testing is handled by e2e_test_3.py, a Python integration test that validates the complete NeuroTube pipeline: it submits a job to the Go fetcher, waits for ML processing (sentiment analysis + spam filter), verifies sentiment counts and spam filtering statistics, and checks Gemini AI topic extraction. The walkthrough.md document captures the history of experimental features that were implemented and tested on the development branch — Sentiment Timeline, AI Summary, SSE progress streaming, Hybrid Sentiment Engine with VADER, Quota Guard with 24-hour Redis caching, and video deletion from history.",
+      "overview": "E2E testing validates the full pipeline from job submission through sentiment analysis and AI topic extraction. The walkthrough document serves as living documentation for experimental features that went through iterative testing.",
+      "layer": "layer:testing",
+      "tags": [
+        "e2e",
+        "integration-test",
+        "sentiment-analysis",
+        "spam-filter",
+        "api-validation",
+        "features"
+      ],
+      "languageLesson": "E2E tests work at the HTTP API level — they don't mock any internal services, so they validate the complete system including Redis queue communication, PostgreSQL persistence, and model inference. The walkthrough.md documents the evolution of the system, showing how features were incrementally added and tested.",
+      "order": 9
+    },
+    {
+      "id": "stop-10",
+      "title": "Documentation — Project Story & Operations",
+      "nodeIds": [
+        "file:README.md",
+        "file:ADMIN_GUIDE.md",
+        "file:frontend/README.md",
+        "file:frontend/src/index.css"
+      ],
+      "description": "The project is documented across several files that tell its story. README.md is the main entry point — it describes the six key features, the microservices architecture, and setup instructions. ADMIN_GUIDE.md provides operational commands for docker compose up/down/restart, container health monitoring, log viewing, and troubleshooting common issues (job status failures, quota errors, empty responses). The frontend README.md describes the frontend stack and setup. The index.css file contains the global Tailwind CSS configuration with custom theme variables for light/dark mode and CSS animations — this is where the 'Pink Mem Form' aesthetic is implemented.",
+      "overview": "Documentation spans setup (README.md), operations (ADMIN_GUIDE.md), and styling (index.css for the 'Pink Mem Form' theme). The README tells the project's story; the Admin Guide keeps it running.",
+      "layer": "layer:documentation",
+      "tags": [
+        "readme",
+        "admin-guide",
+        "documentation",
+        "theme",
+        "pink-mem-form",
+        "setup"
+      ],
+      "languageLesson": "The README is written for new users and follows a standard open-source structure: overview → features → architecture → setup. The Admin Guide is written for operators and assumes Docker knowledge. The CSS file defines CSS custom properties for the design system — changing the theme means updating these variables, which cascade through all components.",
+      "order": 10
+    }
+  ]
+}

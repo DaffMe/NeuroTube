@@ -80,21 +80,20 @@ export function isValidYouTubeUrl(url: string): boolean {
 export async function fetchHistory(limit = 20): Promise<AnalyzedVideo[]> {
     try {
         const response = await fetch(`${ML_API}/history?limit=${limit}`);
-        if (!response.ok) throw new Error("Failed to fetch history from server");
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
         const data = await response.json();
-        
+
         // Sync to local storage just in case
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        
+
         return data;
     } catch (err) {
-        // Only fall back to localStorage on network errors (offline, DNS failure).
-        // Server errors (500, etc.) are re-thrown so the caller can show an error.
-        if (err instanceof TypeError) {
-            console.warn("Network error fetching history, falling back to local storage", err);
-            return getLocalHistory();
-        }
-        throw err;
+        // Fall back to localStorage for any error (network, server5xx,
+        // JSON parse failure, etc.) so the user always sees their history.
+        console.warn("Failed to fetch history from server, falling back to local storage", err);
+        return getLocalHistory();
     }
 }
 

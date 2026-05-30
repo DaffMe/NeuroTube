@@ -7,7 +7,6 @@ This module uses a routing strategy:
 3. If any other language, routes to a multilingual XLM-RoBERTa model.
 """
 import asyncio
-import asyncio
 import logging
 import re
 import torch
@@ -143,10 +142,12 @@ def analyze_batch(texts: list[str]) -> list[dict]:
     return [analyze_comment(text) for text in texts]
 
 
-# Lock to prevent concurrent pipeline calls on GPU (not thread-safe)
+# Lock to prevent concurrent pipeline calls on GPU (not thread-safe).
+# This serializes all pipeline invocations; a semaphore is not needed
+# because the lock already enforces exclusive access.
 pipeline_lock = asyncio.Lock()
 
-async def analyze_comment_async(text: str, client=None) -> dict:
+async def analyze_comment_async(text: str) -> dict:
     """Async wrapper for compatibility. Uses a lock to ensure only one
     pipeline call runs at a time to avoid CUDA race conditions."""
     async with pipeline_lock:

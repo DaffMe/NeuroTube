@@ -1,0 +1,3396 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "14004697f3f571cca066baea1024e306d15ff2a7",
+  "generatedAt": "2026-05-28T09:50:02.163Z",
+  "files": {
+    ".claude/settings.local.json": {
+      "filePath": ".claude/settings.local.json",
+      "contentHash": "edcade56ec8651bb0a07c06a1c5b0c3a594952934baeadc1fb0337aa40d45c8b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    ".env": {
+      "filePath": ".env",
+      "contentHash": "c4673abd6523627a55a1be15520723b36e42c090ee50b6a93509605c0474333e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    ".env.example": {
+      "filePath": ".env.example",
+      "contentHash": "fd920b049499f73c6694b3cb5ec429a4ee4ebe097628a4f0eba0e4f34f75cbeb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": true
+    },
+    ".gitignore": {
+      "filePath": ".gitignore",
+      "contentHash": "ccb2d47aeb40c9b183f3080cbb7e916b84737be58f17b4f78f88e5c7479677f6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": false
+    },
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "272995c2cde8a479a3c78d2328c95d488ce2d1034f5fce07fa8e229e9b84a773",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    ".understand-anything/intermediate/files-list.json": {
+      "filePath": ".understand-anything/intermediate/files-list.json",
+      "contentHash": "95bae02c66a4dd9082068ee117fb3433c3399b03fb2cec1f28b373074be15f27",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 562,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything/intermediate/scan-result.json": {
+      "filePath": ".understand-anything/intermediate/scan-result.json",
+      "contentHash": "d675d1fb73e757123264ca1a4a5cffefd29c29844afd31c02896c9767a5f2beb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 630,
+      "hasStructuralAnalysis": true
+    },
+    ".vscode/settings.json": {
+      "filePath": ".vscode/settings.json",
+      "contentHash": "f4d28520059635ec15f809e93ff94ddd695960348d1be1da5070720fdfe0e7e0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "ADMIN_GUIDE.md": {
+      "filePath": "ADMIN_GUIDE.md",
+      "contentHash": "6750d2dcda7e3f6a2a51a0c96acbad1c3b4b4428b48b67b65eaf931e0da4dbac",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 111,
+      "hasStructuralAnalysis": true
+    },
+    "backend-fetcher/.dockerignore": {
+      "filePath": "backend-fetcher/.dockerignore",
+      "contentHash": "8afbae27fa0812ce693b6f415aa7a35e569e8928a2c26d529d39831e32899927",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "backend-fetcher/cmd/main.go": {
+      "filePath": "backend-fetcher/cmd/main.go",
+      "contentHash": "b5750efb17201301139e98ca7731722a7f574a30c26a7f237afad81f814390c2",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "exported": false,
+          "lineCount": 84
+        },
+        {
+          "name": "splitOrigins",
+          "params": [
+            "s"
+          ],
+          "returnType": "[]string",
+          "exported": false,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "context",
+          "specifiers": [
+            "context"
+          ]
+        },
+        {
+          "source": "log",
+          "specifiers": [
+            "log"
+          ]
+        },
+        {
+          "source": "net/http",
+          "specifiers": [
+            "http"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "os/signal",
+          "specifiers": [
+            "signal"
+          ]
+        },
+        {
+          "source": "syscall",
+          "specifiers": [
+            "syscall"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "github.com/go-chi/chi/v5",
+          "specifiers": [
+            "v5"
+          ]
+        },
+        {
+          "source": "github.com/go-chi/chi/v5/middleware",
+          "specifiers": [
+            "middleware"
+          ]
+        },
+        {
+          "source": "github.com/go-chi/cors",
+          "specifiers": [
+            "cors"
+          ]
+        },
+        {
+          "source": "neurotube/backend-fetcher/internal/handler",
+          "specifiers": [
+            "handler"
+          ]
+        },
+        {
+          "source": "neurotube/backend-fetcher/internal/queue",
+          "specifiers": [
+            "queue"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 123,
+      "hasStructuralAnalysis": true
+    },
+    "backend-fetcher/Dockerfile": {
+      "filePath": "backend-fetcher/Dockerfile",
+      "contentHash": "416fe98759bf281741dc8761b9570662870cd3807c5166adaa47de86776432e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "backend-fetcher/go.mod": {
+      "filePath": "backend-fetcher/go.mod",
+      "contentHash": "ced8dd9254667b92ee44471194faeb93347011ece626f11a08c09d82a8356a52",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    "backend-fetcher/internal/handler/handler.go": {
+      "filePath": "backend-fetcher/internal/handler/handler.go",
+      "contentHash": "72ed4e5d55e6647bf4b8cf9da0e237b6bd39b5a9963a9a688949a6623a817774",
+      "functions": [
+        {
+          "name": "New",
+          "params": [
+            "publisher",
+            "apiKey"
+          ],
+          "returnType": "*Handler",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "Health",
+          "params": [
+            "w",
+            "r"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "Analyze",
+          "params": [
+            "w",
+            "r"
+          ],
+          "exported": true,
+          "lineCount": 103
+        },
+        {
+          "name": "Status",
+          "params": [
+            "w",
+            "r"
+          ],
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "StatusStream",
+          "params": [
+            "w",
+            "r"
+          ],
+          "exported": true,
+          "lineCount": 69
+        },
+        {
+          "name": "sendSSEEvent",
+          "params": [
+            "w",
+            "flusher",
+            "data"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "extractVideoID",
+          "params": [
+            "url"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "getStatusMessage",
+          "params": [
+            "status"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "writeJSON",
+          "params": [
+            "w",
+            "status",
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "Handler",
+          "methods": [
+            "Health",
+            "Analyze",
+            "Status",
+            "StatusStream"
+          ],
+          "properties": [
+            "publisher",
+            "ytClient"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "AnalyzeRequest",
+          "methods": [],
+          "properties": [
+            "URL"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "AnalyzeResponse",
+          "methods": [],
+          "properties": [
+            "JobID",
+            "VideoID",
+            "Status",
+            "Message"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "StatusResponse",
+          "methods": [],
+          "properties": [
+            "JobID",
+            "Status",
+            "Message"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "ErrorResponse",
+          "methods": [],
+          "properties": [
+            "Error",
+            "Details"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "imports": [
+        {
+          "source": "encoding/json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "fmt",
+          "specifiers": [
+            "fmt"
+          ]
+        },
+        {
+          "source": "log",
+          "specifiers": [
+            "log"
+          ]
+        },
+        {
+          "source": "net/http",
+          "specifiers": [
+            "http"
+          ]
+        },
+        {
+          "source": "regexp",
+          "specifiers": [
+            "regexp"
+          ]
+        },
+        {
+          "source": "strings",
+          "specifiers": [
+            "strings"
+          ]
+        },
+        {
+          "source": "strconv",
+          "specifiers": [
+            "strconv"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "github.com/go-chi/chi/v5",
+          "specifiers": [
+            "v5"
+          ]
+        },
+        {
+          "source": "github.com/google/uuid",
+          "specifiers": [
+            "uuid"
+          ]
+        },
+        {
+          "source": "neurotube/backend-fetcher/internal/queue",
+          "specifiers": [
+            "queue"
+          ]
+        },
+        {
+          "source": "neurotube/backend-fetcher/internal/youtube",
+          "specifiers": [
+            "youtube"
+          ]
+        }
+      ],
+      "exports": [
+        "Handler",
+        "New",
+        "AnalyzeRequest",
+        "AnalyzeResponse",
+        "StatusResponse",
+        "ErrorResponse",
+        "Health",
+        "Analyze",
+        "Status",
+        "StatusStream"
+      ],
+      "totalLines": 319,
+      "hasStructuralAnalysis": true
+    },
+    "backend-fetcher/internal/queue/queue.go": {
+      "filePath": "backend-fetcher/internal/queue/queue.go",
+      "contentHash": "438b24cd217074b716234e0a6d90c9b5649d1b60b16a22dff3c2da1fe592a7ce",
+      "functions": [
+        {
+          "name": "NewPublisher",
+          "params": [
+            "redisURL"
+          ],
+          "returnType": "(*Publisher, error)",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "PublishJob",
+          "params": [
+            "jobID",
+            "videoID",
+            "videoInfo",
+            "comments"
+          ],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "GetCache",
+          "params": [
+            "videoID"
+          ],
+          "returnType": "(string, error)",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "SetStatus",
+          "params": [
+            "jobID",
+            "status"
+          ],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "PublishError",
+          "params": [
+            "jobID",
+            "videoID",
+            "errMsg"
+          ],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "GetJobStatus",
+          "params": [
+            "jobID"
+          ],
+          "returnType": "(string, error)",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "SetProgress",
+          "params": [
+            "jobID",
+            "percent"
+          ],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "GetProgress",
+          "params": [
+            "jobID"
+          ],
+          "returnType": "(int, error)",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "Close",
+          "params": [],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "JobPayload",
+          "methods": [],
+          "properties": [
+            "JobID",
+            "VideoID",
+            "VideoInfo",
+            "Comments",
+            "CreatedAt"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "Publisher",
+          "methods": [
+            "PublishJob",
+            "GetCache",
+            "SetStatus",
+            "PublishError",
+            "GetJobStatus",
+            "SetProgress",
+            "GetProgress",
+            "Close"
+          ],
+          "properties": [
+            "client",
+            "ctx"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "imports": [
+        {
+          "source": "context",
+          "specifiers": [
+            "context"
+          ]
+        },
+        {
+          "source": "encoding/json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "fmt",
+          "specifiers": [
+            "fmt"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "github.com/redis/go-redis/v9",
+          "specifiers": [
+            "v9"
+          ]
+        },
+        {
+          "source": "neurotube/backend-fetcher/internal/youtube",
+          "specifiers": [
+            "youtube"
+          ]
+        }
+      ],
+      "exports": [
+        "JobPayload",
+        "Publisher",
+        "NewPublisher",
+        "PublishJob",
+        "GetCache",
+        "SetStatus",
+        "PublishError",
+        "GetJobStatus",
+        "SetProgress",
+        "GetProgress",
+        "Close"
+      ],
+      "totalLines": 144,
+      "hasStructuralAnalysis": true
+    },
+    "backend-fetcher/internal/youtube/youtube.go": {
+      "filePath": "backend-fetcher/internal/youtube/youtube.go",
+      "contentHash": "b40d439b8c8d68615fbfa04d8405672dc7612c7309ab5d86e45264e55dbc4e1e",
+      "functions": [
+        {
+          "name": "NewClient",
+          "params": [
+            "apiKey"
+          ],
+          "returnType": "*Client",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "HasAPIKey",
+          "params": [],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "FetchVideoInfo",
+          "params": [
+            "videoID"
+          ],
+          "returnType": "(*VideoInfo, error)",
+          "exported": true,
+          "lineCount": 50
+        },
+        {
+          "name": "FetchComments",
+          "params": [
+            "videoID",
+            "limit",
+            "onProgress"
+          ],
+          "returnType": "([]Comment, error)",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "fetchCommentsConcurrent",
+          "params": [
+            "videoID",
+            "limit",
+            "strategies",
+            "onProgress"
+          ],
+          "returnType": "([]Comment, error)",
+          "exported": false,
+          "lineCount": 127
+        },
+        {
+          "name": "fetchCommentPage",
+          "params": [
+            "videoID",
+            "pageToken",
+            "order"
+          ],
+          "returnType": "([]Comment, string, error)",
+          "exported": false,
+          "lineCount": 68
+        }
+      ],
+      "classes": [
+        {
+          "name": "Client",
+          "methods": [
+            "HasAPIKey",
+            "FetchVideoInfo",
+            "FetchComments",
+            "fetchCommentsConcurrent",
+            "fetchCommentPage"
+          ],
+          "properties": [
+            "apiKey",
+            "httpClient"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "VideoInfo",
+          "methods": [],
+          "properties": [
+            "ID",
+            "Title",
+            "ChannelTitle",
+            "Thumbnail",
+            "PublishedAt",
+            "ViewCount",
+            "LikeCount",
+            "CommentCount",
+            "Description"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "Comment",
+          "methods": [],
+          "properties": [
+            "ID",
+            "AuthorDisplayName",
+            "AuthorProfileImageURL",
+            "TextDisplay",
+            "TextOriginal",
+            "LikeCount",
+            "PublishedAt",
+            "IsReply",
+            "ParentID"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "videoListResponse",
+          "methods": [],
+          "properties": [
+            "Items"
+          ],
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "commentThreadsResponse",
+          "methods": [],
+          "properties": [
+            "NextPageToken",
+            "PageInfo",
+            "Items"
+          ],
+          "exported": false,
+          "lineCount": 37
+        }
+      ],
+      "imports": [
+        {
+          "source": "context",
+          "specifiers": [
+            "context"
+          ]
+        },
+        {
+          "source": "encoding/json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "fmt",
+          "specifiers": [
+            "fmt"
+          ]
+        },
+        {
+          "source": "io",
+          "specifiers": [
+            "io"
+          ]
+        },
+        {
+          "source": "log",
+          "specifiers": [
+            "log"
+          ]
+        },
+        {
+          "source": "net/http",
+          "specifiers": [
+            "http"
+          ]
+        },
+        {
+          "source": "net/url",
+          "specifiers": [
+            "url"
+          ]
+        },
+        {
+          "source": "sort",
+          "specifiers": [
+            "sort"
+          ]
+        },
+        {
+          "source": "strconv",
+          "specifiers": [
+            "strconv"
+          ]
+        },
+        {
+          "source": "sync",
+          "specifiers": [
+            "sync"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        }
+      ],
+      "exports": [
+        "Client",
+        "NewClient",
+        "HasAPIKey",
+        "VideoInfo",
+        "Comment",
+        "FetchVideoInfo",
+        "FetchComments"
+      ],
+      "totalLines": 413,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/.dockerignore": {
+      "filePath": "backend-ml/.dockerignore",
+      "contentHash": "81ac17a7c56c4dfa673d00cfaabe77e949e6b40fc0397b7e49e9de32a1d130e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "backend-ml/app/api/routes/analysis.py": {
+      "filePath": "backend-ml/app/api/routes/analysis.py",
+      "contentHash": "840e68c2310e9f29a63e433b5ab71fc7975b7a1254cdef937f9a3b118c8fbb23",
+      "functions": [
+        {
+          "name": "health",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "get_analysis_by_job",
+          "params": [
+            "job_id",
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "get_analysis_by_video",
+          "params": [
+            "video_id",
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "get_history",
+          "params": [
+            "limit",
+            "offset",
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "clear_history",
+          "params": [
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "delete_history_item",
+          "params": [
+            "video_id",
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "get_comments",
+          "params": [
+            "video_id",
+            "sentiment",
+            "limit",
+            "offset",
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "_build_analysis_response",
+          "params": [
+            "db",
+            "video_id",
+            "job_id"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 54
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Optional"
+          ]
+        },
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "APIRouter",
+            "Depends",
+            "HTTPException",
+            "Query"
+          ]
+        },
+        {
+          "source": "sqlalchemy.ext.asyncio",
+          "specifiers": [
+            "AsyncSession"
+          ]
+        },
+        {
+          "source": "app.db.session",
+          "specifiers": [
+            "get_db"
+          ]
+        },
+        {
+          "source": "app.crud",
+          "specifiers": [
+            "crud"
+          ]
+        },
+        {
+          "source": "redis.asyncio",
+          "specifiers": [
+            "aioredis"
+          ]
+        },
+        {
+          "source": "app.core.config",
+          "specifiers": [
+            "settings"
+          ]
+        }
+      ],
+      "exports": [
+        "health",
+        "get_analysis_by_job",
+        "get_analysis_by_video",
+        "get_history",
+        "clear_history",
+        "delete_history_item",
+        "get_comments",
+        "_build_analysis_response"
+      ],
+      "totalLines": 229,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/api/routes/__init__.py": {
+      "filePath": "backend-ml/app/api/routes/__init__.py",
+      "contentHash": "ee8b5199ece794875cf42aa423fc1b2767cc24793587a418f06c0903763752fe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/api/__init__.py": {
+      "filePath": "backend-ml/app/api/__init__.py",
+      "contentHash": "6be6a0ef9d0b9ce543f210fb1295c0f7b08662a50af89572b3be6448c6ffe5b8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/core/config.py": {
+      "filePath": "backend-ml/app/core/config.py",
+      "contentHash": "5d8593b0b11f43b1e1c2e354acf5ced91714a649179342f078a6ca0cd3af8ad4",
+      "functions": [],
+      "classes": [
+        {
+          "name": "Settings",
+          "methods": [],
+          "properties": [
+            "DATABASE_URL",
+            "REDIS_URL",
+            "ALLOWED_ORIGINS",
+            "PORT",
+            "GEMINI_API_KEY"
+          ],
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "dotenv",
+          "specifiers": [
+            "load_dotenv"
+          ]
+        }
+      ],
+      "exports": [
+        "Settings"
+      ],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/core/sentiment/sentiment.py": {
+      "filePath": "backend-ml/app/core/sentiment/sentiment.py",
+      "contentHash": "20435267033198186550a011d3c766c05429e29b14e0f9516842cd898efda00d",
+      "functions": [
+        {
+          "name": "is_spam_or_bot",
+          "params": [
+            "text"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "analyze_comment",
+          "params": [
+            "text"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 51
+        },
+        {
+          "name": "analyze_batch",
+          "params": [
+            "texts"
+          ],
+          "returnType": "list[dict]",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "analyze_comment_async",
+          "params": [
+            "text",
+            "client"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "analyze_batch_async",
+          "params": [
+            "texts"
+          ],
+          "returnType": "list[dict]",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "torch",
+          "specifiers": [
+            "torch"
+          ]
+        },
+        {
+          "source": "transformers",
+          "specifiers": [
+            "pipeline",
+            "AutoTokenizer"
+          ]
+        },
+        {
+          "source": "langdetect",
+          "specifiers": [
+            "detect",
+            "DetectorFactory"
+          ]
+        }
+      ],
+      "exports": [
+        "is_spam_or_bot",
+        "analyze_comment",
+        "analyze_batch",
+        "analyze_comment_async",
+        "analyze_batch_async"
+      ],
+      "totalLines": 161,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/core/sentiment/spam.py": {
+      "filePath": "backend-ml/app/core/sentiment/spam.py",
+      "contentHash": "37f6c7e24731f0f169f307101b54cd167dacfaddae9a4d74cf961a5c9cb9ec9d",
+      "functions": [
+        {
+          "name": "is_spam",
+          "params": [
+            "text"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 50
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "is_spam"
+      ],
+      "totalLines": 65,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/core/sentiment/__init__.py": {
+      "filePath": "backend-ml/app/core/sentiment/__init__.py",
+      "contentHash": "fc5332b5954098a32e60b9d10cf250754a8466e3d14091a1f6cc5c442319e2c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/core/topics.py": {
+      "filePath": "backend-ml/app/core/topics.py",
+      "contentHash": "820d162d4c0e4ec1238e8c72ac0b1b0963531d2f73e5dbd8b80eaf89cb53dbb6",
+      "functions": [
+        {
+          "name": "clean_text",
+          "params": [
+            "text"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "extract_topics_local",
+          "params": [
+            "comments"
+          ],
+          "returnType": "list[dict]",
+          "exported": true,
+          "lineCount": 65
+        },
+        {
+          "name": "extract_topics_gemini",
+          "params": [
+            "comments",
+            "sentiment"
+          ],
+          "returnType": "list[dict] | None",
+          "exported": true,
+          "lineCount": 72
+        },
+        {
+          "name": "extract_topics",
+          "params": [
+            "comments",
+            "sentiment"
+          ],
+          "returnType": "list[dict]",
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "Counter"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        }
+      ],
+      "exports": [
+        "clean_text",
+        "extract_topics_local",
+        "extract_topics_gemini",
+        "extract_topics"
+      ],
+      "totalLines": 196,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/core/__init__.py": {
+      "filePath": "backend-ml/app/core/__init__.py",
+      "contentHash": "04bcac4cc38c5ce22d43a2d89a1010f03f15c8b8dad6e99f65677605452c0087",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/crud/crud.py": {
+      "filePath": "backend-ml/app/crud/crud.py",
+      "contentHash": "a27ace531d215541be80373bab1e33fa11ff198b53fdcd0bccea9c156246e59c",
+      "functions": [
+        {
+          "name": "create_job",
+          "params": [
+            "db",
+            "job_id",
+            "video_id"
+          ],
+          "returnType": "AnalysisJob",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "get_job",
+          "params": [
+            "db",
+            "job_id"
+          ],
+          "returnType": "Optional[AnalysisJob]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "get_job_by_video",
+          "params": [
+            "db",
+            "video_id"
+          ],
+          "returnType": "Optional[AnalysisJob]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "update_job_status",
+          "params": [
+            "db",
+            "job_id",
+            "status",
+            "error"
+          ],
+          "returnType": "Optional[AnalysisJob]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "save_video",
+          "params": [
+            "db",
+            "video_info"
+          ],
+          "returnType": "VideoData",
+          "exported": true,
+          "lineCount": 44
+        },
+        {
+          "name": "get_video",
+          "params": [
+            "db",
+            "video_id"
+          ],
+          "returnType": "Optional[VideoData]",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "save_comments_batch",
+          "params": [
+            "db",
+            "video_id",
+            "comments"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "get_comments_by_video",
+          "params": [
+            "db",
+            "video_id",
+            "sentiment_filter",
+            "limit",
+            "offset"
+          ],
+          "returnType": "list[CommentData]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "count_comments_by_video",
+          "params": [
+            "db",
+            "video_id",
+            "sentiment_filter"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "save_sentiment_summary",
+          "params": [
+            "db",
+            "video_id",
+            "positive",
+            "negative",
+            "neutral",
+            "total_comments",
+            "average_score",
+            "topics_positive",
+            "topics_negative"
+          ],
+          "returnType": "SentimentSummary",
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "get_sentiment_summary",
+          "params": [
+            "db",
+            "video_id"
+          ],
+          "returnType": "Optional[SentimentSummary]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "get_analysis_history",
+          "params": [
+            "db",
+            "limit",
+            "offset"
+          ],
+          "returnType": "list[dict]",
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "clear_all_data",
+          "params": [
+            "db"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "delete_video_data",
+          "params": [
+            "db",
+            "video_id"
+          ],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Optional"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select",
+            "func"
+          ]
+        },
+        {
+          "source": "sqlalchemy.ext.asyncio",
+          "specifiers": [
+            "AsyncSession"
+          ]
+        },
+        {
+          "source": "app.models.models",
+          "specifiers": [
+            "AnalysisJob",
+            "VideoData",
+            "CommentData",
+            "SentimentSummary"
+          ]
+        }
+      ],
+      "exports": [
+        "create_job",
+        "get_job",
+        "get_job_by_video",
+        "update_job_status",
+        "save_video",
+        "get_video",
+        "save_comments_batch",
+        "get_comments_by_video",
+        "count_comments_by_video",
+        "save_sentiment_summary",
+        "get_sentiment_summary",
+        "get_analysis_history",
+        "clear_all_data",
+        "delete_video_data"
+      ],
+      "totalLines": 350,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/crud/__init__.py": {
+      "filePath": "backend-ml/app/crud/__init__.py",
+      "contentHash": "4ed1e2c92c7be43b50adbbfbe0ccaed4411ffa6a13a97510a784cca99b31df05",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/db/session.py": {
+      "filePath": "backend-ml/app/db/session.py",
+      "contentHash": "5882e83c4c9819135ed0f32c3dc177b89330435ad332e4a774ba62aaa8ac30e3",
+      "functions": [
+        {
+          "name": "init_db",
+          "params": [],
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "get_db",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sqlmodel",
+          "specifiers": [
+            "SQLModel"
+          ]
+        },
+        {
+          "source": "sqlalchemy.ext.asyncio",
+          "specifiers": [
+            "AsyncSession",
+            "create_async_engine"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "sessionmaker"
+          ]
+        },
+        {
+          "source": "app.core.config",
+          "specifiers": [
+            "settings"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "text"
+          ]
+        }
+      ],
+      "exports": [
+        "init_db",
+        "get_db"
+      ],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/db/__init__.py": {
+      "filePath": "backend-ml/app/db/__init__.py",
+      "contentHash": "2841f79de31d4a084bc3a266b30f4eb999bb6b8e3c517d209b12d22f48c14680",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/main.py": {
+      "filePath": "backend-ml/app/main.py",
+      "contentHash": "9be65d5986039bcb53c822aa811baef4afa03fd37b5925e636015dcf7f8e4f44",
+      "functions": [
+        {
+          "name": "lifespan",
+          "params": [
+            "app"
+          ],
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "root",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "contextlib",
+          "specifiers": [
+            "asynccontextmanager"
+          ]
+        },
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "FastAPI"
+          ]
+        },
+        {
+          "source": "fastapi.middleware.cors",
+          "specifiers": [
+            "CORSMiddleware"
+          ]
+        },
+        {
+          "source": "app.core.config",
+          "specifiers": [
+            "settings"
+          ]
+        },
+        {
+          "source": "app.db.session",
+          "specifiers": [
+            "init_db"
+          ]
+        },
+        {
+          "source": "app.api.routes.analysis",
+          "specifiers": [
+            "analysis_router"
+          ]
+        },
+        {
+          "source": "app.workers.worker",
+          "specifiers": [
+            "worker_loop"
+          ]
+        }
+      ],
+      "exports": [
+        "lifespan",
+        "root"
+      ],
+      "totalLines": 82,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/models/models.py": {
+      "filePath": "backend-ml/app/models/models.py",
+      "contentHash": "3c5cb0363cbe5a1567df6c8b596e220680f07df767a513d0b072300c388af1e5",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AnalysisJob",
+          "methods": [],
+          "properties": [
+            "id",
+            "video_id",
+            "status",
+            "error_message",
+            "created_at",
+            "completed_at"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "VideoData",
+          "methods": [],
+          "properties": [
+            "id",
+            "title",
+            "channel_title",
+            "thumbnail",
+            "published_at",
+            "view_count",
+            "like_count",
+            "comment_count",
+            "description",
+            "created_at"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "CommentData",
+          "methods": [],
+          "properties": [
+            "id",
+            "video_id",
+            "author_display_name",
+            "author_profile_image_url",
+            "text_display",
+            "text_original",
+            "like_count",
+            "published_at",
+            "is_reply",
+            "parent_id",
+            "sentiment",
+            "sentiment_score"
+          ],
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "SentimentSummary",
+          "methods": [],
+          "properties": [
+            "video_id",
+            "positive",
+            "negative",
+            "neutral",
+            "total_comments",
+            "average_score",
+            "topics_positive",
+            "topics_negative",
+            "updated_at"
+          ],
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Optional",
+            "List"
+          ]
+        },
+        {
+          "source": "sqlmodel",
+          "specifiers": [
+            "SQLModel",
+            "Field"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "Column",
+            "JSON"
+          ]
+        }
+      ],
+      "exports": [
+        "AnalysisJob",
+        "VideoData",
+        "CommentData",
+        "SentimentSummary"
+      ],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/models/__init__.py": {
+      "filePath": "backend-ml/app/models/__init__.py",
+      "contentHash": "8c9805d5d78e73df27c838112fa91a70cd8736c9fbd6ce535a3424cc313e8073",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/reanalyze_video.py": {
+      "filePath": "backend-ml/app/reanalyze_video.py",
+      "contentHash": "3026c288f6b1d77de55a07d69b94312cfca79ca09e7a1ae16ccbcbd554558a63",
+      "functions": [
+        {
+          "name": "reanalyze_video",
+          "params": [
+            "video_id"
+          ],
+          "exported": true,
+          "lineCount": 67
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select"
+          ]
+        },
+        {
+          "source": "app.db.session",
+          "specifiers": [
+            "AsyncSessionLocal"
+          ]
+        },
+        {
+          "source": "app.models.models",
+          "specifiers": [
+            "CommentData",
+            "SentimentSummary"
+          ]
+        },
+        {
+          "source": "app.core.sentiment.sentiment",
+          "specifiers": [
+            "analyze_comment"
+          ]
+        }
+      ],
+      "exports": [
+        "reanalyze_video"
+      ],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/workers/worker.py": {
+      "filePath": "backend-ml/app/workers/worker.py",
+      "contentHash": "abb57bb5a98fbe16905385599fc33e4fcdb34589e80d9d793c0bae66d5f5fef4",
+      "functions": [
+        {
+          "name": "process_job",
+          "params": [
+            "job_data"
+          ],
+          "exported": true,
+          "lineCount": 146
+        },
+        {
+          "name": "worker_loop",
+          "params": [],
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "start_worker",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "redis.asyncio",
+          "specifiers": [
+            "aioredis"
+          ]
+        },
+        {
+          "source": "app.core.config",
+          "specifiers": [
+            "settings"
+          ]
+        },
+        {
+          "source": "app.core.sentiment.sentiment",
+          "specifiers": [
+            "analyze_comment",
+            "analyze_comment_async"
+          ]
+        },
+        {
+          "source": "app.crud",
+          "specifiers": [
+            "crud"
+          ]
+        },
+        {
+          "source": "app.db.session",
+          "specifiers": [
+            "AsyncSessionLocal"
+          ]
+        }
+      ],
+      "exports": [
+        "process_job",
+        "worker_loop",
+        "start_worker"
+      ],
+      "totalLines": 211,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/workers/__init__.py": {
+      "filePath": "backend-ml/app/workers/__init__.py",
+      "contentHash": "ac1cb3aa646aec3667ee4a6662f7d497fed6ed5b28c4ecdf0e0dcfa2aec22bc6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/app/__init__.py": {
+      "filePath": "backend-ml/app/__init__.py",
+      "contentHash": "70eb48999ed0bb01108d806b0a934f5d0160373306c3e32eeefbbcc1297b784a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/Dockerfile": {
+      "filePath": "backend-ml/Dockerfile",
+      "contentHash": "ddd099bb98865728d1b4edd4ee6c99c7869e952a73061c78a30c100a70114396",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/download_models.py": {
+      "filePath": "backend-ml/download_models.py",
+      "contentHash": "828d4021a01f25f0ffa703c733d237b810e554f313575cf62407b3cd680876a6",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "huggingface_hub",
+          "specifiers": [
+            "snapshot_download"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    "backend-ml/requirements.txt": {
+      "filePath": "backend-ml/requirements.txt",
+      "contentHash": "6c8c6ff8be907bacdfb1bc05373f4d0f799a219cd57e4fda128afab870ef8afe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    "docker-compose.yml": {
+      "filePath": "docker-compose.yml",
+      "contentHash": "cbfeff482958bcb6da9cf6146d61cb63b264b9c2fc22a56a33c66c8cabfce480",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 104,
+      "hasStructuralAnalysis": true
+    },
+    "e2e_test_3.py": {
+      "filePath": "e2e_test_3.py",
+      "contentHash": "20e5c39558335b068b407886e45154f291f5a415835832e23fe287b366a0b586",
+      "functions": [
+        {
+          "name": "post_json",
+          "params": [
+            "url",
+            "data"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "get_json",
+          "params": [
+            "url"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "urllib.request",
+          "specifiers": [
+            "urllib.request"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        }
+      ],
+      "exports": [
+        "post_json",
+        "get_json"
+      ],
+      "totalLines": 106,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/.dockerignore": {
+      "filePath": "frontend/.dockerignore",
+      "contentHash": "4e89579eaa7be338bb0ac88aa01379e2275ab145554b04b3b0204c138a5dac2d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "frontend/.gitignore": {
+      "filePath": "frontend/.gitignore",
+      "contentHash": "fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "frontend/components.json": {
+      "filePath": "frontend/components.json",
+      "contentHash": "9210a02a00f459fbc5f3fecee169f8017756f4e2ce8fc7b2b3ef9a5ae589dab6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/Dockerfile": {
+      "filePath": "frontend/Dockerfile",
+      "contentHash": "8e0ec39b8274ab605a09f6ba73928ba8a4ff6d9b1eb1f147735a8e2c6e27ad2f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/eslint.config.js": {
+      "filePath": "frontend/eslint.config.js",
+      "contentHash": "2764211db42e1c2e66c16e46dd4681bcd6648fc02be0a17421a9e81c53436ff7",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@eslint/js",
+          "specifiers": [
+            "js"
+          ]
+        },
+        {
+          "source": "globals",
+          "specifiers": [
+            "globals"
+          ]
+        },
+        {
+          "source": "eslint-plugin-react-hooks",
+          "specifiers": [
+            "reactHooks"
+          ]
+        },
+        {
+          "source": "eslint-plugin-react-refresh",
+          "specifiers": [
+            "reactRefresh"
+          ]
+        },
+        {
+          "source": "typescript-eslint",
+          "specifiers": [
+            "tseslint"
+          ]
+        },
+        {
+          "source": "eslint/config",
+          "specifiers": [
+            "defineConfig",
+            "globalIgnores"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/index.html": {
+      "filePath": "frontend/index.html",
+      "contentHash": "a9d46ec03e86ba44e768c7b106e4614d49123e1411dacab91b20764b5fa9aaab",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": false
+    },
+    "frontend/package-lock.json": {
+      "filePath": "frontend/package-lock.json",
+      "contentHash": "37243e186993e90f9ac823c71acabfea1de5629ffeca6da321739aba61adf2f6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3330,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/package.json": {
+      "filePath": "frontend/package.json",
+      "contentHash": "559380c117306d2d8ab9594117310810bcbd0a595ed17349b650f89a15e0e4a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 44,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/README.md": {
+      "filePath": "frontend/README.md",
+      "contentHash": "d1a3f34a5132a475aa756614c371b2916276f7599fc2bf7a9c3b193bc4b42273",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/App.tsx": {
+      "filePath": "frontend/src/App.tsx",
+      "contentHash": "27ac3793d3ebc862ce2db80aab3f67960fa3fb0bc9916feeb3646ab2d16356f6",
+      "functions": [
+        {
+          "name": "HomePage",
+          "params": [],
+          "exported": true,
+          "lineCount": 363
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useCallback",
+            "useEffect"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Search",
+            "Sparkles",
+            "ArrowRight"
+          ]
+        },
+        {
+          "source": "@/components/ui/button",
+          "specifiers": [
+            "Button"
+          ]
+        },
+        {
+          "source": "@/components/ui/input",
+          "specifiers": [
+            "Input"
+          ]
+        },
+        {
+          "source": "@/components/AnalyzedVideoList",
+          "specifiers": [
+            "AnalyzedVideoList"
+          ]
+        },
+        {
+          "source": "@/components/LoadingSpinner",
+          "specifiers": [
+            "LoadingSpinner"
+          ]
+        },
+        {
+          "source": "@/components/VideoDetails",
+          "specifiers": [
+            "VideoDetails"
+          ]
+        },
+        {
+          "source": "@/components/CommentCharts",
+          "specifiers": [
+            "CommentCharts"
+          ]
+        },
+        {
+          "source": "@/components/CommentSection",
+          "specifiers": [
+            "CommentSection"
+          ]
+        },
+        {
+          "source": "@/components/StatBlock",
+          "specifiers": [
+            "SentimentSummary"
+          ]
+        },
+        {
+          "source": "@/components/AiSummary",
+          "specifiers": [
+            "AiSummary"
+          ]
+        },
+        {
+          "source": "@/components/SentimentTimeline",
+          "specifiers": [
+            "SentimentTimeline"
+          ]
+        },
+        {
+          "source": "@/services/api",
+          "specifiers": [
+            "isValidYouTubeUrl",
+            "submitAnalysisJob",
+            "getJobStatus",
+            "getJobStatusStreamUrl",
+            "getAnalysisResults",
+            "getAnalysisByVideo",
+            "fetchHistory",
+            "getLocalHistory",
+            "deleteHistoryFromServer",
+            "deleteVideoFromServer"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "AnalysisResponse",
+            "AnalyzedVideo"
+          ]
+        }
+      ],
+      "exports": [
+        "HomePage"
+      ],
+      "totalLines": 398,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/AiSummary.tsx": {
+      "filePath": "frontend/src/components/AiSummary.tsx",
+      "contentHash": "ea1cedf02395fb3d3ebe77e9d553597253cf99cf740002352db43265eda2a735",
+      "functions": [
+        {
+          "name": "TopicCard",
+          "params": [
+            "{ topic, type }"
+          ],
+          "exported": false,
+          "lineCount": 98
+        },
+        {
+          "name": "AiSummary",
+          "params": [
+            "{ topicsPositive = [], topicsNegative = [] }"
+          ],
+          "exported": true,
+          "lineCount": 102
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Sparkles",
+            "ThumbsUp",
+            "ThumbsDown",
+            "Quote",
+            "ChevronDown",
+            "ChevronUp",
+            "MessageSquare"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "TopicCluster"
+          ]
+        }
+      ],
+      "exports": [
+        "AiSummary"
+      ],
+      "totalLines": 224,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/AnalyzedVideoList.tsx": {
+      "filePath": "frontend/src/components/AnalyzedVideoList.tsx",
+      "contentHash": "b49c76eefcbf240bc0500f2add5688957dc3a43dc6938d01a788e21cc54834a4",
+      "functions": [
+        {
+          "name": "AnalyzedVideoList",
+          "params": [
+            "{ history, onSelect, onClear, onDelete }"
+          ],
+          "exported": true,
+          "lineCount": 79
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Trash2",
+            "BarChart3",
+            "Clock"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "AnalyzedVideo"
+          ]
+        },
+        {
+          "source": "@/services/api",
+          "specifiers": [
+            "clearHistory"
+          ]
+        },
+        {
+          "source": "@/components/ui/button",
+          "specifiers": [
+            "Button"
+          ]
+        }
+      ],
+      "exports": [
+        "AnalyzedVideoList"
+      ],
+      "totalLines": 108,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/CommentCharts.tsx": {
+      "filePath": "frontend/src/components/CommentCharts.tsx",
+      "contentHash": "7da5d06957362d6f669ddaecaf558c4529f655594ee4a5c66589099b921c223c",
+      "functions": [
+        {
+          "name": "CommentCharts",
+          "params": [
+            "{ result }"
+          ],
+          "exported": true,
+          "lineCount": 125
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "recharts",
+          "specifiers": [
+            "PieChart",
+            "Pie",
+            "Cell",
+            "ResponsiveContainer",
+            "BarChart",
+            "Bar",
+            "XAxis",
+            "YAxis",
+            "Tooltip"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "SentimentResult"
+          ]
+        }
+      ],
+      "exports": [
+        "CommentCharts"
+      ],
+      "totalLines": 146,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/CommentSection.tsx": {
+      "filePath": "frontend/src/components/CommentSection.tsx",
+      "contentHash": "4ecac48d4d76a060542e751e269c292a4c6ffeca58e339a34b69227e9fa3ce32",
+      "functions": [
+        {
+          "name": "CommentItem",
+          "params": [
+            "{ comment, replies = [], isReply = false }"
+          ],
+          "exported": false,
+          "lineCount": 108
+        },
+        {
+          "name": "CommentSection",
+          "params": [
+            "{ comments, selectedDate, onSelectDate }"
+          ],
+          "exported": true,
+          "lineCount": 156
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "ThumbsUp",
+            "ChevronDown",
+            "ChevronUp",
+            "Filter"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "@/components/ui/button",
+          "specifiers": [
+            "Button"
+          ]
+        },
+        {
+          "source": "./ExpandableText",
+          "specifiers": [
+            "ExpandableText"
+          ]
+        },
+        {
+          "source": "@/lib/timeline",
+          "specifiers": [
+            "getTimelineData"
+          ]
+        }
+      ],
+      "exports": [
+        "CommentSection"
+      ],
+      "totalLines": 296,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/ExpandableText.tsx": {
+      "filePath": "frontend/src/components/ExpandableText.tsx",
+      "contentHash": "482625a8ca4674eb65046ab2f1c7bc81b0bd794a8ab6ae12a8faf73ed0b28c57",
+      "functions": [
+        {
+          "name": "ExpandableText",
+          "params": [
+            "{ \r\n  text, \r\n  limit, \r\n  lineLimit,\r\n  className = \"\", \r\n  buttonClassName = \"\" \r\n}"
+          ],
+          "exported": true,
+          "lineCount": 91
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useRef",
+            "useEffect"
+          ]
+        }
+      ],
+      "exports": [
+        "ExpandableText"
+      ],
+      "totalLines": 102,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/Header.tsx": {
+      "filePath": "frontend/src/components/Header.tsx",
+      "contentHash": "d6cdea65193f2bb4259a29aab001932f083ed3191fd5564c9532b74ab0635505",
+      "functions": [
+        {
+          "name": "Header",
+          "params": [],
+          "exported": true,
+          "lineCount": 49
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Moon",
+            "Sun"
+          ]
+        },
+        {
+          "source": "@/components/theme-context",
+          "specifiers": [
+            "useTheme"
+          ]
+        },
+        {
+          "source": "@/components/ui/button",
+          "specifiers": [
+            "Button"
+          ]
+        }
+      ],
+      "exports": [
+        "Header"
+      ],
+      "totalLines": 61,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/LoadingSpinner.tsx": {
+      "filePath": "frontend/src/components/LoadingSpinner.tsx",
+      "contentHash": "d409ebcf8a6f4f489da7725391a30fb7727ecca55ff4bf2f4903fe6938120720",
+      "functions": [
+        {
+          "name": "LoadingSpinner",
+          "params": [
+            "{ message = \"Analyzing sentiments...\", progress }"
+          ],
+          "exported": true,
+          "lineCount": 78
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        }
+      ],
+      "exports": [
+        "LoadingSpinner"
+      ],
+      "totalLines": 88,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/SentimentTimeline.tsx": {
+      "filePath": "frontend/src/components/SentimentTimeline.tsx",
+      "contentHash": "06d8564e3487291feedc49f86d71fca6464caf65f35ccc3d04d693502a028fda",
+      "functions": [
+        {
+          "name": "SentimentTimeline",
+          "params": [
+            "{ comments, selectedDate, onSelectDate }"
+          ],
+          "exported": true,
+          "lineCount": 243
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "recharts",
+          "specifiers": [
+            "LineChart",
+            "Line",
+            "XAxis",
+            "YAxis",
+            "CartesianGrid",
+            "Tooltip",
+            "Legend",
+            "ResponsiveContainer"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "@/lib/timeline",
+          "specifiers": [
+            "getTimelineData"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Calendar",
+            "RefreshCw"
+          ]
+        }
+      ],
+      "exports": [
+        "SentimentTimeline"
+      ],
+      "totalLines": 275,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/StatBlock.tsx": {
+      "filePath": "frontend/src/components/StatBlock.tsx",
+      "contentHash": "af0e6ec6d99e26426988b33bdc6c33fbb558040ac18d2f48acde0867465b766b",
+      "functions": [
+        {
+          "name": "StatBlock",
+          "params": [
+            "{ label, value, total, type, delay = 0 }"
+          ],
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "SentimentSummary",
+          "params": [
+            "{ result }"
+          ],
+          "exported": true,
+          "lineCount": 47
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "TrendingUp",
+            "TrendingDown",
+            "Minus"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "SentimentResult"
+          ]
+        }
+      ],
+      "exports": [
+        "StatBlock",
+        "SentimentSummary"
+      ],
+      "totalLines": 139,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/theme-context.ts": {
+      "filePath": "frontend/src/components/theme-context.ts",
+      "contentHash": "5afc4efa1b5c00dc24babab9bf25e5d1be8032d0468c2a1831cf1f2a0f50febf",
+      "functions": [
+        {
+          "name": "useTheme",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "createContext",
+            "useContext"
+          ]
+        }
+      ],
+      "exports": [
+        "ThemeContext",
+        "useTheme"
+      ],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/theme-provider.tsx": {
+      "filePath": "frontend/src/components/theme-provider.tsx",
+      "contentHash": "eb720e0fd6f90732bb2d66a84aebbf87fd592e097e6b3fe5bc3b614786afa8ad",
+      "functions": [
+        {
+          "name": "getSystemTheme",
+          "params": [],
+          "returnType": "\"dark\" | \"light\"",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "ThemeProvider",
+          "params": [
+            "{\r\n  children,\r\n  defaultTheme = \"dark\",\r\n  storageKey = \"NeuroTube-theme\",\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 32
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState",
+            "ReactNode"
+          ]
+        },
+        {
+          "source": "./theme-context",
+          "specifiers": [
+            "ThemeContext",
+            "Theme",
+            "ThemeProviderState"
+          ]
+        }
+      ],
+      "exports": [
+        "ThemeProvider"
+      ],
+      "totalLines": 41,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/ui/button.tsx": {
+      "filePath": "frontend/src/components/ui/button.tsx",
+      "contentHash": "2ef6b6571fa81784e911cbf1f33103e575d280ff4edb0f8125bf2cd87b6cdc20",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "* as React"
+          ]
+        },
+        {
+          "source": "@radix-ui/react-slot",
+          "specifiers": [
+            "Slot"
+          ]
+        },
+        {
+          "source": "class-variance-authority",
+          "specifiers": [
+            "cva",
+            "VariantProps"
+          ]
+        },
+        {
+          "source": "@/lib/utils",
+          "specifiers": [
+            "cn"
+          ]
+        }
+      ],
+      "exports": [
+        "Button",
+        "buttonVariants"
+      ],
+      "totalLines": 59,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/ui/card.tsx": {
+      "filePath": "frontend/src/components/ui/card.tsx",
+      "contentHash": "c58a39198aab485b7bec9dde033dca0b25be3fce06c00a101c2561dceff775a1",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "* as React"
+          ]
+        },
+        {
+          "source": "@/lib/utils",
+          "specifiers": [
+            "cn"
+          ]
+        }
+      ],
+      "exports": [
+        "Card",
+        "CardHeader",
+        "CardFooter",
+        "CardTitle",
+        "CardDescription",
+        "CardContent"
+      ],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/ui/input.tsx": {
+      "filePath": "frontend/src/components/ui/input.tsx",
+      "contentHash": "cacc180f0367350b3fe134949e04a562e027878131faadabeb300148c6cd84fb",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "* as React"
+          ]
+        },
+        {
+          "source": "@/lib/utils",
+          "specifiers": [
+            "cn"
+          ]
+        }
+      ],
+      "exports": [
+        "Input"
+      ],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/components/VideoDetails.tsx": {
+      "filePath": "frontend/src/components/VideoDetails.tsx",
+      "contentHash": "d83942a0b49cce6ffceb87d6fbb91d1d377700ed20e8ad70d551b57ef5f734f8",
+      "functions": [
+        {
+          "name": "VideoDetails",
+          "params": [
+            "{ video }"
+          ],
+          "exported": true,
+          "lineCount": 93
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Eye",
+            "ThumbsUp",
+            "MessageCircle",
+            "Calendar",
+            "ExternalLink"
+          ]
+        },
+        {
+          "source": "@/types",
+          "specifiers": [
+            "VideoInfo"
+          ]
+        },
+        {
+          "source": "./ExpandableText",
+          "specifiers": [
+            "ExpandableText"
+          ]
+        }
+      ],
+      "exports": [
+        "VideoDetails"
+      ],
+      "totalLines": 105,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/index.css": {
+      "filePath": "frontend/src/index.css",
+      "contentHash": "ec06798d247a6e3ebfe7a444a5abcbbb6289b4a31ecfc35d9d06a3bf510cefde",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 127,
+      "hasStructuralAnalysis": false
+    },
+    "frontend/src/lib/timeline.ts": {
+      "filePath": "frontend/src/lib/timeline.ts",
+      "contentHash": "fc8dab2ad5c32db0bf75d900767790824afd70758f0e93cd04f5b1986444e0e4",
+      "functions": [
+        {
+          "name": "getTimelineData",
+          "params": [
+            "comments",
+            "timeRange"
+          ],
+          "exported": true,
+          "lineCount": 95
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/types",
+          "specifiers": [
+            "Comment"
+          ]
+        }
+      ],
+      "exports": [
+        "getTimelineData"
+      ],
+      "totalLines": 106,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/lib/utils.ts": {
+      "filePath": "frontend/src/lib/utils.ts",
+      "contentHash": "74a147991a119f1c4cdc25a4d9b22713632fa32eb136e55ab6939b006d71b9d6",
+      "functions": [
+        {
+          "name": "cn",
+          "params": [
+            "...inputs"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "clsx",
+          "specifiers": [
+            "clsx",
+            "ClassValue"
+          ]
+        },
+        {
+          "source": "tailwind-merge",
+          "specifiers": [
+            "twMerge"
+          ]
+        }
+      ],
+      "exports": [
+        "cn"
+      ],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/main.tsx": {
+      "filePath": "frontend/src/main.tsx",
+      "contentHash": "a1726153d6acc9d03f06ed140a6053d110b66167a211e9ce88aae9494c979e6e",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "StrictMode"
+          ]
+        },
+        {
+          "source": "react-dom/client",
+          "specifiers": [
+            "createRoot"
+          ]
+        },
+        {
+          "source": "@/components/theme-provider",
+          "specifiers": [
+            "ThemeProvider"
+          ]
+        },
+        {
+          "source": "@/components/Header",
+          "specifiers": [
+            "Header"
+          ]
+        },
+        {
+          "source": "./App",
+          "specifiers": [
+            "App"
+          ]
+        },
+        {
+          "source": "./index.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/services/api.ts": {
+      "filePath": "frontend/src/services/api.ts",
+      "contentHash": "cfff8815dc98d2f3b6da9f77e3a2ab50e1bc7c28a267d2b2b0daaf045b70ac92",
+      "functions": [
+        {
+          "name": "submitAnalysisJob",
+          "params": [
+            "url",
+            "force"
+          ],
+          "returnType": "Promise<{ jobId: string; status: string; message: string }>",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "getJobStatus",
+          "params": [
+            "jobId"
+          ],
+          "returnType": "Promise<{ status: string; message: string }>",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "getJobStatusStreamUrl",
+          "params": [
+            "jobId"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getAnalysisResults",
+          "params": [
+            "jobId"
+          ],
+          "returnType": "Promise<AnalysisResponse>",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "getAnalysisByVideo",
+          "params": [
+            "videoId"
+          ],
+          "returnType": "Promise<AnalysisResponse>",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "extractVideoId",
+          "params": [
+            "url"
+          ],
+          "returnType": "string | null",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "isValidYouTubeUrl",
+          "params": [
+            "url"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "fetchHistory",
+          "params": [
+            "limit"
+          ],
+          "returnType": "Promise<AnalyzedVideo[]>",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "getLocalHistory",
+          "params": [],
+          "returnType": "AnalyzedVideo[]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "saveToHistory",
+          "params": [
+            "video"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "clearHistory",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "deleteHistoryFromServer",
+          "params": [],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "deleteVideoFromServer",
+          "params": [
+            "videoId"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/types",
+          "specifiers": [
+            "AnalysisResponse",
+            "AnalyzedVideo"
+          ]
+        }
+      ],
+      "exports": [
+        "submitAnalysisJob",
+        "getJobStatus",
+        "getJobStatusStreamUrl",
+        "getAnalysisResults",
+        "getAnalysisByVideo",
+        "extractVideoId",
+        "isValidYouTubeUrl",
+        "fetchHistory",
+        "getLocalHistory",
+        "saveToHistory",
+        "clearHistory",
+        "deleteHistoryFromServer",
+        "deleteVideoFromServer"
+      ],
+      "totalLines": 153,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/src/types/index.ts": {
+      "filePath": "frontend/src/types/index.ts",
+      "contentHash": "9ecfa540fa785709f309e3f7413d62d15b1cb322546fdd915dfefee3312c64c8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/tsconfig.app.json": {
+      "filePath": "frontend/tsconfig.app.json",
+      "contentHash": "46c11eccf19215ab10243d91a88d0a7530689bd5d601c319b740a4f3787801e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/tsconfig.json": {
+      "filePath": "frontend/tsconfig.json",
+      "contentHash": "b55a1830fd9d60d0117d0fedbe85c9042da56815aa18d72fab39001a6841a3e7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/tsconfig.node.json": {
+      "filePath": "frontend/tsconfig.node.json",
+      "contentHash": "90a22c920cbc14624fb4658b58f15c875abf3234224f3933f211849c3ada3242",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    },
+    "frontend/vite.config.ts": {
+      "filePath": "frontend/vite.config.ts",
+      "contentHash": "06b0aecc23dbd4b2596cc18e63b04193cab372aedbc254820022591676ec840d",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "path",
+          "specifiers": [
+            "path"
+          ]
+        },
+        {
+          "source": "vite",
+          "specifiers": [
+            "defineConfig"
+          ]
+        },
+        {
+          "source": "@vitejs/plugin-react",
+          "specifiers": [
+            "react"
+          ]
+        },
+        {
+          "source": "@tailwindcss/vite",
+          "specifiers": [
+            "tailwindcss"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "implementation_plan.md": {
+      "filePath": "implementation_plan.md",
+      "contentHash": "03f7a8c3ec8c37a4c083f908ded3d2978d0287c952339633559a4b21e58656b0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "d0dbf75c887b3363b17d4e5dc5cd15f7da3eb0d9ecde43cc34de6b7b1797bc60",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 177,
+      "hasStructuralAnalysis": true
+    },
+    "task.md": {
+      "filePath": "task.md",
+      "contentHash": "9113758912504aff4cc9d75bfe6b745be865412f773acdf650316161b072528d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "walkthrough.md": {
+      "filePath": "walkthrough.md",
+      "contentHash": "a74e2ffb83044c6c63fee6d6ddfe855986fcba3373230944471e3089ff8dc166",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 68,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
