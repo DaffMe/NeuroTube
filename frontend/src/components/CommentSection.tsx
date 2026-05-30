@@ -181,10 +181,10 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
   }, [comments, selectedDate]);
 
   const filters = [
-    { key: "all" as const, label: "All", count: dateComments.filter(c => !c.isReply).length },
-    { key: "positive" as const, label: "Positive", count: dateComments.filter((c) => !c.isReply && c.sentiment === "positive").length },
-    { key: "neutral" as const, label: "Neutral", count: dateComments.filter((c) => !c.isReply && c.sentiment === "neutral").length },
-    { key: "negative" as const, label: "Negative", count: dateComments.filter((c) => !c.isReply && c.sentiment === "negative").length },
+    { key: "all" as const, label: "All", count: filteredMain.length },
+    { key: "positive" as const, label: "Positive", count: filteredMain.filter(c => c.sentiment === "positive").length },
+    { key: "neutral" as const, label: "Neutral", count: filteredMain.filter(c => c.sentiment === "neutral").length },
+    { key: "negative" as const, label: "Negative", count: filteredMain.filter(c => c.sentiment === "negative").length },
   ];
 
   return (
@@ -275,14 +275,13 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
               </AnimatePresence>
 
               {hasMore && (
-                <div className="pt-6 text-center">
+                <div className="pt-4 text-center">
                   <Button
-                    variant="outline"
-                    size="lg"
+                    variant="ghost"
                     onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                    className="rounded-4xl px-8 py-6 text-xs font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all active:scale-95"
+                    className="text-xs font-semibold text-primary hover:text-primary/80 hover:bg-primary/5 px-4 py-2 rounded-full border border-primary/20 transition-colors"
                   >
-                    Load more ({groupedComments.main.length - visibleCount} remaining)
+                    Load more
                   </Button>
                 </div>
               )}

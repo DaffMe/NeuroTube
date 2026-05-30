@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,18 @@ import { SentimentSummary } from "@/components/StatBlock";
 import { AiSummary } from "@/components/AiSummary";
 import { SentimentTimeline } from "@/components/SentimentTimeline";
 import {
+  VideoDetailsSkeleton,
+  SentimentSummarySkeleton,
+  ChartsSkeleton,
+  AiSummarySkeleton,
+  CommentSectionSkeleton,
+} from "@/components/SkeletonLoaders";
+import {
   isValidYouTubeUrl,
   submitAnalysisJob,
   getJobStatus,
   getJobStatusStreamUrl,
   getAnalysisResults,
-  getAnalysisByVideo,
   fetchHistory,
   getLocalHistory,
   deleteHistoryFromServer,
@@ -45,6 +51,10 @@ export default function HomePage() {
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [history, setHistory] = useState<AnalyzedVideo[]>(getLocalHistory());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  // Keep a ref to the latest URL so handleAnalyze always reads the current value
+  // without needing 'url' in its dependency array (which would recreate the callback on every keystroke)
+  const urlRef = useRef(url);
+  useEffect(() => { urlRef.current = url; }, [url]);
 
   // ---------------------------------------------------------------------------
   // SIDE EFFECTS (RUNS WHEN THE APP FIRST LOADS)
@@ -58,7 +68,7 @@ export default function HomePage() {
   // ---------------------------------------------------------------------------
   const handleAnalyze = useCallback(
     async (inputUrl?: string) => {
-      const target = inputUrl || url;
+      const target = inputUrl || urlRef.current;
 
       if (!isValidYouTubeUrl(target)) {
         setError("Please enter a valid YouTube URL!");
@@ -151,24 +161,27 @@ export default function HomePage() {
         setProgress(undefined);
       }
     },
-    [url]
+    []
   );
 
   // ---------------------------------------------------------------------------
   // HELPER FUNCTIONS
   // ---------------------------------------------------------------------------
 
-  const handleSample = useCallback(async () => {
-    setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  const handleSample = useCallback(() => {
+    // Pass URL directly to handleAnalyze so it bypasses the url state entirely.
+    // This avoids any timing issues with setUrl being asynchronous.
     handleAnalyze("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   }, [handleAnalyze]);
 
-  const handleHistorySelect = useCallback(async (video: AnalyzedVideo) => {
+  const handleHistorySelect = useCallback(async (video: AnalyzedVideo, jobId: string) => {
     setError("");
     setLoading(true);
     setLoadingMessage("Loading results from database...");
     try {
-      const data = await getAnalysisByVideo(video.videoId);
+      // Use the exact jobId from the history entry so we load the correct analysis,
+      // not just the latest completed job for this video
+      const data = await getAnalysisResults(jobId);
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load that history record");
@@ -377,7 +390,21 @@ export default function HomePage() {
         </motion.div>
 
         <AnimatePresence>
-          {loading && (
+          {loading && !result && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mx-auto max-w-4xl space-y-6 px-4 py-8 w-full"
+            >
+              <VideoDetailsSkeleton />
+              <SentimentSummarySkeleton />
+              <ChartsSkeleton />
+              <AiSummarySkeleton />
+              <CommentSectionSkeleton />
+            </motion.div>
+          )}
+          {loading && result && (
             <LoadingSpinner
               message={loadingMessage || "Loading..."}
               progress={progress}

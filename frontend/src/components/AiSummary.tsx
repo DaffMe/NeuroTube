@@ -63,18 +63,18 @@ function TopicCard({ topic, type }: { topic: TopicCluster; type: "positive" | "n
       </div>
 
       {/* Interactive Word Cloud Visualizer using Flexbox Pills (Crash-free) */}
-      <div className="mt-4 w-full rounded-xl bg-background/50 border border-border/30 overflow-hidden shadow-inner p-4 flex flex-wrap gap-2 items-center justify-center">
+      <div className="mt-4 w-full rounded-xl bg-background/50 border border-border/30 shadow-inner p-4 flex flex-wrap gap-2 items-center justify-center overflow-x-auto">
         {topic.keywords.map((kw, idx) => (
-          <span 
+          <span
             key={idx}
-            className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-colors cursor-default ${
-              isPositive 
-                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" 
+            className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-colors cursor-default shrink-0 ${
+              isPositive
+                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20"
                 : "bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500/20"
             }`}
-            style={{ 
+            style={{
               fontSize: `${Math.max(0.75, 1.2 - (idx * 0.1))}rem`,
-              opacity: Math.max(0.6, 1 - (idx * 0.15))
+              opacity: Math.max(0.3, 1 - (idx * 0.15))
             }}
           >
             {kw}
@@ -145,25 +145,25 @@ export function AiSummary({ topicsPositive = [], topicsNegative = [] }: Props) {
       </div>
 
       {/* Interactive Keyword Cloud using Flexbox Pills */}
-      <div className="rounded-2xl border border-border/40 bg-card/20 p-6 overflow-hidden relative min-h-[200px]">
+      <div className="rounded-2xl border border-border/40 bg-card/20 p-6 relative min-h-[200px]">
         <h4 className="text-xs font-bold uppercase tracking-widest text-foreground/50 absolute top-4 left-4 z-10">
           Keyword Cloud
         </h4>
-        <div className="w-full h-full mt-6 flex flex-wrap gap-3 items-center justify-center opacity-90 hover:opacity-100 transition-opacity">
-          {[...topicsPositive, ...topicsNegative].flatMap((t, tIdx) => 
+        <div className="w-full h-full mt-6 flex flex-wrap gap-3 items-center justify-center opacity-90 hover:opacity-100 transition-opacity overflow-x-auto">
+          {[...topicsPositive, ...topicsNegative].flatMap((t, tIdx) =>
             (t.keywords || []).map((kw, kwIdx) => {
               const isPositiveTheme = tIdx < topicsPositive.length;
               return (
-                <span 
+                <span
                   key={`${tIdx}-${kwIdx}`}
-                  className={`px-4 py-2 rounded-full font-black border transition-transform hover:scale-110 cursor-default shadow-sm ${
-                    isPositiveTheme 
-                      ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30 shadow-emerald-500/5" 
+                  className={`px-4 py-2 rounded-full font-black border transition-transform hover:scale-110 cursor-default shadow-sm shrink-0 ${
+                    isPositiveTheme
+                      ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30 shadow-emerald-500/5"
                       : "bg-rose-500/15 text-rose-500 border-rose-500/30 shadow-rose-500/5"
                   }`}
-                  style={{ 
+                  style={{
                     fontSize: `${Math.max(0.8, 1.5 - (kwIdx * 0.15))}rem`,
-                    opacity: Math.max(0.6, 1 - (kwIdx * 0.1))
+                    opacity: Math.max(0.3, 1 - (kwIdx * 0.1))
                   }}
                 >
                   {kw}

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trash2, BarChart3, Clock } from "lucide-react";
+import { Trash2, BarChart3, Clock, Video } from "lucide-react";
 import type { AnalyzedVideo } from "@/types";
 import { clearHistory } from "@/services/api";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,40 @@ const itemVariants = {
 
 interface Props {
   history: AnalyzedVideo[];
-  onSelect: (video: AnalyzedVideo) => void;
+  onSelect: (video: AnalyzedVideo, jobId: string) => void;
   onClear: () => void;
   onDelete: (videoId: string) => void;
 }
 
 export function AnalyzedVideoList({ history, onSelect, onClear, onDelete }: Props) {
-  if (history.length === 0) return null;
+  if (history.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...spring, delay: 0.3 }}
+        className="mt-12 w-full max-w-2xl"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Recent Analyses
+          </h2>
+        </div>
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border/40 bg-card/20 p-8 text-center backdrop-blur-sm">
+          <div className="rounded-full bg-muted/30 p-3">
+            <Video className="h-5 w-5 text-muted-foreground/50" />
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">
+            No analyses yet
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            Paste a YouTube link above to get started
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.section
@@ -72,7 +99,7 @@ export function AnalyzedVideoList({ history, onSelect, onClear, onDelete }: Prop
             whileHover={{ scale: 1.01, x: 4 }}
             whileTap={{ scale: 0.99 }}
             transition={spring}
-            onClick={() => onSelect(video)}
+            onClick={() => onSelect(video, video.id)}
             className="flex w-full items-center gap-3 rounded-2xl border border-border/50 bg-card/50 p-3 text-left backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card cursor-pointer group"
           >
             <img
