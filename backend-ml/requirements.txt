@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+redis
+sqlmodel
+sqlalchemy[asyncio]
+asyncpg>=0.31.0
+psycopg[binary]>=3.3.4
+transformers
+torch
+sentencepiece
+protobuf
+langdetect
+python-dotenv
+pydantic
+httpx

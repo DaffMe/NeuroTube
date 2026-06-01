@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-logo-tube: hsl(var(--logo-tube));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-lg: 1.5rem;
+  --radius-md: 1rem;
+  --radius-sm: 0.75rem;
+
+  --animate-bounce-soft: bounce-soft 2s infinite;
+}
+
+@layer base {
+  :root {
+    --background: 359 20% 98%;
+    --foreground: 293 36% 18%;
+    --logo-tube: 293 36% 18%;
+    
+    --primary: 359 98% 82%;
+    --primary-foreground: 293 36% 18%;
+    
+    --secondary: 359 40% 94%;
+    --secondary-foreground: 293 36% 18%;
+    
+    --accent: 359 90% 75%;
+    --accent-foreground: 293 36% 18%;
+    
+    --muted: 293 20% 95%;
+    --muted-foreground: 293 20% 40%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 293 36% 18%;
+    
+    --border: 359 30% 90%;
+    --input: 359 30% 90%;
+    --ring: 359 98% 82%;
+    
+    --radius: 1rem;
+
+    /* Chart specific for light mode */
+    --chart-tick: 293 20% 50%;
+    --chart-tooltip-bg: 0 0% 100%;
+    --chart-tooltip-border: 359 30% 90%;
+    --chart-tooltip-text: 293 36% 18%;
+  }
+
+  .dark {
+    --background: 293 36% 12%;
+    --foreground: 359 40% 96%;
+    --logo-tube: 270 100% 95%;
+    
+    --primary: 359 98% 82%;
+    --primary-foreground: 293 36% 18%;
+    
+    --secondary: 293 40% 20%;
+    --secondary-foreground: 359 40% 96%;
+    
+    --accent: 359 90% 75%;
+    --accent-foreground: 293 36% 18%;
+    
+    --muted: 293 30% 25%;
+    --muted-foreground: 359 20% 75%;
+    
+    --card: 293 36% 16%;
+    --card-foreground: 359 40% 96%;
+    
+    --border: 293 40% 25%;
+    --input: 293 40% 25%;
+    --ring: 359 98% 82%;
+
+    /* Chart specific for dark mode */
+    --chart-tick: 359 20% 70%;
+    --chart-tooltip-bg: 293 36% 16%;
+    --chart-tooltip-border: 293 40% 25%;
+    --chart-tooltip-text: 359 40% 96%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+  button, [role="button"], a {
+    cursor: pointer;
+  }
+}
+
+@keyframes bounce-soft {
+  0%, 100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
