@@ -33,6 +33,8 @@ func New(publisher *queue.Publisher, apiKey string) *Handler {
 
 // ── Request / Response types ─────────────────────────────────────
 
+// penerapan materi Modul 06 (Tipe Bentukan)
+// baris code ini berfungsi mendefinisikan custom struct untuk menampung format JSON pada request
 type AnalyzeRequest struct {
 	URL string `json:"url"`
 }
@@ -58,6 +60,8 @@ type ErrorResponse struct {
 // ── Handlers ─────────────────────────────────────────────────────
 
 // Health returns a simple health check.
+// penerapan materi Modul 04 (Prosedur)
+// baris code ini berfungsi sebagai prosedur HTTP handler yang mengelola request dan memodifikasi ResponseWriter tanpa mengembalikan nilai (return void)
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{
 		"status":  "ok",
@@ -274,6 +278,8 @@ var videoIDPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`^([a-zA-Z0-9_-]{11})$`),
 }
 
+// penerapan materi Modul 03 (Fungsi)
+// baris code ini berfungsi sebagai fungsi yang menerima string url dan memprosesnya untuk mengembalikan nilai string berupa ID video
 func extractVideoID(url string) string {
 	url = strings.TrimSpace(url)
 	for _, pattern := range videoIDPatterns {

@@ -17,6 +17,8 @@ import (
 	"neurotube/backend-fetcher/internal/queue"
 )
 
+// penerapan materi Modul 04 (Prosedur Utama)
+// baris code ini berfungsi sebagai titik awal eksekusi program tanpa mengembalikan nilai apapun (void)
 func main() {
 	// ── Redis connection ─────────────────────────────────────────
 	redisURL := os.Getenv("REDIS_URL")

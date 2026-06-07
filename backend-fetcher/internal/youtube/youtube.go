@@ -46,6 +46,8 @@ type VideoInfo struct {
 }
 
 // Comment represents a single YouTube comment.
+// penerapan materi Modul 06 (Tipe Bentukan)
+// baris code ini berfungsi mendefinisikan tipe data komposit baru (struct) bernama Comment untuk menampung berbagai atribut komentar
 type Comment struct {
 	ID                    string `json:"id"`
 	AuthorDisplayName     string `json:"authorDisplayName"`
@@ -322,6 +324,9 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 		}
 		return allComments[i].PublishedAt < allComments[j].PublishedAt
 	})
+
+	// Run comment metrics asynchronously to not block the main fetch pipeline
+	go c.logCommentMetrics(allComments)
 
 	return allComments, nil
 }

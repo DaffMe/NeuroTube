@@ -21,6 +21,8 @@ const (
 )
 
 // JobPayload is the message published to Redis for the Python ML engine.
+// penerapan materi Modul 06 (Tipe Bentukan)
+// baris code ini berfungsi membuat struktur tipe data payload yang menggabungkan banyak tipe (string, pointer, dan slice/array)
 type JobPayload struct {
 	JobID     string            `json:"jobId"`
 	VideoID   string            `json:"videoId"`
@@ -36,6 +38,8 @@ type Publisher struct {
 }
 
 // NewPublisher creates a new Redis publisher from a URL.
+// penerapan materi Modul 03 (Fungsi)
+// baris code ini berfungsi sebagai fungsi yang bertugas membuat koneksi Redis lalu mengembalikan referensinya ke fungsi pemanggil
 func NewPublisher(redisURL string) (*Publisher, error) {
 	opts, err := redis.ParseURL(redisURL)
 	if err != nil {

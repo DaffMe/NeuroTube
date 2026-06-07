@@ -1,0 +1,397 @@
+
+
+### - Modul 03: Fungsi
+
+Modul ini memperkenalkan konsep pemrograman modular melalui penggunaan Fungsi. Fungsi adalah blok kode terpisah yang dirancang untuk memproses suatu input menjadi sebuah output atau nilai kembalian. Secara spesifik dalam bahasa Go, suatu subprogram teridentifikasi sebagai fungsi jika memiliki deklarasi tipe nilai yang akan dikembalikan pada header-nya, serta diakhiri dengan instruksi `return` di akhir badan blok program tersebut.
+
+Karena sifatnya yang secara langsung mewakili sebuah nilai, fungsi dapat langsung di-assign ke dalam sebuah variabel, dipanggil di dalam ekspresi matematika, atau dijadikan parameter argumen untuk dicetak pada utilitas output. Dianjurkan untuk menggunakan nama yang mendeskripsikan suatu nilai—seperti kata benda atau kata sifat—untuk menamai sebuah fungsi agar mudah dipahami.
+
+```go
+package main
+
+import "fmt"
+
+func faktorial(n int) int {
+	var hasil int = 1
+	var i int
+	for i = 1; i <= n; i++ {
+		hasil = hasil * i
+	}
+	return hasil
+}
+
+func permutasi(n, r int) int {
+	return faktorial(n) / faktorial(n-r)
+}
+
+func main() {
+	var a, b int
+	fmt.Scan(&a, &b)
+	if a >= b {
+		fmt.Println(permutasi(a, b))
+	} else {
+		fmt.Println(permutasi(b, a))
+	}
+}
+
+```
+
+---
+
+### - Modul 04: Prosedur
+
+Modul keempat ini masih melanjutkan pilar pemrograman modular, namun terfokus pada Prosedur. Sedikit berbeda dengan fungsi, prosedur adalah blok subprogram yang mengeksekusi urutan instruksi spesifik guna mengubah sebuah keadaan tanpa mengembalikan nilai kembalian secara eksplisit menggunakan return. Karena prosedur bertindak selayaknya kata kerja atau instruksi, nama prosedur dianjurkan berupa kalimat aktif atau kata kerja seperti hitung, cetak, atau cari.
+
+Satu hal krusial yang dibahas pada prosedur adalah tentang Parameter. Terdapat dua jenis pemanggilan (passing) pada prosedur: Pass by Value, yang mana argumen hanya menyalin nilai sehingga memori aslinya tidak berubah. Dan Pass by Reference (menggunakan pointer `*` dan `&`), di mana alamat memori dilempar langsung ke prosedur sehingga perubahan yang terjadi di dalam blok prosedur akan langsung mengubah variabel parameter aktual di program utamanya.
+
+```go
+package main
+
+import "fmt"
+
+func f2(x, y int, hasil *float64) {
+	*hasil = float64(2*x) - 0.5*float64(y) + 3.0
+}
+
+func main() {
+	var a, b int
+	var c float64
+	fmt.Scan(&a, &b)
+	f2(a, b, &c)
+	fmt.Println(c)
+}
+
+```
+
+---
+
+### - Modul 05: Rekursif
+
+Modul kelima membedah konsep Rekursif, yaitu sebuah teknik penyelesaian masalah di mana sebuah subprogram (fungsi atau prosedur) memanggil dirinya sendiri. Teknik ini menyederhanakan suatu masalah besar dengan memecahnya menjadi sub-masalah identik yang ukurannya lebih kecil secara iteratif.
+
+Terdapat dua bagian paling penting agar algoritma rekursif tidak memicu iterasi yang tak terbatas: Base-case (basis) dan Recursive-case. Base-case merupakan kondisi penghentian di mana proses subprogram berhenti mereplikasi dirinya dan mulai mengembalikan hasil. Sedangkan Recursive-case adalah kebalikan dari basis, yaitu tahapan di mana pemanggilan ke dirinya sendiri dilakukan selama target basis tersebut belum tercapai.
+
+```go
+package main
+
+import "fmt"
+
+func pangkat(x, y int) int {
+	if y == 0 {
+		return 1
+	} else {
+		return x * pangkat(x, y-1)
+	}
+}
+
+func main() {
+	var x, y int
+	fmt.Scan(&x, &y)
+	fmt.Println(pangkat(x, y))
+}
+
+```
+
+---
+
+### - Modul 06: Tipe Bentukan dan Array
+
+Modul keenam ini berpindah pada implementasi tipe data terstruktur. Anda diperkenalkan dengan Tipe Bentukan, yang memungkinkan pembuatan variasi jenis data kustom. Pendekatannya dibagi dua: pertama adalah alias (menggunakan kata kunci `type` untuk meringkas suatu tipe yang ada agar menjadi lebih familiar) dan kedua adalah Structure atau `struct` (yang dapat menggabungkan banyak tipe variabel dengan field berbeda menjadi satu entitas kolektif atau record).
+
+Materi kedua adalah tentang struktur memori statis Array. Array adalah penampung berbasis indeks statis yang berfungsi untuk menyimpan sekumpulan nilai bertipe sama dan memiliki jumlah batasan ruang elemen yang tetap selama durasi eksekusi program berlangsung. Modul ini juga secara singkat menyinggung tentang Array Dinamis (Slice) yang tidak mendefinisikan batas ruang elemen di awal dan Map yang memungkinkan penggunaan kunci (indeks) berbentuk string atau tipe lainnya.
+
+```go
+package main
+
+import "fmt"
+
+type waktu struct {
+	jam, menit, detik int
+}
+
+func main() {
+	var wParkir, wPulang, durasi waktu
+	var dParkir, dPulang, lParkir int
+
+	fmt.Scan(&wParkir.jam, &wParkir.menit, &wParkir.detik)
+	fmt.Scan(&wPulang.jam, &wPulang.menit, &wPulang.detik)
+
+	dParkir = wParkir.detik + wParkir.menit*60 + wParkir.jam*3600
+	dPulang = wPulang.detik + wPulang.menit*60 + wPulang.jam*3600
+	lParkir = dPulang - dParkir
+
+	durasi.jam = lParkir / 3600
+	durasi.menit = (lParkir % 3600) / 60
+	durasi.detik = (lParkir % 3600) % 60
+
+	fmt.Printf("Lama parkir: %d jam %d menit %d detik", durasi.jam, durasi.menit, durasi.detik)
+}
+
+```
+
+---
+
+### - Modul 07 & 08: Asesmen Praktikum 1 & Asistensi Tugas Besar
+
+Modul 07 merupakan sesi Asesmen Praktikum 1 yang digunakan untuk menguji pemahaman Anda secara mandiri tanpa bantuan asisten terhadap materi Modul 1 sampai Modul 6. Modul 08 merupakan agenda Asistensi Tugas Besar yang berfokus pada pengarahan, perencanaan, dan pengerjaan proyek perangkat lunak/aplikasi terintegrasi berskala kecil sebagai salah satu komponen penilaian besar di akhir semester.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Asesmen Praktikum 1 dan Asistensi Tugas Besar")
+}
+
+```
+
+---
+
+### - Modul 09: Pencarian Nilai Ekstrim
+
+Modul ini membahas tentang algoritma dasar untuk melakukan pencarian nilai ekstrim, yaitu menemukan nilai minimum (terkecil) atau maksimum (terbesar) pada sekumpulan data di dalam struktur array. Cara kerjanya sangat sederhana dengan melakukan pengecekan sekuensial yang menjadikan elemen pertama sebagai kandidat ekstrim sementara, lalu nilainya di-update setiap kali ditemukan nilai yang lebih ekstrim pada rentang iterasi data selanjutnya.
+
+Selain pencarian pada himpunan data dasar, modul ini juga mengajarkan cara mencari indeks nilai ekstrim pada struktur data bentukan (struct). Hal ini memungkinkan program untuk tidak hanya mendapatkan nilainya saja, melainkan juga memperoleh identitas atau field lain yang berkesesuaian dengan elemen tersebut.
+
+```go
+package main
+
+import "fmt"
+
+type arrBalita [100]float64
+
+func hitungMinMax(arrBerat arrBalita, n int, bMin, bMax *float64) {
+	*bMin = arrBerat[0]
+	*bMax = arrBerat[0]
+	for i := 1; i < n; i++ {
+		if arrBerat[i] < *bMin {
+			*bMin = arrBerat[i]
+		}
+		if arrBerat[i] > *bMax {
+			*bMax = arrBerat[i]
+		}
+	}
+}
+
+func main() {
+	var n int
+	var berat arrBalita
+	var min, max float64
+
+	fmt.Scan(&n)
+	for i := 0; i < n; i++ {
+		fmt.Scan(&berat[i])
+	}
+
+	hitungMinMax(berat, n, &min, &max)
+	fmt.Printf("Berat balita minimum: %.2f kg\n", min)
+	fmt.Printf("Berat balita maksimum: %.2f kg\n", max)
+}
+
+```
+
+---
+
+### - Modul 10: Sequential Search
+
+Modul ini mendalami teknik pencarian spesifik terhadap sebuah nilai acuan menggunakan metode Sequential Search. Ide dasarnya adalah melakukan pengecekan perbandingan elemen secara linear satu per satu mulai dari awal array hingga akhir. Ciri khas efisiensi dari pencarian ini adalah penggunaan parameter status berhenti, di mana proses iterasi akan diterminasi tepat ketika data pertama kali ditemukan tanpa perlu menyisir sisa array di belakangnya.
+
+Penggunaan Sequential Search sangat dianjurkan dan fleksibel pada himpunan data yang masih acak (unsorted). Selain itu algoritma ini sangat mudah diimplementasikan pada pencarian bertipe array of struct manakala atribut yang menjadi kategori pemindaian berbeda dari atribut basis urutan hierarki array-nya.
+
+```go
+package main
+
+import "fmt"
+
+const NMAX = 1000000
+var data [NMAX]int
+
+func isiArray(n int) {
+	for i := 0; i < n; i++ {
+		fmt.Scan(&data[i])
+	}
+}
+
+func posisi(n, k int) int {
+	var found int = -1
+	var j int = 0
+	for j < n && found == -1 {
+		if data[j] == k {
+			found = j
+		}
+		j++
+	}
+	return found
+}
+
+func main() {
+	var n, k, p int
+	fmt.Scan(&n, &k)
+	isiArray(n)
+	p = posisi(n, k)
+	if p != -1 {
+		fmt.Println(p)
+	} else {
+		fmt.Println("TIDAK ADA")
+	}
+}
+
+```
+
+---
+
+### - Modul 11: Binary Searching
+
+Modul kesebelas memperkenalkan metode pencarian yang sangat diandalkan ketika berhadapan pada memori array berkapasitas besar, yaitu Binary Search. Syarat mutlak dan fundamental agar algoritma ini kompeten memindai data adalah seluruh himpunan elemen array wajib berada dalam keadaan yang sudah terurut secara hierarkis.
+
+Langkah algoritmik utamanya bekerja dengan cara membelah dua rentang pencarian (divide and conquer) pada setiap putaran iterasinya. Dengan membandingkan nilai parameter pencarian dengan posisi eksak yang ada di nilai tengah, program akan menolak paruh wilayah indeks yang dinilai tidak masuk akal hingga iterasi melacak indeks pastinya.
+
+```go
+package main
+
+import "fmt"
+
+const NMAX = 1000000
+var data [NMAX]int
+
+func isiArray(n int) {
+	for i := 0; i < n; i++ {
+		fmt.Scan(&data[i])
+	}
+}
+
+func posisi(n, k int) int {
+	var found int = -1
+	var kr int = 0
+	var kn int = n - 1
+	var med int
+
+	for kr <= kn && found == -1 {
+		med = (kr + kn) / 2
+		if k < data[med] {
+			kn = med - 1
+		} else if k > data[med] {
+			kr = med + 1
+		} else {
+			found = med
+		}
+	}
+	return found
+}
+
+func main() {
+	var n, k, p int
+	fmt.Scan(&n, &k)
+	isiArray(n)
+	p = posisi(n, k)
+	if p != -1 {
+		fmt.Println(p)
+	} else {
+		fmt.Println("TIDAK ADA")
+	}
+}
+
+```
+
+---
+
+### - Modul 12: Selection Sort
+
+Modul ini beralih pada mekanisme dasar algoritma pengurutan (sorting), yang secara khusus mendiskusikan Selection Sort. Konsep arsitekturnya berfokus pada dua tahapan berulang: memindai rentang indeks array untuk mendeteksi posisi memori dari elemen ekstrim paling minimum atau maksimum, kemudian mengeksekusi perpindahan (swap) dengan sel memori yang terhimpit paling tepi dari rentang sisa data yang acak.
+
+Kinerja perhitungannya diimplementasikan dengan perulangan bertingkat (bersarang) yang pada gilirannya akan memisahkan porsi bagian array ke dua sisi. Karena Selection Sort secara masif memindahkan posisi elemen, alur algoritmanya bergantung pada kehadiran sebuah variabel sementara agar setiap pemindahan indeks data dapat transit dan tidak musnah.
+
+```go
+package main
+
+import "fmt"
+
+func selectionSort(arr []int, n int) {
+	var t, idx_min int
+	for i := 1; i <= n-1; i++ {
+		idx_min = i - 1
+		for j := i; j < n; j++ {
+			if arr[idx_min] > arr[j] {
+				idx_min = j
+			}
+		}
+		t = arr[idx_min]
+		arr[idx_min] = arr[i-1]
+		arr[i-1] = t
+	}
+}
+
+func main() {
+	var n, x int
+	var arr []int
+
+	fmt.Scan(&n)
+	for i := 0; i < n; i++ {
+		fmt.Scan(&x)
+		arr = append(arr, x)
+	}
+	
+	selectionSort(arr, n)
+	
+	for i := 0; i < n; i++ {
+		fmt.Print(arr[i], " ")
+	}
+	fmt.Println()
+}
+
+```
+
+---
+
+### - Modul 13: Insertion Sort
+
+Modul pamungkas ini mendiskusikan implementasi pemilahan data varian algoritma pengurutan kedua, yaitu Insertion Sort. Algoritma penyortiran ini bekerja layaknya simulasi di mana seseorang sedang merapikan sekumpulan kartu di tangan. Pendekatannya mengambil elemen array selanjutnya lalu melakukan pencarian bergerak ke lintasan belakang guna meraba-raba dan menyelipkannya persis di titik ruang yang paling setara hierarkinya.
+
+Sebagai perbedaan mencolok dari modul dua belas, metode insersi sangat adaptif karena instruksi komparasinya bekerja dengan mengeksekusi pergeseran relokasi baris nilai array tanpa saling bertukar utuh. Nilai elemen pada sel yang posisinya tidak berkesesuaian di sekuens sebelumnya akan dirombak dan dipaksa merambat untuk memperluas ruang selipan dari nilai asal.
+
+```go
+package main
+
+import "fmt"
+
+type arrInt [1000]int
+
+func insertionSort(T *arrInt, n int) {
+	var temp, i, j int
+	i = 1
+	for i <= n-1 {
+		j = i
+		temp = T[j]
+		for j > 0 && temp < T[j-1] {
+			T[j] = T[j-1]
+			j = j - 1
+		}
+		T[j] = temp
+		i = i + 1
+	}
+}
+
+func main() {
+	var arr arrInt
+	var data, n int
+	
+	n = 0
+	for {
+		fmt.Scan(&data)
+		if data < 0 {
+			break
+		}
+		arr[n] = data
+		n++
+	}
+	
+	insertionSort(&arr, n)
+	
+	for i := 0; i < n; i++ {
+		fmt.Print(arr[i], " ")
+	}
+	fmt.Println()
+}
+
+```
