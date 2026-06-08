@@ -31,18 +31,18 @@ func main() {
 	publisher, err := queue.NewPublisher(redisURL)
 	if err != nil {
 		// Jika koneksi gagal, program akan berhenti dan mencetak pesan error
-		log.Fatalf("❌ Failed to connect to Redis: %v", err)
+		log.Fatalf(" Failed to connect to Redis: %v", err)
 	}
 	// Pastikan koneksi Redis ditutup secara otomatis saat fungsi main selesai dieksekusi
 	defer publisher.Close()
-	log.Println("✅ Connected to Redis")
+	log.Println(" Connected to Redis")
 
 	// ── YouTube API key ──────────────────────────────────────────
 	// Mengambil kunci API YouTube dari environment variable
 	apiKey := os.Getenv("YOUTUBE_API_KEY")
 	if apiKey == "" {
 		// Peringatan jika kunci API tidak ditemukan
-		log.Println("⚠️  YOUTUBE_API_KEY not set — YouTube fetching will fail")
+		log.Println("  YOUTUBE_API_KEY not set — YouTube fetching will fail")
 	}
 
 	// ── HTTP handler ─────────────────────────────────────────────
@@ -98,9 +98,9 @@ func main() {
 
 	// Memulai server di dalam Goroutine (jalan di latar belakang) agar program bisa lanjut menerima sinyal
 	go func() {
-		log.Printf("🚀 NeuroTube Fetcher listening on :%s", port)
+		log.Printf(" NeuroTube Fetcher listening on :%s", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("❌ Server error: %v", err)
+			log.Fatalf(" Server error: %v", err)
 		}
 	}()
 
@@ -109,14 +109,14 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("🛑 Shutting down server...")
+	log.Println(" Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	// Mematikan server secara perlahan agar request yang sedang berjalan bisa diselesaikan dulu
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("❌ Server forced to shutdown: %v", err)
+		log.Fatalf(" Server forced to shutdown: %v", err)
 	}
-	log.Println("👋 Server stopped")
+	log.Println(" Server stopped")
 }
 
 // Fungsi pembantu untuk memisahkan string berdasarkan koma menjadi array string

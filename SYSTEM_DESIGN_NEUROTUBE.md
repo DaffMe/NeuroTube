@@ -34,7 +34,9 @@ flowchart TD
     subgraph PyBackend [ML Tier / Python]
         Py_API[FastAPI Endpoint]
         Worker[Background Worker]
-        NLP_Model[IndoBERT Sentiment Model]
+        Spam_Filter[Regex Spam Filter]
+        NLP_Indo[Indo-RoBERTa Model]
+        NLP_Multi[XLM-RoBERTa Model]
         Topic_Model[Topic Extraction Logic]
     end
 
@@ -52,13 +54,15 @@ flowchart TD
     Metrics_Logic -- "3. Publish Job" --> Redis
     
     Worker -- "4. Consume Job" --> Redis
-    Worker -- "5. Klasifikasi Sentimen" --> NLP_Model
-    Worker -- "6. Ringkasan Topik" --> Topic_Model
+    Worker -- "5. Cek Spam" --> Spam_Filter
+    Worker -- "6a. Sentimen Indo" --> NLP_Indo
+    Worker -- "6b. Sentimen Asing" --> NLP_Multi
+    Worker -- "7. Ringkasan Topik" --> Topic_Model
     Topic_Model -. "Jika sukses" .-> Gemini_API
     
-    Worker -- "7. Simpan Hasil" --> PostgreSQL
+    Worker -- "8. Simpan Hasil" --> PostgreSQL
     
-    ReactUI -- "8. Polling Status/GET Hasil" --> Py_API
+    ReactUI -- "9. Polling Status/GET Hasil" --> Py_API
     Py_API -- "Query Data" --> PostgreSQL
     HTTP_Handler -- "Stream Status Loading" --> ReactUI
 ```

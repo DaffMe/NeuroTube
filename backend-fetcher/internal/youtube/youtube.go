@@ -206,7 +206,7 @@ func (c *Client) FetchComments(videoID string, limit int, onProgress func(int)) 
 	}
 
 	totalCommentsOnYT, _ := strconv.Atoi(videoInfo.CommentCount)
-	log.Printf("🔍 Video %s has %d total comments on YouTube. Target: %d", videoID, totalCommentsOnYT, limit)
+	log.Printf(" Video %s has %d total comments on YouTube. Target: %d", videoID, totalCommentsOnYT, limit)
 
 	// We use two strategies if needed: first 'relevance' (for top comments), then 'time' (to fill the quota)
 	// Kita unduh dulu komentar yang "paling relevan/populer", lalu "terbaru"
@@ -235,7 +235,7 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 		}
 		mu.Unlock()
 
-		log.Printf("🚀 Starting strategy: %s", order)
+		log.Printf(" Starting strategy: %s", order)
 		
 		// Initial page
 		// Mengambil halaman pertama (tanpa token) untuk mendapatkan token halaman selanjutnya
@@ -292,7 +292,7 @@ func (c *Client) fetchCommentsConcurrent(videoID string, limit int, strategies [
 						// Memanggil API YouTube untuk token spesifik ini
 						p, next, err := c.fetchCommentPage(videoID, t, order)
 						if err != nil {
-							log.Printf("⚠️ fetchCommentPage error for video %s: %v", videoID, err)
+							log.Printf(" fetchCommentPage error for video %s: %v", videoID, err)
 							cancel() // Berhentikan pekerja lain jika ada error fatal
 							return
 						}

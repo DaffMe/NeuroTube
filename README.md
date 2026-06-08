@@ -20,7 +20,7 @@
 
 ---
 
-## 🌟 Overview
+## Overview
 
 NeuroTube is a web application that takes a YouTube video URL and analyzes the sentiments of its comments. It fetches comments directly from YouTube, processes them using Hugging Face Transformer models to determine their sentiment (Positive, Neutral, Negative), and visualizes the results on an interactive dashboard.
 
@@ -28,7 +28,7 @@ The project uses a microservices architecture to separate the fast data ingestio
 
 ---
 
-## ✨ Features
+## Features
 
 - **Tugas Besar Edition (Fully Documented)**: Seluruh basis kode aplikasi (Golang, Python, dan React) telah dilengkapi dengan anotasi komentar *line-by-line* dan penjelasan fungsi `import` dalam **Bahasa Indonesia** yang sangat komprehensif. Didesain khusus untuk mempermudah proses belajar dan presentasi akademik.
 - **Concurrent Data Fetching**: Uses a Go backend to rapidly fetch thousands of YouTube comments and their replies.
@@ -41,7 +41,7 @@ The project uses a microservices architecture to separate the fast data ingestio
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 The app is split into three main services:
 
@@ -63,7 +63,7 @@ graph TD
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS v4, Shadcn UI, Framer Motion, Recharts.
 - **Backend Fetcher**: Go 1.24, Redis.
@@ -72,7 +72,7 @@ graph TD
 
 ---
 
-## 🖥️ UI Showcase
+## UI Showcase
 
 ### Landing Page
 
@@ -84,7 +84,7 @@ graph TD
 
 ---
 
-## 🚀 Quick Start (Docker)
+## Quick Start (Docker)
 
 To run this project locally, you need Docker installed and a YouTube API Key.
 
@@ -115,11 +115,11 @@ To run this project locally, you need Docker installed and a YouTube API Key.
 
 ---
 
-## 🛠️ Local Development (Without Docker)
+## Local Development (Without Docker)
 
 If you prefer to run the services directly on your host machine:
 
-### 🐍 ML Backend (Python)
+### ML Backend (Python)
 
 ```bash
 cd backend-ml
@@ -129,7 +129,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 🐹 Fetcher Backend (Go)
+### Fetcher Backend (Go)
 
 ```bash
 cd backend-fetcher
@@ -137,7 +137,7 @@ go mod download
 go run cmd/main.go
 ```
 
-### 🎨 Frontend (React with Bun)
+### Frontend (React with Bun)
 
 Disarankan menggunakan **Bun** untuk instalasi Node modules yang lebih cepat.
 
@@ -149,7 +149,7 @@ bun run dev
 
 ---
 
-## 📝 Acknowledgments
+## Acknowledgments
 
 - Built collaboratively with **Google Antigravity AI Agent**.
 - Inspired by [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).

@@ -97,7 +97,7 @@ export function SentimentSummary({ result }: { result: SentimentResult }) {
   
   // Secara garis besar, sentimen lebih dominan ke mana?
   // 0.2 merepresentasikan batasan batas wajar bagi sebuah video (20% condong positif)
-  const emoji = averageScore > 0.2 ? "😊" : averageScore < -0.2 ? "😟" : "😐";
+  const emoji = averageScore > 0.2 ? "" : averageScore < -0.2 ? "" : "";
   const label =
     averageScore > 0.2
       ? "Mostly Positive"

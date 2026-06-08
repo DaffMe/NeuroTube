@@ -41,7 +41,7 @@ async def process_job(job_data: dict):
     video_info = job_data["videoInfo"]
     raw_comments = job_data["comments"]
 
-    logger.info(f"🔬 [{job_id}] Processing {len(raw_comments)} comments for video {video_id}")
+    logger.info(f" [{job_id}] Processing {len(raw_comments)} comments for video {video_id}")
 
     # Membuka koneksi database relasional secara asinkron (menggunakan konteks with agar aman)
     async with AsyncSessionLocal() as db:
@@ -126,7 +126,7 @@ async def process_job(job_data: dict):
             # 4. Save analyzed comments to DB
             # Menyimpan secara massal (batch) semua komentar beserta label sentimennya ke dalam database
             saved_count = await crud.save_comments_batch(db, video_id, analyzed_comments)
-            logger.info(f"💾 [{job_id}] Saved {saved_count} new comments to DB")
+            logger.info(f" [{job_id}] Saved {saved_count} new comments to DB")
             await redis_client.set(f"neurotube:progress:{job_id}", 90, ex=3600) # Update ke 90%
 
             # Extract topics for positive and negative comments
@@ -186,7 +186,7 @@ async def process_job(job_data: dict):
             await redis_client.set(f"neurotube:cache:{video_id}", job_id, ex=86400)
 
             logger.info(
-                f"✅ [{job_id}] Analysis complete: "
+                f" [{job_id}] Analysis complete: "
                 f"+{positive} / -{negative} / ~{neutral} ({total} total)"
             )
 
@@ -194,7 +194,7 @@ async def process_job(job_data: dict):
 
         except Exception as e:
             # Error handler (Penangkap gagal)
-            logger.exception(f"❌ [{job_id}] Failed to process job: {e}")
+            logger.exception(f" [{job_id}] Failed to process job: {e}")
             try:
                 await crud.update_job_status(db, job_id, "failed", str(e))
                 redis_client = aioredis.from_url(settings.REDIS_URL)
@@ -209,7 +209,7 @@ async def worker_loop():
     Main worker loop. Uses BRPOP to block-wait for new jobs from Redis.
     Runs in a background asyncio task.
     """
-    logger.info("🔄 Redis worker started — waiting for jobs...")
+    logger.info(" Redis worker started — waiting for jobs...")
 
     redis_client = aioredis.from_url(settings.REDIS_URL)
 
@@ -226,16 +226,16 @@ async def worker_loop():
             # Mengubah format JSON teks menjadi dictionary Python
             job_data = json.loads(raw_data)
 
-            logger.info(f"📨 Received job: {job_data.get('jobId', 'unknown')}")
+            logger.info(f" Received job: {job_data.get('jobId', 'unknown')}")
 
             # Process asynchronously
             # Mengeksekusi fungsi utama processing di atas secara asinkron agar loop ini tidak terhenti parah
             await process_job(job_data)
 
         except json.JSONDecodeError as e:
-            logger.error(f"❌ Failed to decode job data: {e}")
+            logger.error(f" Failed to decode job data: {e}")
         except Exception as e:
-            logger.error(f"❌ Worker error: {e}")
+            logger.error(f" Worker error: {e}")
             await asyncio.sleep(2)  # Brief backoff on error (istirahat 2 detik kalau error)
 
 

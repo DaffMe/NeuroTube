@@ -12,7 +12,7 @@ from app.core.sentiment.sentiment import analyze_comment # Mesin utama AI untuk 
 async def reanalyze_video(video_id: str):
     # Membuka jalur komunikasi (koneksi) ke database
     async with AsyncSessionLocal() as db:
-        print(f"🔄 Reanalyzing comments for video: {video_id}...")
+        print(f" Reanalyzing comments for video: {video_id}...")
         
         # LANGKAH 1: Mengambil (Fetch) seluruh komentar mentah dari video tersebut di database
         result = await db.execute(
@@ -88,7 +88,7 @@ async def reanalyze_video(video_id: str):
             
         # Simpan pembaruan rangkuman ke database
         await db.commit()
-        print("✅ Reanalysis complete!")
+        print(" Reanalysis complete!")
 
 # -----------------------------------------------------------------------------
 # TITIK AWAL EKSEKUSI (ENTRY POINT)

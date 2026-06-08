@@ -47,7 +47,7 @@ try:
     multi_tokenizer = AutoTokenizer.from_pretrained(MULTI_MODEL_NAME, use_fast=False)
     multi_pipeline = pipeline("sentiment-analysis", model=MULTI_MODEL_NAME, tokenizer=multi_tokenizer, truncation=True, max_length=512, device=device_id)
     
-    logger.info(f"✅ Models loaded successfully on {device_name.upper()}")
+    logger.info(f" Models loaded successfully on {device_name.upper()}")
 except Exception as e:
     logger.error(f"Failed to load NLP models: {e}")
 

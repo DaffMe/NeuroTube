@@ -105,7 +105,7 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 		// Jika tidak di-force, periksa apakah video ini sudah pernah dianalisis sebelumnya (berada di cache Redis)
 		cachedJobID, err := h.publisher.GetCache(videoID)
 		if err == nil && cachedJobID != "" {
-			log.Printf("🛡️ [Quota Guard] Cache hit for video %s -> Job %s", videoID, cachedJobID)
+			log.Printf(" [Quota Guard] Cache hit for video %s -> Job %s", videoID, cachedJobID)
 			// Memperbarui masa aktif status di Redis agar tidak kedaluwarsa
 			_ = h.publisher.SetStatus(cachedJobID, "completed")
 
@@ -127,26 +127,26 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 	// Set initial status immediately so status polling works
 	// Menyimpan status awal "processing" ke Redis agar frontend bisa langsung memantaunya
 	if err := h.publisher.SetStatus(jobID, "processing"); err != nil {
-		log.Printf("⚠️ Failed to set initial job status: %v", err)
+		log.Printf(" Failed to set initial job status: %v", err)
 	}
 
 	// Fetch video info + comments asynchronously
 	// Membuka Goroutine baru untuk mengunduh data secara asinkron di latar belakang
 	go func() {
-		log.Printf("📥 [%s] Fetching video info for %s...", jobID, videoID)
+		log.Printf(" [%s] Fetching video info for %s...", jobID, videoID)
 		_ = h.publisher.SetProgress(jobID, 5) // Set progres loading ke 5%
 
 		// 1. Mengambil detail metadata video (seperti judul dan total komentar) dari API YouTube
 		videoInfo, err := h.ytClient.FetchVideoInfo(videoID)
 		if err != nil {
-			log.Printf("❌ [%s] Failed to fetch video info: %v", jobID, err)
+			log.Printf(" [%s] Failed to fetch video info: %v", jobID, err)
 			_ = h.publisher.PublishError(jobID, videoID, fmt.Sprintf("Failed to fetch video: %v", err))
 			return
 		}
 
 		_ = h.publisher.SetProgress(jobID, 10) // Set progres loading ke 10%
 		totalComments, _ := strconv.Atoi(videoInfo.CommentCount) // Mengonversi jumlah komentar menjadi integer
-		log.Printf("📝 [%s] Video: %s | Total comments on YT: %d (Target: 5000)", jobID, videoInfo.Title, totalComments)
+		log.Printf(" [%s] Video: %s | Total comments on YT: %d (Target: 5000)", jobID, videoInfo.Title, totalComments)
 
 		// 2. Mengunduh komentar secara bertahap
 		// Fungsi ini memanggil YouTube API berkali-kali untuk meraup hingga 5000 komentar, sambil mengupdate persen progres
@@ -155,20 +155,20 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			// Jika error saat mengunduh sebagian data, kita tetap lanjut menganalisis data yang sudah didapat (partial)
-			log.Printf("⚠️ [%s] Error fetching comments (partial results): %v", jobID, err)
+			log.Printf(" [%s] Error fetching comments (partial results): %v", jobID, err)
 		}
 
-		log.Printf("✅ [%s] Fetched %d comments", jobID, len(comments))
+		log.Printf(" [%s] Fetched %d comments", jobID, len(comments))
 		_ = h.publisher.SetProgress(jobID, 50) // Set progres loading ke 50% setelah unduhan selesai
 
 		// 3. Menerbitkan data komentar yang sudah diunduh ke dalam antrean Redis
 		err = h.publisher.PublishJob(jobID, videoID, videoInfo, comments)
 		if err != nil {
-			log.Printf("❌ [%s] Failed to publish to Redis: %v", jobID, err)
+			log.Printf(" [%s] Failed to publish to Redis: %v", jobID, err)
 			return
 		}
 
-		log.Printf("📨 [%s] Job published to Redis queue", jobID)
+		log.Printf(" [%s] Job published to Redis queue", jobID)
 	}()
 
 	// Return immediately with job ID
@@ -242,7 +242,7 @@ func (h *Handler) StatusStream(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-r.Context().Done():
 			// Jika pengguna menutup tab browser atau membatalkan request, loop dihentikan
-			log.Printf("🔌 SSE client disconnected for job %s", jobID)
+			log.Printf(" SSE client disconnected for job %s", jobID)
 			return
 		case <-ticker.C:
 			// Setiap 0.5 detik, ambil status terbaru dari Redis

@@ -35,22 +35,22 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
     # Startup (Saat server menyala)
-    logger.info("🚀 Starting NeuroTube ML Backend...")
+    logger.info(" Starting NeuroTube ML Backend...")
 
     # Initialize database tables
     # Membuat tabel-tabel di database PostgreSQL jika belum ada
     await init_db()
-    logger.info("✅ Database initialized")
+    logger.info(" Database initialized")
 
     # Start Redis worker in background
     # Menjalankan proses pekerja (Worker) secara asinkron di latar belakang untuk membaca antrean dari Redis
     worker_task = asyncio.create_task(worker_loop())
-    logger.info("✅ Redis worker started")
+    logger.info(" Redis worker started")
 
     yield # Memberikan kendali ke aplikasi utama FastAPI selama server berjalan
 
     # Shutdown (Saat server dimatikan)
-    logger.info("🛑 Shutting down...")
+    logger.info(" Shutting down...")
     worker_task.cancel() # Membatalkan tugas pekerja Redis
     try:
         await worker_task # Menunggu hingga pekerja benar-benar berhenti
