@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
-import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink } from "lucide-react";
-import type { VideoInfo } from "@/types";
-import { ExpandableText } from "./ExpandableText";
+import { motion } from "framer-motion"; // Pustaka eksternal untuk memperindah tampilan muncul/hilang komponen (animasi mengambang)
+import { Eye, ThumbsUp, MessageCircle, Calendar, ExternalLink } from "lucide-react"; // Kumpulan ikon yang merepresentasikan tombol-tombol media sosial
+import type { VideoInfo } from "@/types"; // Cetak biru pembatas format data spesifikasi video YouTube agar ketat
+import { ExpandableText } from "./ExpandableText"; // Komponen tombol pemotong teks cerdas baca selengkapnya buatan sendiri
 
 // Konfigurasi standar untuk animasi memantul
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };

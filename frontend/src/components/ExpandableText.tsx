@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react"; // Pustaka penanganan data sementara (state), Referensi langsung ke tag HTML, dan pemantau efek siklus halaman (useEffect)
 
 interface ExpandableTextProps {
   text: string;

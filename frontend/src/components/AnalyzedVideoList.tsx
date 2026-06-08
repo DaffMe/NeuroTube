@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
-import { Trash2, BarChart3, Clock } from "lucide-react";
-import type { AnalyzedVideo } from "@/types";
-import { clearHistory } from "@/services/api";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion"; // Pustaka eksternal untuk animasi pergerakan elemen UI
+import { Trash2, BarChart3, Clock } from "lucide-react"; // Pustaka koleksi ikon vektor yang indah
+import type { AnalyzedVideo } from "@/types"; // Kerangka tipe data cetak biru daftar video hasil analisis
+import { clearHistory } from "@/services/api"; // Fungsi pemanggil jaringan (API) untuk menghapus seluruh riwayat video
+import { Button } from "@/components/ui/button"; // Komponen antarmuka tombol modular bawaan dari Shadcn UI
 
 // Konfigurasi animasi efek pegas agar mulus saat muncul
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };

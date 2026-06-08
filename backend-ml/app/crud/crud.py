@@ -5,13 +5,13 @@ All database writes go through this layer to maintain data integrity.
 Response serialization uses camelCase to match frontend TypeScript interfaces.
 """
 
-from datetime import datetime
-from typing import Optional
+from datetime import datetime # Mengambil waktu sistem untuk mencatat stempel waktu kapan data diperbarui
+from typing import Optional # Penanda bahwa suatu data boleh bernilai kosong (Null/None)
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func # Mengimpor perintah SQL mentah (seperti SELECT * FROM tabel) melalui objek Python
+from sqlalchemy.ext.asyncio import AsyncSession # Tipe data sesi asinkron untuk operasi baca-tulis ke database tanpa memblokir CPU
 
-from app.models.models import AnalysisJob, VideoData, CommentData, SentimentSummary
+from app.models.models import AnalysisJob, VideoData, CommentData, SentimentSummary # Memanggil rancangan tabel database internal buatan sendiri
 
 
 # ── Analysis Jobs ─────────────────────────────────────────────────

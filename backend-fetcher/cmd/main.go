@@ -1,20 +1,20 @@
 package main
 
 import (
-	"context"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+	"context" // Memberi jatah waktu maksimal saat proses agar tidak hang (Graceful shutdown)
+	"log" // Menampilkan tulisan pemberitahuan server (sukses/gagal) di terminal
+	"net/http" // Mesin utama untuk mendirikan server web yang terus mendengarkan di suatu Port
+	"os" // Membaca setting atau nilai rahasia (environment variable) langsung dari laptop/server
+	"os/signal" // Menangkap sinyal/tombol penutup aplikasi dari user (misal tombol CTRL+C)
+	"syscall" // Berkomunikasi dengan inti sistem operasi Windows/Linux tentang interupsi
+	"time" // Menghitung detik, menit, batas waktu request HTTP (timeout)
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"github.com/go-chi/chi/v5" // Pustaka eksternal untuk membuat peta persimpangan jalur URL (Routing)
+	"github.com/go-chi/chi/v5/middleware" // Pustaka satpam URL tambahan (mencatat IP pengunjung, memulihkan otomatis kalau crash)
+	"github.com/go-chi/cors" // Pustaka untuk mengizinkan website beda domain (seperti localhost React) bisa mengambil data ke server ini
 
-	"neurotube/backend-fetcher/internal/handler"
-	"neurotube/backend-fetcher/internal/queue"
+	"neurotube/backend-fetcher/internal/handler" // Memanggil folder modul internal buatan sendiri untuk logika urutan HTTP
+	"neurotube/backend-fetcher/internal/queue" // Memanggil folder modul internal buatan sendiri untuk membuang paket ke Redis
 )
 
 // penerapan materi Modul 04 (Prosedur Utama)

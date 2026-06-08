@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ThumbsUp, ChevronDown, ChevronUp, Filter } from "lucide-react";
-import type { Comment } from "@/types";
-import { Button } from "@/components/ui/button";
-import { ExpandableText } from "./ExpandableText";
-import { getTimelineData } from "@/lib/timeline";
+import { useState, useMemo } from "react"; // Alat-alat pemori React (Menyimpan input teks sementara dan merekam hasil hitung kalkulasi berat agar tak berulang)
+import { motion, AnimatePresence } from "framer-motion"; // Pustaka pemulus gerak animasi masuk/keluarnya tabel komponen
+import { ThumbsUp, ChevronDown, ChevronUp, Filter } from "lucide-react"; // Kumpulan aset ikon grafis cantik
+import type { Comment } from "@/types"; // Format struktur acuan TypeScript untuk satu buah data Komentar
+import { Button } from "@/components/ui/button"; // Memanggil desain elemen tombol standar dari kerangka Shadcn UI
+import { ExpandableText } from "./ExpandableText"; // Komponen pemotong teks panjang agar jadi "Baca Selengkapnya..."
+import { getTimelineData } from "@/lib/timeline"; // Memanggil fungsi pembantu penghitung statistik dari hari ke hari
 
 // Konfigurasi efek pegas animasi (Bouncy spring)
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };

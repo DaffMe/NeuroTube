@@ -1,4 +1,4 @@
-import type { Comment } from "@/types";
+import type { Comment } from "@/types"; // Memanggil stempel tipe data Komentar agar kode TypeScript tahu wujud isinya
 
 // Antarmuka (Interface) Struktur Data untuk Ember Periode Waktu
 export interface TimelineBucket {

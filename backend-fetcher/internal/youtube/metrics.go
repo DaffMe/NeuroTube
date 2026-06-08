@@ -1,7 +1,7 @@
 package youtube
 
 import (
-	"log"
+	"log" // Membawa perintah untuk menampilkan pencatatan teks perjalanan program ke layar terminal
 )
 
 // ── Comment Metrics & Analysis ───────────────────────────────────

@@ -1,18 +1,18 @@
-import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo } from "react"; // Pustaka memori state React untuk mengatur opsi garis waktu (Harian/Bulanan)
+import { motion } from "framer-motion"; // Pustaka penambah efek animasi pegas saat grafik baru dimuat
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import type { Comment } from "@/types";
-import { getTimelineData } from "@/lib/timeline";
-import { Calendar, RefreshCw } from "lucide-react";
+  LineChart, // Kerangka dasar untuk membuat grafik garis (Line)
+  Line, // Garis lintasan yang menghubungkan titik-titik data
+  XAxis, // Sumbu mendatar (X) yang menampilkan waktu/tanggal
+  YAxis, // Sumbu vertikal (Y) yang menampilkan jumlah komentar
+  CartesianGrid, // Garis-garis kotak samar di latar belakang diagram (Grid)
+  Tooltip, // Kotak informasi rincian tanggal yang muncul saat kursor menyentuh garis
+  Legend, // Keterangan warna (contoh: Merah = Negatif, Hijau = Positif)
+  ResponsiveContainer, // Pembungkus agar grafik tidak keluar dari ukuran layar perangkat
+} from "recharts"; // Pustaka canggih untuk mengubah angka mentah menjadi grafik garis interaktif
+import type { Comment } from "@/types"; // Cetak biru format data 1 baris komentar
+import { getTimelineData } from "@/lib/timeline"; // Pemanggil rumus matematika untuk mengubah daftar komentar menjadi perhitungan harian
+import { Calendar, RefreshCw } from "lucide-react"; // Ikon kalender dan panah melingkar (refresh)
 
 interface Props {
   comments: Comment[];

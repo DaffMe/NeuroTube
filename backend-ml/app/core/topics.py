@@ -3,10 +3,10 @@ Topic extraction and summarization module for NeuroTube.
 Supports Gemini API and local NLP extractive summarization fallback.
 """
 
-import re
-import json
-from collections import Counter
-import httpx
+import re # Pustaka untuk mencari dan membersihkan pola teks yang rumit (Regular Expression)
+import json # Pustaka untuk membaca dan memodifikasi format data pertukaran (JSON)
+from collections import Counter # Pustaka matematika untuk menghitung kemunculan kata terbanyak secara otomatis
+import httpx # Pustaka klien HTTP modern untuk menembak API Google Gemini secara asinkron
 
 # Daftar kata hubung (Stopwords) bahasa Indonesia yang tidak memiliki makna penting dan harus dibuang sebelum analisis
 INDONESIAN_STOPWORDS = {

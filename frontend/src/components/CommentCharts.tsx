@@ -1,16 +1,16 @@
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // Pustaka alat efek animasi keluar/masuk komponen
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-import type { SentimentResult } from "@/types";
+  PieChart, // Kerangka dasar diagram bentuk lingkaran (Pie)
+  Pie, // Komponen irisan porsi di dalam diagram lingkaran
+  Cell, // Bagian komponen untuk mewarnai masing-masing irisan diagram
+  ResponsiveContainer, // Pembungkus agar grafik otomatis menyesuaikan ukuran lebar layar perangkat (Responsif)
+  BarChart, // Kerangka dasar diagram bentuk balok/batang
+  Bar, // Komponen balok pengisi diagram
+  XAxis, // Sumbu garis mendatar (X) pada grafik
+  YAxis, // Sumbu garis tegak vertikal (Y) pada grafik
+  Tooltip, // Kotak informasi melayang (Pop-up) kecil yang muncul saat kursor menyorot grafik
+} from "recharts"; // Pustaka eksternal terkenal khusus untuk menggambar diagram data di React
+import type { SentimentResult } from "@/types"; // Format tipe data yang memuat rangkuman statistik sentimen (total skor, jumlah positif/negatif)
 
 // Konfigurasi animasi pegas (spring) untuk membuat transisi memantul dan mulus
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };

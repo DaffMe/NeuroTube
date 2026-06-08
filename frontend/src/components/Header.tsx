@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "@/components/theme-context";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion"; // Pustaka eksternal untuk membuat animasi perpindahan yang mengalir
+import { Moon, Sun } from "lucide-react"; // Pustaka ikon untuk tombol ubah tema terang/gelap
+import { useTheme } from "@/components/theme-context"; // Memanggil fungsi pengubah tema (Theme Context) buatan sendiri
+import { Button } from "@/components/ui/button"; // Memanggil komponen standar tombol bergaya Shadcn UI
 
 // Pengaturan khusus untuk efek animasi pegas berayun secara global pada bilah navigasi (Header)
 const springTransition = {

@@ -3,8 +3,8 @@
 # Berfungsi sebagai pusat pengambilan variabel lingkungan (Environment Variables).
 # Bertugas membaca file .env dan menyediakan pengaturan server ke seluruh bagian kode Python.
 # -----------------------------------------------------------------------------
-import os
-from dotenv import load_dotenv
+import os # Berinteraksi langsung dengan sistem operasi laptop (seperti membaca nilai variabel lingkungan)
+from dotenv import load_dotenv # Pustaka eksternal untuk membaca kata sandi rahasia dari file teks .env
 
 # Membaca isi file .env (jika ada) dan memasukkannya ke variabel sistem komputer
 load_dotenv()

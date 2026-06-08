@@ -1,17 +1,17 @@
 package youtube
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"net/url"
-	"sort"
-	"strconv"
-	"sync"
-	"time"
+	"context" // Mengelola umur atau jatah jeda waktu suatu sub-pekerja (goroutine)
+	"encoding/json" // Mengubah data JSON yang baru diunduh dari Google menjadi bentuk struct Golang
+	"fmt" // Mencetak pesan error berformat dengan tambahan variabel
+	"io" // Menangani aliran data mentah (stream bytes) saat server mendownload teks panjang
+	"log" // Mencetak rekaman jejak proses pekerja ke layar hitam terminal
+	"net/http" // Melakukan pemanggilan web jarak jauh (API Request GET) ke komputer Google
+	"net/url" // Menyusun rapi parameter URL (seperti ?key=xyz&id=123) tanpa berantakan
+	"sort" // Digunakan untuk memanggil mesin pengurut array secara otomatis (built-in sort)
+	"strconv" // Mengubah huruf teks (String) murni kembali menjadi angka mutlak (Integer)
+	"sync" // Menyediakan fasilitas gembok data (Mutex) agar aman saat banyak thread bekerja berebutan
+	"time" // Membantu mengatur batas toleransi lama proses menembak web (Request Timeout)
 )
 
 // Client handles YouTube Data API v3 requests.

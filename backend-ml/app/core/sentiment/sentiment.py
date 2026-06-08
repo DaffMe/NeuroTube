@@ -6,12 +6,12 @@ This module uses a routing strategy:
 2. If Indonesian, routes to an Indonesian-specific RoBERTa model (highly accurate for local slang/sarcasm).
 3. If any other language, routes to a multilingual XLM-RoBERTa model.
 """
-import asyncio
-import logging
-import re
-import torch
-from transformers import pipeline, AutoTokenizer
-from langdetect import detect, DetectorFactory
+import asyncio # Mengatur urutan eksekusi asinkron agar server tetap responsif walau AI sedang berpikir lambat
+import logging # Menulis pesan jejak operasi (log) ke terminal
+import re # Mencocokkan teks menggunakan pola khusus (Regular Expression/RegEx)
+import torch # Pustaka matematika tingkat lanjut (Tensor) untuk menjalankan jaringan saraf tiruan Kecerdasan Buatan (GPU)
+from transformers import pipeline, AutoTokenizer # Pustaka utama HuggingFace untuk memuat dan menjalankan model bahasa AI seperti IndoBERT
+from langdetect import detect, DetectorFactory # Pustaka pendeteksi teks bahasa untuk merutekan apakah ini komentar orang Indonesia atau Asing
 
 # Fix random seed for langdetect to ensure consistent language detection
 # Memastikan hasil deteksi bahasa selalu konsisten meskipun dijalankan berulang kali

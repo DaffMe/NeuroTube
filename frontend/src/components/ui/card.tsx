@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react" // Mengimpor mesin cetak komponen HTML berbasis React
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils" // Fungsi cerdas pembasmi gaya CSS Tailwind yang bertabrakan (bentrok)
 
 // -----------------------------------------------------------------------------
 // KOMPONEN UI BAWAAN SHADCN: Card (Kartu)

@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext } from "react"; // Alat dasar dari React untuk membagikan data tema terang/gelap ke seluruh penjuru aplikasi (Context API)
 
 // Tipe data yang mendefinisikan ragam variasi tema sistem yang didukung oleh desain
 export type Theme = "dark" | "light" | "system";

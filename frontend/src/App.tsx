@@ -1,29 +1,29 @@
-import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { AnalyzedVideoList } from "@/components/AnalyzedVideoList";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { VideoDetails } from "@/components/VideoDetails";
-import { CommentCharts } from "@/components/CommentCharts";
-import { CommentSection } from "@/components/CommentSection";
-import { SentimentSummary } from "@/components/StatBlock";
-import { AiSummary } from "@/components/AiSummary";
-import { SentimentTimeline } from "@/components/SentimentTimeline";
+import { useState, useCallback, useEffect } from "react"; // Alat-alat bawaan React (Hooks) untuk mengatur memori (State) dan siklus hidup halaman
+import { motion, AnimatePresence } from "framer-motion"; // Pustaka animasi eksternal untuk membuat transisi UI yang halus (Smooth)
+import { Search, Sparkles, ArrowRight } from "lucide-react"; // Pustaka ikon-ikon estetis
+import { Button } from "@/components/ui/button"; // Memanggil komponen tombol modular (Shadcn UI)
+import { Input } from "@/components/ui/input"; // Memanggil komponen kotak isian teks (Shadcn UI)
+import { AnalyzedVideoList } from "@/components/AnalyzedVideoList"; // Memanggil komponen daftar video yang tersimpan
+import { LoadingSpinner } from "@/components/LoadingSpinner"; // Memanggil komponen animasi loading berputar
+import { VideoDetails } from "@/components/VideoDetails"; // Memanggil komponen kotak profil video YouTube
+import { CommentCharts } from "@/components/CommentCharts"; // Memanggil komponen grafik persentase statistik sentimen
+import { CommentSection } from "@/components/CommentSection"; // Memanggil komponen daftar tabel komentar dan filternya
+import { SentimentSummary } from "@/components/StatBlock"; // Memanggil komponen kartu angka statistik (misal: Total Positif 1000)
+import { AiSummary } from "@/components/AiSummary"; // Memanggil komponen teks paragraf rangkuman AI
+import { SentimentTimeline } from "@/components/SentimentTimeline"; // Memanggil komponen diagram garis perjalanan waktu sentimen
 import {
-  isValidYouTubeUrl,
-  submitAnalysisJob,
-  getJobStatus,
-  getJobStatusStreamUrl,
-  getAnalysisResults,
-  getAnalysisByVideo,
-  fetchHistory,
-  getLocalHistory,
-  deleteHistoryFromServer,
-  deleteVideoFromServer,
-} from "@/services/api";
-import type { AnalysisResponse, AnalyzedVideo } from "@/types";
+  isValidYouTubeUrl, // Fungsi pembantu untuk memvalidasi pola URL
+  submitAnalysisJob, // Fungsi API untuk mengirimkan URL ke backend fetcher
+  getJobStatus, // Fungsi API untuk mengecek status pekerjaan dari backend
+  getJobStatusStreamUrl, // Fungsi API pembuat tautan untuk mendengarkan progress real-time (SSE)
+  getAnalysisResults, // Fungsi API untuk mengunduh hasil lengkap komentar dari backend ML
+  getAnalysisByVideo, // Fungsi API untuk melihat data video dari database yang sudah ada
+  fetchHistory, // Fungsi API untuk mengambil seluruh riwayat analisis dari database
+  getLocalHistory, // Fungsi pembantu untuk mengambil data riwayat dari penyimpanan memori Browser (Local Storage)
+  deleteHistoryFromServer, // Fungsi API untuk menghapus semua database riwayat secara total
+  deleteVideoFromServer, // Fungsi API untuk menghapus 1 data video spesifik dari riwayat
+} from "@/services/api"; // Modul tempat semua penembak server (HTTP Client) disatukan
+import type { AnalysisResponse, AnalyzedVideo } from "@/types"; // Memanggil kerangka Tipe Data agar TypeScript bisa mencegah error salah struktur
 
 // -----------------------------------------------------------------------------
 // KONFIGURASI ANIMASI PEGAS (SPRING)

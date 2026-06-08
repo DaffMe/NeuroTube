@@ -1,9 +1,9 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/Header";
-import App from "./App";
-import "./index.css";
+import { StrictMode } from "react"; // Mode khusus React untuk mengecek error/peringatan tersembunyi selama masa pengembangan
+import { createRoot } from "react-dom/client"; // Fungsi perakit (Renderer) untuk menempelkan aplikasi React ke kerangka HTML asli
+import { ThemeProvider } from "@/components/theme-provider"; // Komponen pembungkus buatan sendiri yang mengatur mode terang/gelap
+import { Header } from "@/components/Header"; // Komponen navigasi atas buatan sendiri
+import App from "./App"; // Komponen inti tempat seluruh halaman aplikasi berada
+import "./index.css"; // Memanggil file gaya desain utama (Tailwind CSS) agar diaktifkan secara global
 
 // -----------------------------------------------------------------------------
 // TITIK MASUK UTAMA (ENTRY POINT) APLIKASI REACT

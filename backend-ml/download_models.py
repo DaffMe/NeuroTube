@@ -4,9 +4,9 @@
 # ke dalam memori komputer sebelum server ML dinyalakan pertama kali.
 # Mencegah server mati karena timeout (kelamaan download) saat pertama kali menerima request.
 # -----------------------------------------------------------------------------
-import os
-import sys
-from huggingface_hub import snapshot_download
+import os # Berfungsi untuk memanipulasi variabel lingkungan sistem
+import sys # Berfungsi untuk berinteraksi dengan interpreter Python
+from huggingface_hub import snapshot_download # Alat khusus untuk mengunduh model dari HuggingFace
 
 # Matikan animasi bar persentase unduhan agar log di Docker terlihat rapi dan tidak spam
 os.environ["HF_HUB_DISABLE_PROGRESS_BAR"] = "1"

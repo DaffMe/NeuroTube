@@ -3,11 +3,11 @@
 # Berfungsi sebagai alat (tools) bantuan admin untuk menghitung ulang sentimen
 # seluruh komentar dari sebuah video secara manual, jika terjadi error sebelumnya.
 # -----------------------------------------------------------------------------
-import asyncio
-from sqlalchemy import select
-from app.db.session import AsyncSessionLocal
-from app.models.models import CommentData, SentimentSummary
-from app.core.sentiment.sentiment import analyze_comment
+import asyncio # Pustaka untuk menjalankan fungsi asinkron (async) di skrip biasa
+from sqlalchemy import select # Pustaka yang menyambung dengan SQL raw untuk melakukan pencarian tabel
+from app.db.session import AsyncSessionLocal # Konektor jaringan ke sistem PostgreSQL
+from app.models.models import CommentData, SentimentSummary # Menyalin struktur tabel spesifik untuk memanipulasinya langsung di dalam array Python
+from app.core.sentiment.sentiment import analyze_comment # Mesin utama AI untuk menghitung ulang nilai positif/negatif teks
 
 async def reanalyze_video(video_id: str):
     # Membuka jalur komunikasi (koneksi) ke database

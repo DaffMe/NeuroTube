@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react" // Pustaka utama pembuat komponen antarmuka web
+import { Slot } from "@radix-ui/react-slot" // Pustaka tingkat rendah untuk menempelkan gaya/tombol ke elemen anak di dalamnya
+import { cva, type VariantProps } from "class-variance-authority" // Alat canggih pembuat aturan variasi tombol (seperti "ukuran: kecil/besar", "warna: merah/biru")
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils" // Pemanggil utilitas fungsi perangkai dan penjahit kelas CSS Tailwiind
 
 // -----------------------------------------------------------------------------
 // KOMPONEN UI BAWAAN SHADCN: Button

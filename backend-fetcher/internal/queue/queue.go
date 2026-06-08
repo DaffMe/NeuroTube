@@ -1,14 +1,14 @@
 package queue
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"time"
+	"context" // Mengelola pembatalan tugas paksa atau jatah jeda waktu dari suatu proses
+	"encoding/json" // Membongkar dan membungkus struktur data Golang ke dalam bentuk teks JSON
+	"fmt" // Menggabungkan pesan error dengan nama variabel aslinya secara rapi
+	"time" // Mengatur waktu saat ini, waktu durasi, dan waktu kedaluwarsa hapus otomatis di memori (TTL)
 
-	"github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9" // Pustaka eksternal kuat penghubung program Golang ke database RAM (Redis)
 
-	"neurotube/backend-fetcher/internal/youtube"
+	"neurotube/backend-fetcher/internal/youtube" // Memanggil folder modul YouTube mandiri agar program ini kenal dengan format struct Komentar
 )
 
 // Konstanta (nilai tetap) yang digunakan sebagai kunci (key) di dalam memori Redis

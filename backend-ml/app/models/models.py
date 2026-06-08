@@ -5,10 +5,10 @@ These models define the PostgreSQL schema and match the frontend's
 TypeScript interfaces (VideoInfo, Comment, SentimentResult, AnalyzedVideo).
 """
 
-from datetime import datetime
-from typing import Optional, List
-from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, JSON
+from datetime import datetime # Pustaka untuk mengambil dan merekam waktu saat ini (jam, menit, tanggal)
+from typing import Optional, List # Pustaka pelindung tipe (Type Hinting) agar kode lebih stabil
+from sqlmodel import SQLModel, Field # Pustaka untuk mendefinisikan kolom dan tipe tabel database seperti cetak biru (blueprint)
+from sqlalchemy import Column, JSON # Pustaka murni SQL untuk tipe data khusus tingkat lanjut (seperti objek JSON dalam tabel)
 
 # Masing-masing Class di bawah ini akan diubah (di-compile) oleh framework SQLModel menjadi struktur tabel di database PostgreSQL
 

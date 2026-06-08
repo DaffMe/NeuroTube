@@ -9,15 +9,15 @@ For each job:
   4. Updates job status in Redis to 'completed'
 """
 
-import asyncio
-import json
-import logging
-import redis.asyncio as aioredis
+import asyncio # Mesin penggerak utama latar belakang (Background Task) agar bisa jalan terus-menerus
+import json # Pustaka perakit dan pembongkar teks bersarang format JSON dari Redis
+import logging # Pustaka untuk mencetak laporan kerja (Log) setiap kuli panggul memproses pesan
+import redis.asyncio as aioredis # Pustaka koneksi ke kotak surat antrean Redis secara asinkron (kuli panggul mengecek kotak ini berulang kali)
 
-from app.core.config import settings
-from app.core.sentiment.sentiment import analyze_comment, analyze_comment_async
-from app.crud import crud
-from app.db.session import AsyncSessionLocal
+from app.core.config import settings # Memanggil URL Redis dan pengaturan sandi sistem
+from app.core.sentiment.sentiment import analyze_comment, analyze_comment_async # Memanggil kecerdasan buatan (otak sentiment NLP) buatan sendiri
+from app.crud import crud # Memanggil modul penyimpan data (menyimpan skor AI ke PostgreSQL)
+from app.db.session import AsyncSessionLocal # Tiket antrean sesi khusus agar proses penulisan ke database tidak tertukar
 
 logger = logging.getLogger(__name__)
 

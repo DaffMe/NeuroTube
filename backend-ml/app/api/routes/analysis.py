@@ -8,16 +8,16 @@ Provides endpoints for the frontend to:
 - Health check
 """
 
-from datetime import datetime
-from typing import Optional
+from datetime import datetime # Fungsi dasar Python untuk merekam tanggal dan waktu akses
+from typing import Optional # Mengizinkan parameter fungsi atau rute untuk tidak diisi (opsional)
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, Query # Pustaka FastAPI untuk membuat gerbang rute, melempar error HTTP, dan menangkap parameter URL
+from sqlalchemy.ext.asyncio import AsyncSession # Menjamin koneksi database asinkron tidak saling bertabrakan
 
-from app.db.session import get_db
-from app.crud import crud
-import redis.asyncio as aioredis
-from app.core.config import settings
+from app.db.session import get_db # Modul internal yang bertugas membuka dan menutup brankas database setiap kali ada request
+from app.crud import crud # Modul internal berisi fungsi perantara manipulasi data SQL (Create, Read, Update, Delete)
+import redis.asyncio as aioredis # Pustaka klien untuk membaca antrean RAM pada server Redis secara asinkron
+from app.core.config import settings # Konfigurasi pusat yang menyimpan alamat peladen (Host) Redis
 
 # Router berfungsi sebagai sub-aplikasi yang mengatur sekelompok endpoint tertentu (seperti Controller di pola MVC)
 router = APIRouter()

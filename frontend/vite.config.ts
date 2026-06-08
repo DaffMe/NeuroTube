@@ -1,7 +1,7 @@
-import path from "path"
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import path from "path" // Pustaka bawaan Node.js untuk mengatur dan membaca jalur folder (direktori) lokal
+import { defineConfig } from 'vite' // Pustaka untuk mendefinisikan objek pengaturan Vite secara aman (Type-safe)
+import react from '@vitejs/plugin-react' // Pustaka plugin agar Vite mengerti cara menerjemahkan sintaks JSX/TSX milik React
+import tailwindcss from '@tailwindcss/vite' // Pustaka plugin agar Tailwind CSS v4 dapat langsung disuntikkan ke dalam bundel Vite
 
 // -----------------------------------------------------------------------------
 // KONFIGURASI VITE (BUNDLER FRONTEND)

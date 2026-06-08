@@ -1,11 +1,3 @@
-import re
-from typing import List
-
-# Pre-compiled regex patterns for performance
-# Mengompilasi (compile) pola pencarian teks (Regular Expression) di awal agar saat dijalankan berulang kali prosesnya sangat cepat
-URL_PATTERN = re.compile(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
-
-# Pola untuk mendeteksi penipuan/scam berkedok investasi Kripto, Saham, dll
 CRYPTO_SCAM_PATTERN = re.compile(
     r'\b(whatsapp|telegram|invest|crypto|bitcoin|btc|eth|ethereum|usdt|profit|guaranteed|binary options|forex|fx trading|investment|earning|investor|mining)\b', 
     re.IGNORECASE

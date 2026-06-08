@@ -8,17 +8,17 @@ This service:
 4. Serves analysis data to the frontend via REST API
 """
 
-import asyncio
-import logging
-from contextlib import asynccontextmanager
+import asyncio # Menjalankan banyak pekerjaan sekaligus secara asinkron (tidak memblokir kode lain)
+import logging # Mencatat pesan status (info/error) server ke terminal hitam
+from contextlib import asynccontextmanager # Mengatur proses yang harus dijalankan saat server baru nyala dan mau mati
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI # Kerangka kerja eksternal untuk membuat server web (API) yang sangat cepat
+from fastapi.middleware.cors import CORSMiddleware # Satpam lalu lintas web agar React bisa menembak API ini lintas port
 
-from app.core.config import settings
-from app.db.session import init_db
-from app.api.routes.analysis import router as analysis_router
-from app.workers.worker import worker_loop
+from app.core.config import settings # Memanggil variabel sandi/setting internal dari file config
+from app.db.session import init_db # Memanggil modul internal database untuk menyambung ke tabel PostgreSQL
+from app.api.routes.analysis import router as analysis_router # Memanggil rute/alamat URL spesifik dari internal proyek
+from app.workers.worker import worker_loop # Memanggil otak pekerja internal yang menyedot antrean Redis
 
 # ── Logging ───────────────────────────────────────────────────────
 # Mengonfigurasi format pencatatan log agar rapi dan mudah dibaca (mencakup waktu, level, nama, dan pesan)

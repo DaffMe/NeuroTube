@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { ThemeContext, type Theme, type ThemeProviderState } from "./theme-context";
+import { useEffect, useState, type ReactNode } from "react"; // Alat pemori React (State, Effect, dan pemandu tipe komponen HTML)
+import { ThemeContext, type Theme, type ThemeProviderState } from "./theme-context"; // Memanggil komponen jalur distribusi rahasia pembagi tema yang tadi kita buat
 
 // -----------------------------------------------------------------------------
 // FUNGSI PEMBANTU: getSystemTheme

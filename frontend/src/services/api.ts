@@ -1,4 +1,4 @@
-import type { AnalysisResponse, AnalyzedVideo } from "@/types";
+import type { AnalysisResponse, AnalyzedVideo } from "@/types"; // Format pengaman tipe dari TypeScript yang mewakili respons paket data dari backend Golang/Python
 
 // Nama kunci penyimpanan lokal (Local Storage) di browser pengguna
 const STORAGE_KEY = "NeuroTube_history";

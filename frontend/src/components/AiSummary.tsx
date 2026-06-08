@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ThumbsUp, ThumbsDown, Quote, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
-import type { TopicCluster } from "@/types";
+import { useState } from "react"; // Alat untuk menyimpan ingatan status memori (seperti tab mana yang sedang dibuka: Positif/Negatif)
+import { motion, AnimatePresence } from "framer-motion"; // Pustaka alat efek animasi untuk membuat efek memudar (fade) saat berganti tab
+import { Sparkles, ThumbsUp, ThumbsDown, Quote, ChevronDown, ChevronUp, MessageSquare } from "lucide-react"; // Kumpulan ikon estetis (Bintang, Jempol, Tanda Kutip, dll)
+import type { TopicCluster } from "@/types"; // Cetak biru pembatas format data yang mewakili hasil rangkuman topik dari AI Gemini
 
 // Atribut yang diterima oleh komponen utama AiSummary
 interface Props {

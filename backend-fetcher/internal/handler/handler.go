@@ -1,20 +1,20 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"regexp"
-	"strings"
-	"strconv"
-	"time"
+	"encoding/json" // Mengubah data menjadi bentuk teks JSON sebelum dilempar ke frontend
+	"fmt" // Membungkus data teks dengan rapi (string formatting)
+	"log" // Mencetak pesan pemberitahuan status kerja ke layar terminal
+	"net/http" // Membaca permintaan (request) dan mengirim balasan status web (response)
+	"regexp" // Membaca dan menyeleksi pola unik dalam sebuah kata (mencari huruf ID video di dalam URL YouTube)
+	"strings" // Memotong karakter spasi berlebih atau merapikan sebuah kalimat
+	"strconv" // Mengonversi teks yang bertuliskan angka (String) menjadi murni Angka (Integer)
+	"time" // Membantu mengatur batas detik dan detak perulangan Server-Sent Events
 
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
+	"github.com/go-chi/chi/v5" // Pustaka pengatur rute yang dipakai untuk membaca parameter dari URL
+	"github.com/google/uuid" // Pustaka untuk memproduksi nomor resi acak yang dijamin unik (ID Pekerjaan)
 
-	"neurotube/backend-fetcher/internal/queue"
-	"neurotube/backend-fetcher/internal/youtube"
+	"neurotube/backend-fetcher/internal/queue" // Memanggil folder modul buatan sendiri agar bisa menyuruh antrean Redis
+	"neurotube/backend-fetcher/internal/youtube" // Memanggil folder modul buatan sendiri yang berisi logika unduh YouTube
 )
 
 // Handler holds dependencies for HTTP handlers.

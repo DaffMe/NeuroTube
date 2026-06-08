@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
-import type { SentimentResult } from "@/types";
+import { motion } from "framer-motion"; // Memanggil pustaka penambah efek animasi saat kotak statistik bergeser naik
+import { TrendingUp, TrendingDown, Minus } from "lucide-react"; // Memanggil ikon panah naik (Positif), turun (Negatif), dan datar (Netral)
+import type { SentimentResult } from "@/types"; // Memanggil kerangka penampung angka total statistik
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 

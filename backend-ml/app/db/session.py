@@ -2,11 +2,11 @@
 Async PostgreSQL database session management using SQLAlchemy.
 """
 
-from sqlmodel import SQLModel
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlmodel import SQLModel # Pustaka kerangka pemetaan objek database (ORM) yang berbasis Pydantic
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine # Pustaka untuk membuat mesin koneksi asinkron ke server PostgreSQL
+from sqlalchemy.orm import sessionmaker # Pustaka untuk menciptakan tiket sesi transaksi baru setiap kali ada permintaan
 
-from app.core.config import settings
+from app.core.config import settings # Memanggil pengaturan rahasia URL database dari konfigurasi pusat
 
 # Engine merupakan "mesin utama" yang terhubung langsung dan menggerakkan jalur pipa komunikasi TCP ke server PostgreSQL
 engine = create_async_engine(settings.DATABASE_URL, echo=False, future=True)

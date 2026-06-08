@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // Pustaka penggerak animasi titik-titik melompat dan cincin berputar
 
 const dots = [0, 1, 2, 3, 4];
 

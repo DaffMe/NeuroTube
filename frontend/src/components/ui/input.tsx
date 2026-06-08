@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react" // Mengimpor seluruh fungsi rahasia pembentuk komponen React
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils" // Utilitas andalan Shadcn untuk menyatukan puluhan baris class CSS dengan aman
 
 // -----------------------------------------------------------------------------
 // KOMPONEN UI BAWAAN SHADCN: Input
