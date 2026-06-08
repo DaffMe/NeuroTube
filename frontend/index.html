@@ -1,17 +1,28 @@
 <!DOCTYPE html>
+<!-- Mendeklarasikan bahwa dokumen ini menggunakan standar HTML5 terbaru -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Menambahkan ikon kecil (favicon) yang muncul di tab atas browser -->
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Pengaturan wajib agar website bisa menyesuaikan ukuran layar HP (Responsive) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Deskripsi website yang akan dibaca oleh mesin pencari seperti Google (SEO) -->
     <meta name="description" content="NeuroTube — Instantly analyze the sentiment of thousands of YouTube comments. Cute, bouncy, and fast." />
+    <!-- Judul website yang muncul di tab browser -->
     <title>NeuroTube — YouTube Comment Sentiment Analyzer</title>
+    
+    <!-- Membuka jalur cepat ke server Google Fonts agar teks tulisan (font) termuat lebih cepat -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Mengimpor font 'Inter' dan 'Outfit' dari Google Fonts untuk mempercantik teks -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <!-- #root adalah elemen kerangka kosong tempat seluruh halaman aplikasi React (App.tsx) akan disuntikkan/ditampilkan oleh Vite -->
     <div id="root"></div>
+    
+    <!-- Memanggil skrip inti dari React untuk menyalakan aplikasinya -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

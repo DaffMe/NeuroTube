@@ -1,3 +1,10 @@
+import re # Pustaka bawaan Python untuk mencari teks dengan pola rumit (Regular Expression)
+from typing import List # Pustaka bawaan untuk memberikan petunjuk tipe data berupa Daftar (List)
+
+# Mengompilasi (compile) pola pencarian teks di awal agar saat server berjalan berulang kali, prosesnya sangat ringan dan cepat
+URL_PATTERN = re.compile(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
+
+# Pola untuk mendeteksi penipuan/scam berkedok investasi Kripto, Saham, dll
 CRYPTO_SCAM_PATTERN = re.compile(
     r'\b(whatsapp|telegram|invest|crypto|bitcoin|btc|eth|ethereum|usdt|profit|guaranteed|binary options|forex|fx trading|investment|earning|investor|mining)\b', 
     re.IGNORECASE

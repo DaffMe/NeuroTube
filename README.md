@@ -30,8 +30,9 @@ The project uses a microservices architecture to separate the fast data ingestio
 
 ## ✨ Features
 
+- **Tugas Besar Edition (Fully Documented)**: Seluruh basis kode aplikasi (Golang, Python, dan React) telah dilengkapi dengan anotasi komentar *line-by-line* dan penjelasan fungsi `import` dalam **Bahasa Indonesia** yang sangat komprehensif. Didesain khusus untuk mempermudah proses belajar dan presentasi akademik.
 - **Concurrent Data Fetching**: Uses a Go backend to rapidly fetch thousands of YouTube comments and their replies.
-- **Sentiment Analysis Engine**: A Python FastAPI backend that runs a Dual-Engine Hugging Face Transformers setup (XLM-RoBERTa & Indo-RoBERTa) for highly accurate, multilingual sentiment classification.
+- **Sentiment Analysis Engine**: A Python FastAPI backend that runs a Dual-Engine Hugging Face Transformers setup (XLM-RoBERTa & Indo-RoBERTa) for highly accurate, multilingual sentiment classification. Dilengkapi juga dengan Regex Spammer Filter untuk menghemat resource GPU.
 - **Interactive Dashboard**: A modern, responsive frontend built with React 19 and Tailwind CSS v4, featuring:
   - **Sentiment Timeline**: A chart showing how sentiments change over time.
   - **Keyword Cloud**: A dynamic visual representation of the most common topics.
@@ -64,7 +65,7 @@ graph TD
 
 ## 🚀 Tech Stack
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Framer Motion, Recharts.
+- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Shadcn UI, Framer Motion, Recharts.
 - **Backend Fetcher**: Go 1.24, Redis.
 - **Backend ML**: Python 3.13, FastAPI, SQLModel, PostgreSQL, Hugging Face Transformers, PyTorch, Langdetect, Gemini API (for AI summary).
 - **Infrastructure**: Docker & Docker Compose.
@@ -136,12 +137,14 @@ go mod download
 go run cmd/main.go
 ```
 
-### 🎨 Frontend (React)
+### 🎨 Frontend (React with Bun)
+
+Disarankan menggunakan **Bun** untuk instalasi Node modules yang lebih cepat.
 
 ```bash
 cd frontend
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 ---
