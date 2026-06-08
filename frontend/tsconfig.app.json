@@ -1,33 +1,38 @@
 {
+  // -----------------------------------------------------------------------------
+  // KONFIGURASI APLIKASI (APP TSCONFIG)
+  // Ini adalah pengaturan aturan bahasa TypeScript khusus untuk KODE SUMBER REACT KITA (folder /src).
+  // -----------------------------------------------------------------------------
   "compilerOptions": {
-
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "es2023",
-    "lib": ["ES2023", "DOM"],
-    "module": "esnext",
-    "types": ["vite/client"],
-    "skipLibCheck": true,
+    "target": "es2023", // Standar target JavaScript modern tahun 2023
+    "lib": ["ES2023", "DOM"], // Mengenali fungsi modern dan tipe-tipe Browser Web (seperti HTMLDivElement)
+    "module": "esnext", // Sistem impor modul generasi terbaru
+    "types": ["vite/client"], // Mengenali tipe-tipe spesifik Vite (misal: import.meta.env)
+    "skipLibCheck": true, // Lompat pemeriksaan tipe di dalam folder node_modules agar build jauh lebih cepat
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    /* Bundler mode (Mode Pemaketan) */
+    "moduleResolution": "bundler", // Memakai gaya resolusi bundler modern (Vite)
+    "allowImportingTsExtensions": true, // Izinkan mengimpor file dengan eksistensi .ts eksplisit
+    "verbatimModuleSyntax": true, // Wajibkan kata kunci 'type' saat mengimpor sekadar tipe (misal: import type { Video } from '..')
     "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "noEmit": true, // TypeScript TIDAK akan menghasilkan file .js secara fisik, karena tugas itu diserahkan ke Vite
+    "jsx": "react-jsx", // Mendukung sintaks HTML di dalam JavaScript (JSX) secara otomatis untuk React 17+
 
-    /* Linting */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    /* Linting (Aturan Kerapihan Kode) */
+    "noUnusedLocals": true, // Error jika ada variabel lokal yang dibuat tapi tidak pernah dipakai
+    "noUnusedParameters": true, // Error jika fungsi punya parameter tapi diabaikan/tidak diolah
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true, // Cegah lupa menaruh instruksi 'break' di blok switch-case
 
-
+    // Konfigurasi Path Alias untuk import
+    // Menyuruh TypeScript agar paham bahwa lambang "@" merujuk ke folder "src"
     "paths": {
       "@/*": [
         "./src/*"
       ]
     }
   },
+  // Hanya jalankan aturan-aturan di atas ini terhadap file-file di dalam folder "src"
   "include": ["src"]
 }

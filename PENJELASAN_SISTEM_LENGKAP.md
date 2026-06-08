@@ -1,139 +1,116 @@
 # Dokumentasi Arsitektur & Deskripsi File Sistem NeuroTube
 
-Dokumen ini berisi penjelasan teknis mengenai arsitektur sistem dan fungsi spesifik dari setiap file pada proyek NeuroTube (Frontend dan Backend). Sistem ini menggunakan arsitektur **Microservices**, di mana komponen-komponen aplikasi dipisahkan menjadi layanan independen yang saling terintegrasi.
+Dokumen ini berisi penjelasan teknis mengenai arsitektur sistem dan fungsi spesifik dari SETIAP file (tanpa terkecuali) pada proyek NeuroTube (Frontend dan Backend). Sistem ini menggunakan arsitektur Microservices, di mana komponen-komponen aplikasi dipisahkan menjadi layanan independen yang saling terintegrasi.
 
 ---
 
-## 1. Konfigurasi Lingkungan (Root Directory)
+## 1. File Tingkat Dasar (Root Directory)
 
-File-file pada tingkat dasar (root) berfungsi untuk mengatur konfigurasi infrastruktur dan lingkungan eksekusi secara global.
+Berisi file-file yang mengatur konfigurasi infrastruktur dan lingkungan proyek secara keseluruhan.
 
-- **`docker-compose.yml`**
-  File konfigurasi untuk orkestrasi *container*. Berfungsi mendefinisikan dan menjalankan seluruh *microservices* (Frontend, Backend-Fetcher, Backend-ML, PostgreSQL, dan Redis) secara serentak dalam environment Docker yang saling terhubung.
-
-- **`.env`**
-  File konfigurasi variabel lingkungan (*Environment Variables*). Berfungsi untuk menyimpan data kredensial dan konfigurasi sistem (seperti parameter koneksi database, port layanan, API Key YouTube, dan API Key Gemini) secara aman di luar kode sumber.
+- **`docker-compose.yml`**: Orkestrasi Docker untuk menyalakan semua sistem (Frontend, Fetcher, ML, Postgres, Redis) secara serentak.
+- **`.env`** & **`.env.example`**: Tempat menyimpan kunci rahasia (API Key YouTube, API Key Gemini, password Database).
+- **`e2e_test_3.py`**: Skrip Python otomatis (End-to-End Test) untuk mengetes apakah semua komponen terhubung dengan benar.
+- **`README.md`**: Dokumentasi pengenalan proyek secara umum.
+- **`MATERI.txt`**: Catatan referensi pribadi pengguna mengenai materi kuliah dasar pemrograman.
+- **`SYSTEM_DESIGN_NEUROTUBE.md` / `.txt`**: Penjelasan diagram alur logika dari sistem ini.
+- **`PENJELASAN_SISTEM_LENGKAP.md` / `.txt`**: File dokumentasi lengkap yang sedang Anda baca ini.
+- **`PENJELASAN_PACKAGE_DAN_BUN.md`**: Penjelasan khusus mengenai konfigurasi Node.js (package.json).
+- **`.vscode/settings.json`**: Pengaturan seragam untuk teks editor Visual Studio Code.
+- **`assets/`**: Folder yang berisi aset visual pasif seperti logo (favicon) dan gambar tangkapan layar UI.
 
 ---
 
 ## 2. Layanan `frontend/` (React & TypeScript)
 
-Layanan ini merupakan antarmuka pengguna (*User Interface*) interaktif yang berjalan pada browser klien. Dikembangkan menggunakan pustaka React dengan bahasa pemrograman TypeScript dan bundler Vite. Fokus utamanya adalah visualisasi data hasil komputasi dari backend dan pengelolaan interaksi pengguna.
+Berisi antarmuka pengguna interaktif (User Interface).
 
-### Struktur Source Code (`src/`)
+### Struktur Dasar & Konfigurasi
 
-- **`src/main.tsx`**
-  *Entry point* (titik masuk) eksekusi aplikasi web di sisi klien (*Client-Side*). Berfungsi untuk melakukan inisialisasi lingkungan React dan menyisipkan komponen utama (App) ke dalam *Document Object Model* (DOM) pada browser.
+- **`index.html`**: Rangka dasar halaman web (Kerangka HTML utama).
+- **`package.json`**: Identitas aplikasi dan daftar pustaka yang harus diinstal.
+- **`package-lock.json`** & **`bun.lock`**: Catatan persis (hash) dari versi setiap pustaka agar seragam di semua komputer.
+- **`vite.config.ts`**: Mesin pengemas (Bundler) agar aplikasi web ringan dimuat.
+- **`tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`**: Peta aturan untuk kompilasi bahasa TypeScript.
+- **`eslint.config.js`**: Polisi kode (Linter) pemeriksa salah ketik (error/typo).
+- **`components.json`**: File pengaturan bawaan library Shadcn UI.
+- **`Dockerfile`** & **`.dockerignore`**: Resep membungkus web menjadi *Docker Container*.
+- **`README.md`**: Instruksi spesifik cara menjalankan frontend lokal.
+- **`public/favicon.png`**: Gambar kecil di tab browser Chrome.
 
-- **`src/App.tsx`**
-  Komponen utama (*Root Component*) yang mendefinisikan struktur tata letak visual (*layout*) dan mengelola status (*state*) keseluruhan aplikasi, termasuk alur input URL YouTube dan proses reaktivitas (*reactivity*) saat menunggu hasil.
+### Source Code (`src/`)
 
-- **`src/components/`**
-  Direktori ini berisi pustaka komponen visual modular (seperti *bar chart* sentimen, daftar komentar, dan notifikasi status) yang dapat dipanggil secara berulang (*reusable*) di dalam aplikasi.
+- **`src/main.tsx`**: Titik masuk (Entry point) eksekusi React ke dalam browser HTML.
+- **`src/App.tsx`**: Halaman utama yang mengoordinasikan seluruh alur dan interaksi web.
+- **`src/index.css`**: Pengaturan global warna, animasi, dan gaya Tailwind CSS.
+- **`src/types/index.ts`**: Buku kamus struktur data (Tipe data untuk Video, Komentar, dll).
+- **`src/services/api.ts`**: Fungsi penembak/pembawa pesan dari Frontend ke Backend (HTTP Request).
+- **`src/lib/utils.ts`**: Fungsi asisten kecil untuk CSS.
+- **`src/lib/timeline.ts`**: Algoritma perhitungan grafik garis waktu (*Timeline*).
 
-- **`src/services/`**
-  Modul komunikasi *Client-Server*. Berfungsi sebagai lapisan abstraksi jaringan (*Network Layer*) untuk melakukan eksekusi pemanggilan HTTP/REST API ke layanan *backend* (Golang dan Python).
+### Komponen Visual (`src/components/`)
 
-- **`src/index.css` & `src/lib/`**
-  Memuat lembar gaya (*Stylesheet*) global berbasis sistem *utility-first* (Tailwind CSS) dan fungsi utilitas pendukung pemrograman (*Helper Functions*) untuk menstandarisasi estetika desain UI.
-
-### Konfigurasi Dependensi Frontend
-
-- **`package.json`** & **`package-lock.json`**
-  Manifest proyek yang mendeklarasikan pustaka JavaScript pihak ketiga (seperti React, library *Chart*, *Routing*) beserta versi pastinya.
-
-- **`vite.config.ts`**
-  Konfigurasi mesin *compiler/bundler* (Vite) untuk merakit dan mengoptimalkan kode mentah TypeScript menjadi aset statis yang ringan dan kompatibel untuk *browser*.
-
-- **`Dockerfile`**
-  File definisi instruksi untuk mem-build dan menyajikan (*serve*) file statis antarmuka melalui peladen web ringan di lingkungan Docker terisolasi.
+- **`ui/` (`button.tsx`, `card.tsx`, `input.tsx`)**: Tombol, kartu, dan kotak input standar (Bawaan Shadcn UI).
+- **`theme-provider.tsx`** & **`theme-context.ts`**: Mesin pemindah Mode Gelap (Dark Mode) dan Mode Terang.
+- **`AiSummary.tsx`**: Menampilkan ringkasan teks Gemini.
+- **`AnalyzedVideoList.tsx`**: Menampilkan daftar video yang pernah dianalisis sebelumnya.
+- **`CommentCharts.tsx`**: Menampilkan grafik bulat (Pie Chart) sentimen.
+- **`CommentSection.tsx`**: Menampilkan daftar percakapan/komentar individu.
+- **`ExpandableText.tsx`**: Teks yang bisa dipanjangkan/dipendekkan (Read More).
+- **`Header.tsx`**: Bagian atas halaman (Navigasi & Logo).
+- **`LoadingSpinner.tsx`**: Animasi berputar saat menunggu proses loading.
+- **`SentimentTimeline.tsx`**: Grafik naik turun (Bar Chart) sentimen per menit.
+- **`StatBlock.tsx`**: Kotak-kotak kecil berisi angka ringkasan statistik.
+- **`VideoDetails.tsx`**: Menampilkan gambar *thumbnail* dan judul YouTube.
 
 ---
 
 ## 3. Layanan `backend-fetcher/` (Golang)
 
-Layanan ini fokus pada kinerja tinggi untuk menangani permintaan masuk dari frontend, melakukan penarikan data mentah dalam kuantitas masif (pengambilan ribuan komentar YouTube secara paralel), dan mengelola logika antrean data.
+Layanan pengambil data YouTube super cepat.
 
-### `cmd/`
-
-- **`cmd/main.go`**
-  *Entry point* eksekusi layanan Golang. Berfungsi untuk melakukan inisialisasi server HTTP, mengonfigurasi rute jaringan (router), membangun koneksi dengan Redis, dan memulai *listening* pada port. (Penerapan Modul: Prosedur Utama).
-
-### `internal/handler/`
-
-- **`internal/handler/handler.go`**
-  Berfungsi sebagai pengontrol HTTP (*HTTP Handler*). Menangani proses *routing* dari URL YouTube, mengekstrak parameter, serta mengelola alur komunikasi menggunakan *Server-Sent Events* (SSE) untuk mengirim pembaruan status progres secara instan (*real-time*) kembali ke klien (Frontend). (Penerapan Modul: Tipe Bentukan, Fungsi, dan Prosedur).
-
-### `internal/youtube/`
-
-- **`internal/youtube/youtube.go`**
-  Modul integrasi API pihak ketiga. Berfungsi khusus untuk melakukan otentikasi dan transaksi data dengan *YouTube Data API v3* untuk memanen metadata video dan komentar yang kemudian direpresentasikan ke dalam struktur data (Struct).
-
-- **`internal/youtube/metrics.go`**
-  Modul komputasi metrik statis. File ini mengimplementasikan algoritma ilmu komputer dasar secara langsung di memori. **Penting:** Modul ini berisi penerapan materi mata kuliah (seperti *Array*, *Fungsi*, *Pointer*, *Rekursi*, *Sequential/Binary Search*, dan *Selection/Insertion Sort*).
-
-### `internal/queue/`
-
-- **`internal/queue/queue.go`**
-  Modul manajemen pesan/antrean. Berfungsi memformat data array komentar menjadi *Job Payload* (format JSON) dan mendelegasikan (*push*) paket pesan tersebut ke dalam antrean pada *Redis Message Broker*.
-
-### Konfigurasi Dependensi Golang
-
-- **`go.mod`** & **`go.sum`**
-  File manajemen dependensi standar pada Golang yang memvalidasi pustaka (library) eksternal (seperti modul Redis dan HTTP Router).
-
-- **`Dockerfile`**
-  Resep definisi kontainerisasi (*Containerization*) kode sumber Golang menjadi eksekusi *binary* terkompilasi (*compiled binary*).
+- **`cmd/main.go`**: Titik awal eksekusi program Golang (Menyalakan Server HTTP).
+- **`internal/handler/handler.go`**: Penerima sinyal URL, mengatur proses secara berurutan, dan memancarkan status proses (SSE).
+- **`internal/youtube/youtube.go`**: Agen yang berbicara langsung dengan Server YouTube untuk menarik data komentar asli.
+- **`internal/youtube/metrics.go`**: Algoritma murni mata kuliah (Sorting, Searching, Pointer, Rekursi) untuk menghitung statistik data.
+- **`internal/queue/queue.go`**: Mesin pendorong paket ke dalam antrean (Redis Message Broker).
+- **`go.mod`** & **`go.sum`**: Daftar pustaka Golang yang dipakai (manajemen dependency).
+- **`Dockerfile`** & **`.dockerignore`**: Resep untuk mengompres program Golang ke Docker.
 
 ---
 
 ## 4. Layanan `backend-ml/` (Python)
 
-Layanan ini bertindak sebagai peladen komputasi kecerdasan buatan, mengkhususkan diri di ranah *Machine Learning* dan pemrosesan bahasa alami (*Natural Language Processing*/NLP) untuk klasifikasi dan peringkasan teks.
+Otak kecerdasan buatan (Machine Learning & NLP).
 
-### `app/`
+### File Akar Backend-ML
 
-- **`app/main.py`**
-  *Entry point* layanan Python (menggunakan FastAPI). File ini menginisialisasi server API, menyiapkan konektivitas database relasional, dan menginstruksikan peluncuran *Background Worker* secara asinkron.
+- **`download_models.py`**: Skrip pra-syarat untuk mengunduh model AI sentimen (HuggingFace) ke komputer sebelum dipakai.
+- **`requirements.txt`**: Daftar pusaka (library) Python seperti FastAPI, SQLAlchemy.
+- **`Dockerfile`** & **`.dockerignore`**: Resep membuat mesin server AI dalam kontainer Docker.
 
-- **`app/core/config.py`**
-  Berfungsi sebagai kelas abstraksi utilitas untuk memuat, memvalidasi tipe data, dan menyediakan akses pada variabel lingkungan secara aman ke dalam ekosistem Python.
+### Modul Aplikasi (`app/`)
 
-### `app/core/` (Logika Kecerdasan Buatan)
+Setiap folder umumnya diakhiri dengan file kosong **`__init__.py`** sebagai penanda wajib bahwa itu adalah modul Python.
 
-- **`app/core/sentiment.py`**
-  Modul inferensi *Deep Learning*. File ini mengimpor arsitektur model NLP (berbasis *Transformer* seperti IndoBERT/RoBERTa) untuk mengalkulasi dan memprediksi sentimen probabilitas (positif, negatif, atau netral) dari setiap unit kalimat komentar.
-
-- **`app/core/topics.py`**
-  Modul peringkasan topik teks (*Document Summarization*). Secara hibrida beroperasi melalui dua sub-mekanisme: Pertama, inferensi linguistik melalui koneksi ke model generasi LLM Google Gemini (*Generative Summary*). Kedua, modul pereduksian statistik lokal berdasarkan algoritma frekuensi kata jika layanan API eksternal mengalami kendala jaringan (*Extractive Fallback*).
-
-### `app/workers/`
-
-- **`app/workers/worker.py`**
-  Berfungsi sebagai proses pemantau laten (*Daemon Process*). Menggunakan interval *polling* untuk secara iteratif mengekstrak perintah komputasi dari antrean Redis. Apabila muatan data dideteksi, pekerja mengalirkannya ke *pipeline* NLP dan menyimpan hasil akhir tanpa memblokir server utama.
-
-### `app/db/` & `app/api/` (Database & Endpoint)
-
-- **`app/db/database.py`**
-  Modul ORM (*Object-Relational Mapping*). Bertugas menciptakan lapisan koneksi dengan PostgreSQL dan mengonversi relasi objek Python (*Classes*) ke dalam skema tabel SQL untuk persistensi data komprehensif.
-
-- **`app/api/endpoints.py`**
-  Berfungsi menyediakan layanan antarmuka program aplikasi (*REST API Data Exposure*). Rute (*Endpoints*) ini mengakomodasi permintaan kueri tipe GET dari *frontend* untuk memuat (*fetch*) riwayat laporan statistik analitik.
-
-### Konfigurasi Dependensi Python
-
-- **`requirements.txt`**
-  Berisi definisi paket pustaka spesifik (seperti `torch`, `transformers`) untuk *framework Machine Learning* dan utilitas *web server* di dalam lingkungan virtual Python.
-
-- **`Dockerfile`**
-  File definisi instruksi arsitektur sistem operasi (*Base OS*) untuk menyokong dependensi library Python dalam batasan lingkungan *image* Docker.
+- **`app/main.py`**: Titik nyala Server API Python (FastAPI).
+- **`app/reanalyze_video.py`**: Alat (skrip manual) untuk admin jika ingin menghitung ulang sentimen sebuah video.
+- **`app/core/config.py`**: Pembaca kata sandi dan pengaturan sistem.
+- **`app/core/topics.py`**: Mesin NLP peringkas percakapan menggunakan AI Gemini Google (atau algoritma kata sering muncul).
+- **`app/core/sentiment/sentiment.py`**: Mesin AI penebak nada emosi (Positif/Negatif/Netral) menggunakan model IndoBERT dan XLM-RoBERTa.
+- **`app/core/sentiment/spam.py`**: Saringan/Detektor untuk mengabaikan komentar sampah (Spam, Promosi Judol, dsb).
+- **`app/api/routes/analysis.py`**: Pintu gerbang (Endpoint HTTP) untuk mengirim laporan statistik jadi kembali ke Frontend.
+- **`app/db/session.py`**: Modul penyambung kabel (koneksi) antara Python dan database PostgreSQL.
+- **`app/models/models.py`**: Cetak biru rancangan struktur kolom tabel di database.
+- **`app/crud/crud.py`**: Operasi spesifik (Create/Read/Update) untuk baca-tulis ke tabel database.
+- **`app/workers/worker.py`**: Kuli panggul (Background Worker) yang selalu siaga menarik kerjaan dari antrean Redis, dan menyetor teksnya ke Mesin AI.
 
 ---
 
 ## 5. Alur Komunikasi Arsitektur Keseluruhan (System Flow)
 
-1. **Frontend $\rightarrow$ Golang**: Klien mentransmisikan *Request HTTP POST* yang menyertakan payload berisi referensi URL YouTube.
-2. **Golang $\rightarrow$ Redis**: Layanan API Golang memanen parameter metrik dan komentar YouTube, merakit data, kemudian mendistribusikan paket tersebut melalui mekanisme *Message Passing* ke dalam memori antrean Redis.
-3. **Redis $\rightarrow$ Python**: Pekerja otonom (*Background Worker*) berbasis Python secara persisten mengeksekusi ekstraksi (*dequeue*) dari antrean Redis.
-4. **Python $\rightarrow$ Database**: Kumpulan teks ditransformasi secara matematis melalui vektor inferensi NLP, dirangkum menggunakan algoritma hibrida AI, kemudian hasil matriks sentimennya disinkronisasi ke dalam penyimpanan relasional PostgreSQL.
-5. **Frontend $\rightarrow$ Python**: Klien Frontend, atas tindakan interaksi pengguna, mengeksekusi pemanggilan *REST API GET* untuk mengunduh laporan matriks, dan melakukan *re-rendering* grafik UI di layar.
+1. **Frontend -> Golang**: Klien mentransmisikan *Request HTTP POST* yang menyertakan payload berisi referensi URL YouTube.
+2. **Golang -> Redis**: Layanan API Golang memanen parameter metrik dan komentar YouTube, merakit data, kemudian mendistribusikan paket tersebut melalui mekanisme *Message Passing* ke dalam memori antrean Redis.
+3. **Redis -> Python**: Pekerja otonom (*Background Worker*) berbasis Python secara persisten mengeksekusi ekstraksi (*dequeue*) dari antrean Redis.
+4. **Python -> Database**: Kumpulan teks ditransformasi secara matematis melalui vektor inferensi NLP, dirangkum menggunakan algoritma hibrida AI, kemudian hasil matriks sentimennya disinkronisasi ke dalam penyimpanan relasional PostgreSQL.
+5. **Frontend -> Python**: Klien Frontend, atas tindakan interaksi pengguna, mengeksekusi pemanggilan *REST API GET* untuk mengunduh laporan matriks, dan melakukan *re-rendering* grafik UI di layar.

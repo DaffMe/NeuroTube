@@ -26,94 +26,97 @@ import {
 import type { AnalysisResponse, AnalyzedVideo } from "@/types";
 
 // -----------------------------------------------------------------------------
-// SPRING ANIMATION CONFIGURATION
+// KONFIGURASI ANIMASI PEGAS (SPRING)
 // -----------------------------------------------------------------------------
-// The 'spring' object controls how bouncy and smooth the UI transitions will be.
+// Objek 'spring' ini mengatur seberapa memantul (bouncy) dan mulus transisi UI menggunakan Framer Motion
 const spring = { type: "spring" as const, stiffness: 400, damping: 18 };
 
 export default function HomePage() {
   // ---------------------------------------------------------------------------
-  // STATE MANAGEMENT (TEMPORARY DATA STORAGE FOR THIS PAGE)
+  // MANAJEMEN STATE (PENYIMPANAN DATA SEMENTARA UNTUK HALAMAN INI)
   // ---------------------------------------------------------------------------
-  // url: Stores the YouTube link text typed by the user in the search box
+  // url: Menyimpan teks tautan YouTube yang diketik pengguna di kotak pencarian
   const [url, setUrl] = useState("");
+  // error: Menyimpan pesan kesalahan jika tautan tidak valid atau analisis gagal
   const [error, setError] = useState("");
+  // shake: Pemicu (trigger) animasi bergetar pada kotak pencarian jika terjadi error
   const [shake, setShake] = useState(false);
+  // loading: Penanda apakah sistem sedang memuat (loading)
   const [loading, setLoading] = useState(false);
-  // loadingMessage: Stores status messages like "Fetching...", "Analyzing..."
+  // loadingMessage: Menyimpan teks status seperti "Sedang mengambil data...", "Sedang menganalisis..."
   const [loadingMessage, setLoadingMessage] = useState("");
-  // progress: Stores the progress percentage (0 to 100%) of the backend job
+  // progress: Menyimpan angka persentase progres (0 sampai 100%) dari pekerjaan Backend
   const [progress, setProgress] = useState<number | undefined>(undefined);
-  // result: Stores all the final analysis data (statistics, charts, AI summary) upon success
+  // result: Menyimpan seluruh hasil akhir analisis (statistik, grafik, ringkasan AI) setelah sukses
   const [result, setResult] = useState<AnalysisResponse | null>(null);
-  // history: Stores the list of previously analyzed videos fetched from the database
+  // history: Menyimpan daftar riwayat video yang pernah dianalisis sebelumnya (diambil dari database)
   const [history, setHistory] = useState<AnalyzedVideo[]>(getLocalHistory());
-  // selectedDate: Stores the specific date filter if the user clicks a point on the timeline chart
+  // selectedDate: Menyimpan tanggal spesifik yang dipilih jika pengguna mengklik suatu titik pada grafik timeline
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
-  // SIDE EFFECTS (RUNS WHEN THE APP FIRST LOADS)
+  // EFEK SAMPING (BERJALAN SAAT APLIKASI PERTAMA KALI DIMUAT)
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    // Contacts the server (backend) to request the list of previous analysis history
+    // Menghubungi server (backend) untuk meminta daftar riwayat analisis sebelumnya
     fetchHistory().then(setHistory).catch(console.error);
   }, []);
 
   // ---------------------------------------------------------------------------
-  // MAIN FUNCTION: PROCESS THE ANALYZE BUTTON CLICK
+  // FUNGSI UTAMA: MEMPROSES KLIK TOMBOL ANALISIS
   // ---------------------------------------------------------------------------
   const handleAnalyze = useCallback(
     async (inputUrl?: string) => {
-      // Use the URL from the input box, OR a direct URL (if clicked from History)
+      // Gunakan URL dari kotak input, ATAU URL langsung (jika diklik dari riwayat)
       const target = inputUrl || url;
       
-      // Stop the process if the provided link is not a valid YouTube URL
+      // Hentikan proses jika tautan yang diberikan bukan URL YouTube yang sah (valid)
       if (!isValidYouTubeUrl(target)) {
         setError("Please enter a valid YouTube URL!");
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+        setShake(true); // Getarkan kotak pencarian
+        setTimeout(() => setShake(false), 500); // Hentikan getaran setelah setengah detik
         return;
       }
       
-      // Clear any previous error messages and activate the Loading mode
+      // Bersihkan pesan kesalahan sebelumnya dan aktifkan mode Loading
       setError("");
       setLoading(true);
       setLoadingMessage("Sending request to server...");
       setProgress(0);
 
       try {
-        // 1. Send the video to the Backend Queue system. The server responds with a 'Job ID'
+        // 1. Kirim video ke sistem Antrean (Queue) Backend. Server merespons dengan memberikan 'Job ID'
         const jobRes = await submitAnalysisJob(target);
         const jobId = jobRes.jobId;
 
-        // 2. Check if the job happens to be completed immediately
-        // Using const because this value is set once and never reassigned afterward
+        // 2. Periksa apakah pekerjaannya kebetulan selesai seketika
+        // Menggunakan const karena nilai ini hanya ditetapkan sekali dan tidak diubah setelahnya
         const completed = jobRes.status === "completed";
         
-        // If not finished yet, we will continuously monitor (Polling/Streaming) the progress
+        // Jika belum selesai, kita akan terus memantau perkembangannya secara langsung (Polling/Streaming)
         if (!completed) {
           try {
             await new Promise<void>((resolve, reject) => {
-              // Establish a dedicated Server-Sent Events (SSE) connection to receive real-time progress updates
+              // Membuka jalur komunikasi khusus (Server-Sent Events / SSE) untuk menerima pembaruan progres secara real-time (waktu nyata)
               const eventSource = new EventSource(getJobStatusStreamUrl(jobId));
 
-              // Every time the Backend sends a new progress message:
+              // Setiap kali Backend mengirimkan pesan pembaruan progres:
               eventSource.onmessage = (event) => {
                 try {
                   const data = JSON.parse(event.data);
-                  // Update the progress bar percentage in the UI
+                  // Perbarui angka persentase bilah progres di layar UI
                   if (typeof data.progress === "number") {
                     setProgress(data.progress);
                   }
-                  // Update the loading text message in the UI
+                  // Perbarui pesan teks pemuatan di layar UI
                   if (data.message) {
                     setLoadingMessage(data.message);
                   }
 
-                  // If the server says the process is "completed"
+                  // Jika server mengatakan prosesnya sudah "completed" (selesai)
                   if (data.status === "completed") {
-                    eventSource.close(); // Close the communication channel
-                    resolve();           // Proceed to the next step (fetching results)
+                    eventSource.close(); // Tutup saluran komunikasi
+                    resolve();           // Lanjut ke langkah berikutnya (mengambil hasil)
                   } else if (data.status === "failed") {
                     eventSource.close();
                     reject(new Error(data.message || "Analysis failed during processing"));
@@ -124,18 +127,18 @@ export default function HomePage() {
                 }
               };
 
-              // If the internet connection drops unexpectedly
+              // Jika koneksi internet terputus secara tiba-tiba
               eventSource.onerror = () => {
                 eventSource.close();
                 reject(new Error("Connection lost"));
               };
             });
           } catch (sseErr) {
-            // IF the dedicated SSE stream fails, fallback to manual Polling mode
+            // JIKA aliran SSE khusus tadi gagal, kembali ke mode Polling (bertanya secara manual)
             console.warn("SSE stream connection failed, switching to manual polling...", sseErr);
             let fallbackCompleted = false;
             
-            // The system will ask the server "Is it done yet?" every 2 seconds
+            // Sistem akan berulang kali bertanya ke server "Apakah sudah selesai?" setiap 2 detik (Polling)
             while (!fallbackCompleted) {
               await new Promise((r) => setTimeout(r, 2000));
               const statusRes = await getJobStatus(jobId);
@@ -144,27 +147,27 @@ export default function HomePage() {
               if (statusRes.status === "completed") {
                 fallbackCompleted = true;
               } else if (statusRes.status.startsWith("failed")) {
-                // Attach the original caught error (sseErr) as the 'cause' for proper error tracing
+                // Lampirkan penyebab error asli (sseErr) agar mudah dilacak (tracing)
                 throw new Error(statusRes.message, { cause: sseErr });
               }
             }
           }
         }
 
-        // 3. Fetch the Complete Results (Statistics Data & Comments) once 100% processed
+        // 3. Ambil Hasil Lengkapnya (Data Statistik & Komentar) setelah proses mencapai 100%
         setLoadingMessage("Downloading final results...");
         const data = await getAnalysisResults(jobId);
-        setResult(data); // Save the results into the 'result' state so it renders on the screen
+        setResult(data); // Simpan hasil tersebut ke dalam state 'result' agar langsung tergambar di layar
         
-        // Refresh the history list because we just successfully analyzed a new video
+        // Segarkan (Refresh) daftar riwayat karena kita baru saja berhasil menganalisis video baru
         const newHistory = await fetchHistory();
         setHistory(newHistory);
 
       } catch (err) {
-        // Display red error text if the analysis fails
+        // Tampilkan teks error berwarna merah jika analisis gagal
         setError(err instanceof Error ? err.message : "An error occurred during analysis");
       } finally {
-        // Regardless of success or failure, turn off the loading spinner
+        // Terlepas dari apakah sukses atau gagal, pastikan untuk mematikan ikon pemuatan (loading spinner)
         setLoading(false);
         setLoadingMessage("");
         setProgress(undefined);
@@ -174,16 +177,16 @@ export default function HomePage() {
   );
 
   // ---------------------------------------------------------------------------
-  // HELPER FUNCTIONS
+  // FUNGSI-FUNGSI PEMBANTU (HELPER FUNCTIONS)
   // ---------------------------------------------------------------------------
 
-  // Function for the "Sample" button (fills the box with a Rickroll link for testing)
+  // Fungsi untuk tombol "Sample" (mengisi kotak dengan tautan Rickroll untuk keperluan uji coba)
   const handleSample = useCallback(async () => {
     setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     handleAnalyze("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   }, [handleAnalyze]);
 
-  // Function when a user clicks on a previously analyzed video from the history sidebar
+  // Fungsi ketika pengguna mengklik salah satu video yang pernah dianalisis dari menu samping (sidebar) riwayat
   const handleHistorySelect = useCallback(async (video: AnalyzedVideo) => {
     setError("");
     setLoading(true);
@@ -199,34 +202,39 @@ export default function HomePage() {
     }
   }, []);
 
+  // Fungsi untuk tombol "Kembali" dari layar hasil menuju ke halaman awal pencarian
   const handleBack = useCallback(() => {
-    setResult(null);
+    setResult(null); // Kosongkan hasil saat ini
     setUrl("");
     setError("");
     setSelectedDate(null);
   }, []);
 
+  // Fungsi untuk menghapus seluruh riwayat analisis dari server
   const handleClearHistory = useCallback(async () => {
     try {
       await deleteHistoryFromServer();
       setHistory([]);
     } catch (err) {
       console.error("Failed to clear history:", err);
-      // Fallback to just clearing local if server fails
+      // Opsi cadangan: jika server gagal, setidaknya hapus secara lokal
       setHistory([]);
     }
   }, []);
 
+  // Fungsi untuk menghapus satu buah video tertentu dari riwayat
   const handleDeleteVideo = useCallback(async (videoId: string) => {
     try {
       await deleteVideoFromServer(videoId);
+      // Perbarui tampilan dengan memfilter (membuang) video yang ID-nya sama dengan yang dihapus
       setHistory((prev) => prev.filter((v) => v.videoId !== videoId));
     } catch (err) {
       console.error("Failed to delete video:", err);
     }
   }, []);
 
-  // ── Result View ─────────────────────────────────────────────────────────────
+  // ── Tampilan Hasil (Result View) ─────────────────────────────────────────────────────────────
+  // Jika ada 'result' yang sukses diambil, sembunyikan halaman utama dan tampilkan panel statistik
   if (result) {
     return (
       <motion.div
@@ -236,7 +244,7 @@ export default function HomePage() {
         exit={{ opacity: 0 }}
         className="mx-auto max-w-4xl space-y-6 px-4 py-8"
       >
-        {/* Back button */}
+        {/* Tombol Kembali (Back button) */}
         <motion.button
           onClick={handleBack}
           whileHover={{ scale: 1.05, x: -4 }}
@@ -247,6 +255,7 @@ export default function HomePage() {
           ← New Analysis
         </motion.button>
 
+        {/* Pemisahan berbagai Komponen UI untuk modularitas dan keterbacaan kode */}
         <VideoDetails video={result.videoInfo} />
         <SentimentSummary result={result.sentimentResult} />
         <CommentCharts result={result.sentimentResult} />
@@ -257,7 +266,7 @@ export default function HomePage() {
         <SentimentTimeline
           comments={result.comments}
           selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
+          onSelectDate={setSelectedDate} // Meneruskan state perubahan tanggal antar komponen (Prop Drilling)
         />
         <CommentSection
           comments={result.comments}
@@ -268,7 +277,7 @@ export default function HomePage() {
     );
   }
 
-  // ── Home / Landing View ─────────────────────────────────────────────────────
+  // ── Tampilan Halaman Utama / Pencarian (Home View) ─────────────────────────────────────────────────────
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -278,7 +287,7 @@ export default function HomePage() {
         exit={{ opacity: 0 }}
         className="flex flex-col items-center px-4 py-16"
       >
-        {/* Decorative background blobs */}
+        {/* Ornamen Latar Belakang (Decorative background blobs) */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <motion.div
             className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-primary/8 blur-3xl"
@@ -297,7 +306,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Hero */}
+        {/* Teks Sambutan (Hero Section) */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -325,7 +334,7 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        {/* Input bar */}
+        {/* Bilah Input Pencarian (Input bar) */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -345,9 +354,9 @@ export default function HomePage() {
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
-                  setError("");
+                  setError(""); // Reset pesan kesalahan saat pengguna mulai mengetik ulang
                 }}
-                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} // Menjalankan fungsi jika menekan tombol Enter
                 className={`h-12 rounded-2xl border-primary/20 bg-secondary/40 px-5 text-sm backdrop-blur-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary ${error ? 'border-rose-500/50 focus-visible:ring-rose-500/50' : ''}`}
               />
             </motion.div>
@@ -381,7 +390,7 @@ export default function HomePage() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Sample button */}
+        {/* Tombol Contoh Analisis (Sample button) */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -403,7 +412,7 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
 
-        {/* Loading */}
+        {/* Layar Pemuatan (Loading Overlay) */}
         <AnimatePresence>
           {loading && (
             <LoadingSpinner
@@ -413,7 +422,7 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* History */}
+        {/* Panel Riwayat Pencarian (History Sidebar) */}
         <AnalyzedVideoList
           history={history}
           onSelect={handleHistorySelect}

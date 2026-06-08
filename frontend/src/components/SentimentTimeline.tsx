@@ -22,52 +22,54 @@ interface Props {
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
-// List of time range filter options, styled like Google Finance
+// Daftar opsi filter rentang waktu, bergaya seperti Google Finance
 const TIME_RANGES = ["1D", "5D", "1M", "6M", "YTD", "1Y", "MAX"];
 
 // -----------------------------------------------------------------------------
-// TIMELINE COMPONENT
+// KOMPONEN TIMELINE
 // -----------------------------------------------------------------------------
-// The SentimentTimeline component displays a chart of sentiment trends over time.
+// Komponen SentimentTimeline menampilkan grafik tren komentar sentimen dari waktu ke waktu.
 export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Props) {
-  // State to store the time range selected by the user (default: MAX/All time)
+  // State untuk menyimpan rentang waktu yang dipilih oleh pengguna (bawaan: MAX/Sepanjang waktu)
   const [timeRange, setTimeRange] = useState("MAX");
 
-  // useMemo ensures that the filtering logic only runs when the comments or timeRange change.
+  // useMemo memastikan bahwa logika penyaringan (filter) hanya berjalan ketika ada perubahan pada komentar atau tombol waktu.
+  // Ini penting agar komputer tidak lag (memori berlebih) setiap kali komponen menggambar ulang (re-render)
   const filteredComments = useMemo(() => {
-    // If the filter is MAX or there are no comments, return all comments without filtering
+    // Jika filternya MAX atau datanya kosong, kembalikan semua komentar utuh tanpa disaring
     if (timeRange === "MAX" || !comments || comments.length === 0) return comments;
     
-    // Find the absolute newest (latest) date among all comments to act as "Today" (Now)
+    // Cari tanggal paling baru (terbaru) dari semua komentar untuk dijadikan patokan "Hari Ini" (Now)
     const times = comments.map(c => new Date(c.publishedAt).getTime()).filter(t => !isNaN(t));
     if (times.length === 0) return comments;
     const now = new Date(Math.max(...times));
     
-    // Calculate the cutoff date based on the selected filter going backwards
+    // Hitung tanggal batas waktu mundurnya berdasarkan filter yang dipilih
     const cutoff = new Date(now.getTime());
     switch (timeRange) {
-      case "1D": cutoff.setDate(cutoff.getDate() - 1); break; // Go back 1 day
-      case "5D": cutoff.setDate(cutoff.getDate() - 5); break; // Go back 5 days
-      case "1M": cutoff.setMonth(cutoff.getMonth() - 1); break; // Go back 1 month
-      case "6M": cutoff.setMonth(cutoff.getMonth() - 6); break; // Go back 6 months
-      case "YTD": // Year To Date: Start from January 1st of the same year
+      case "1D": cutoff.setDate(cutoff.getDate() - 1); break; // Mundur 1 hari
+      case "5D": cutoff.setDate(cutoff.getDate() - 5); break; // Mundur 5 hari
+      case "1M": cutoff.setMonth(cutoff.getMonth() - 1); break; // Mundur 1 bulan
+      case "6M": cutoff.setMonth(cutoff.getMonth() - 6); break; // Mundur 6 bulan
+      case "YTD": // Year To Date: Dimulai sejak tanggal 1 Januari tahun yang sama
         cutoff.setMonth(0); 
         cutoff.setDate(1);  
         break;
-      case "1Y": cutoff.setFullYear(cutoff.getFullYear() - 1); break; // Go back 1 year
+      case "1Y": cutoff.setFullYear(cutoff.getFullYear() - 1); break; // Mundur 1 tahun
     }
     
-    // Get comments published on or after the cutoff date
+    // Kembalikan hanya komentar yang dibuat SETELAH tanggal batas mundur tersebut
     return comments.filter(c => new Date(c.publishedAt).getTime() >= cutoff.getTime());
   }, [comments, timeRange]);
-  // Get grouped bucket data from the timeline function, based on filtered comments and selected timeRange
+  
+  // Dapatkan data keranjang agregasi (bucket) dari fungsi timeline library kita (misal dikelompokkan per jam/hari/bulan)
   const { data, bucketType } = getTimelineData(filteredComments, timeRange);
 
-  // Dynamic X-Axis Formatter based on the actual data granularity (bucketType)
+  // Fungsi dinamis (Formatter) untuk menyulap label sumbu X (Sumbu Mendatar) agar pas dan estetik
   const formatXAxis = (tickItem: string) => {
     if (!tickItem) return "";
 
-    // 1. Parse tickItem into a valid Date object safely
+    // 1. Analisa tickItem dan jadikan objek Date (Waktu) secara aman
     let d = new Date(tickItem);
     
     if (isNaN(d.getTime())) {
@@ -88,14 +90,14 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
        d = new Date(cleanTick);
     }
     
-    // Fallback if parsing STILL fails
+    // Opsi Cadangan jika analisis masih gagal
     if (isNaN(d.getTime())) {
-      // Just fallback to returning the time portion or date portion
+      // Potong saja langsung menggunakan manipulasi spasi (String Split)
       if (tickItem.includes(" ")) return tickItem.split(" ")[1];
       return tickItem;
     }
     
-    // 2. Format the Date object based on the actual data granularity (bucketType)
+    // 2. Format hasil teks sumbu (Axis Label) tergantung pada lebar waktu (bucketType)
     switch (bucketType) {
       case "hour":
         // Format: "16.00"
@@ -104,7 +106,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
         // Format: "19 May"
         return d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
       case "month":
-        // If the user selected MAX, prefer showing just the Year (e.g. "2026") as requested
+        // Jika pengguna memilih MAX, kita lebih memilih untuk menampilkan Tahun saja (misal "2026") agar tidak penuh
         if (timeRange === "MAX") {
           return d.getFullYear().toString();
         }
@@ -115,7 +117,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
     }
   };
 
-  // If there's no data after filtering, do not render the chart
+  // Jangan gambar kotak grafiknya kalau datanya tidak ada
   if (data.length === 0) return null;
 
   interface ChartClickState {
@@ -123,12 +125,12 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
     activePayload?: { value: number; name: string }[];
   }
 
-  // Function called when a user clicks a specific point on the chart.
+  // Fungsi yang terpanggil ketika pengguna mengklik titik (dot) pada grafik
   const handleChartClick = (state: ChartClickState) => {
     if (state && state.activeLabel != null) {
-      // Convert activeLabel to string since our dateLabel values are always strings
+      // Ubah jadi teks String
       const label = String(state.activeLabel);
-      // Toggle the filter: clicking the same point again clears the selection
+      // Toggle Filter: Jika dia menekan titik yang sama, hilangkan filter, jika beda, ubah filternya.
       onSelectDate(selectedDate === label ? null : label);
     }
   };
@@ -141,7 +143,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
       className="rounded-[2.5rem] border border-border/40 bg-card/40 p-6 backdrop-blur-md shadow-2xl shadow-primary/5 space-y-6"
     >
       <div className="flex flex-col gap-4">
-        {/* Header Section: Title & Time Range Filters */}
+        {/* Bagian Atas: Judul & Tombol Filter Rentang Waktu */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -157,7 +159,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
             </p>
           </div>
 
-          {/* Time Range Filter Buttons (Google Finance Style) */}
+          {/* Tombol Filter Rentang Waktu (Gaya Google Finance) */}
           <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/50 bg-background/50 p-1">
             {TIME_RANGES.map(range => (
               <button
@@ -175,7 +177,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
           </div>
         </div>
 
-        {/* Display clear filter button if a specific date point is selected */}
+        {/* Tampilkan lencana (badge) dan tombol hapus filter jika ada titik grafik yang sedang dipilih */}
         {selectedDate && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -198,6 +200,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
 
       <div className="h-70 w-full rounded-2xl border border-border/50 bg-card/50 p-4 backdrop-blur-sm">
         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+          {/* Library Recharts: Membangun grafik berbasis vektor SVG secara otomatis */}
           <LineChart data={data} onClick={handleChartClick} className="cursor-pointer">
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.2} />
             <XAxis
@@ -214,6 +217,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
               tickLine={false}
               dx={-5}
             />
+            {/* Tooltip yang muncul saat pengguna mengarahkan mouse ke sebuah titik (Hover/Tooltip) */}
             <Tooltip
               contentStyle={{
                 borderRadius: "16px",
@@ -222,7 +226,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
                 color: "hsl(var(--chart-tooltip-text))",
                 fontSize: "12px",
                 fontWeight: "700",
-                backdropFilter: "blur(8px)",
+                backdropFilter: "blur(8px)", // Efek kaca buram (Blur)
               }}
               itemStyle={{ color: "hsl(var(--chart-tooltip-text))" }}
             />
@@ -239,6 +243,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
                 color: "var(--muted-foreground)",
               }}
             />
+            {/* Garis Positif (Hijau) */}
             <Line
               type="monotone"
               dataKey="positive"
@@ -248,6 +253,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
               dot={{ r: 4, strokeWidth: 0, fill: "var(--color-emerald-500)" }}
               activeDot={{ r: 6, strokeWidth: 0, fill: "var(--color-emerald-500)" }}
             />
+            {/* Garis Netral (Kuning) */}
             <Line
               type="monotone"
               dataKey="neutral"
@@ -257,6 +263,7 @@ export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Prop
               dot={{ r: 4, strokeWidth: 0, fill: "var(--color-amber-500)" }}
               activeDot={{ r: 6, strokeWidth: 0, fill: "var(--color-amber-500)" }}
             />
+            {/* Garis Negatif (Merah) */}
             <Line
               type="monotone"
               dataKey="negative"
