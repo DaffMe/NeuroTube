@@ -8,7 +8,6 @@ Dokumen ini menjelaskan urutan jalannya proses aplikasi NeuroTube langkah-demi-l
 
 Proses dibagi menjadi 3 fase utama yang berjalan secara teratur:
 
-
 ```text
 [FRONTEND REACT] ───────────────> [BACKEND GOLANG] ──────────────> [REDIS QUEUE]
 Halaman Utama                     1. cmd/main.go                   Antrean Tugas
