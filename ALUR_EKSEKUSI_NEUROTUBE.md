@@ -8,15 +8,6 @@ Dokumen ini menjelaskan urutan jalannya proses aplikasi NeuroTube langkah-demi-l
 
 Proses dibagi menjadi 3 fase utama yang berjalan secara teratur:
 
-# Alur Eksekusi Sistem (System Execution Flow) NeuroTube
-
-Dokumen ini menjelaskan urutan jalannya proses aplikasi NeuroTube langkah-demi-langkah (End-to-End) beserta file-file kode yang terlibat dan saling berinteraksi.
-
----
-
-## Ringkasan Peta Alur (Pipeline Map)
-
-Proses dibagi menjadi 3 fase utama yang berjalan secara teratur:
 
 ```text
 [FRONTEND REACT] ───────────────> [BACKEND GOLANG] ──────────────> [REDIS QUEUE]
