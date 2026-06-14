@@ -200,7 +200,7 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
   // Search and Sort states
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState<"sequential" | "binary">("sequential");
-  const [sortMode, setSortMode] = useState<"none" | "lengthDesc" | "lengthAsc" | "sentiment">("none");
+  const [sortMode, setSortMode] = useState<"none" | "lengthDesc" | "lengthAsc" | "sentimentDesc" | "sentimentAsc">("none");
 
   // Add Comment Form State
   const [newCommentName, setNewCommentName] = useState("");
@@ -274,8 +274,10 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
       main = selectionSortByLength(main, "desc");
     } else if (sortMode === "lengthAsc") {
       main = selectionSortByLength(main, "asc");
-    } else if (sortMode === "sentiment") {
-      main = insertionSortBySentiment(main);
+    } else if (sortMode === "sentimentDesc") {
+      main = insertionSortBySentiment(main, "desc");
+    } else if (sortMode === "sentimentAsc") {
+      main = insertionSortBySentiment(main, "asc");
     }
 
     const repliesMap: Record<string, Comment[]> = {};
@@ -406,13 +408,14 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
               {/* Sort Control */}
               <select 
                 value={sortMode}
-                onChange={(e) => setSortMode(e.target.value as "none" | "lengthDesc" | "lengthAsc" | "sentiment")}
+                onChange={(e) => setSortMode(e.target.value as "none" | "lengthDesc" | "lengthAsc" | "sentimentDesc" | "sentimentAsc")}
                 className="rounded-xl border border-border/50 bg-background/50 px-4 py-2 text-sm focus:outline-none cursor-pointer text-muted-foreground"
               >
                 <option value="none">Default Sort</option>
                 <option value="lengthDesc">Sort: Longest Text (Selection)</option>
                 <option value="lengthAsc">Sort: Shortest Text (Selection)</option>
-                <option value="sentiment">Sort: Sentiment Level (Insertion)</option>
+                <option value="sentimentDesc">Sort: Sentiment Descending (Insertion)</option>
+                <option value="sentimentAsc">Sort: Sentiment Ascending (Insertion)</option>
               </select>
             </div>
 

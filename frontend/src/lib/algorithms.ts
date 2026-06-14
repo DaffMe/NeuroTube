@@ -123,7 +123,7 @@ export function selectionSortByLength(comments: Comment[], mode: "asc" | "desc" 
  * 4. Insertion Sort (Berdasarkan Tingkat Sentimen: Positif -> Netral -> Negatif)
  * Algoritma pengurutan yang mengambil satu elemen, lalu menyisipkannya ke posisi yang tepat pada bagian yang sudah terurut.
  */
-export function insertionSortBySentiment(comments: Comment[]): Comment[] {
+export function insertionSortBySentiment(comments: Comment[], mode: "asc" | "desc" = "desc"): Comment[] {
   const arr = [...comments];
   const n = arr.length;
 
@@ -140,10 +140,18 @@ export function insertionSortBySentiment(comments: Comment[]): Comment[] {
     const currentScore = sentimentScore(currentItem.sentiment);
     let j = i - 1;
 
-    // Geser elemen-elemen sebelumnya yang skornya lebih kecil (karena kita ingin descending 3 -> 2 -> 1)
-    while (j >= 0 && sentimentScore(arr[j].sentiment) < currentScore) {
-      arr[j + 1] = arr[j];
-      j--;
+    if (mode === "desc") {
+      // Geser elemen-elemen sebelumnya yang skornya lebih kecil (karena kita ingin descending 3 -> 2 -> 1)
+      while (j >= 0 && sentimentScore(arr[j].sentiment) < currentScore) {
+        arr[j + 1] = arr[j];
+        j--;
+      }
+    } else {
+      // Geser elemen-elemen sebelumnya yang skornya lebih besar (karena kita ingin ascending 1 -> 2 -> 3)
+      while (j >= 0 && sentimentScore(arr[j].sentiment) > currentScore) {
+        arr[j + 1] = arr[j];
+        j--;
+      }
     }
     // Sisipkan di posisi yang kosong
     arr[j + 1] = currentItem;
