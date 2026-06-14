@@ -121,7 +121,7 @@ Untuk menjalankan proyek ini di lingkungan pengembangan lokal, pastikan Docker t
    - **Dokumentasi API Python**: `http://localhost:8000/docs`
 
 > [!TIP]
-> 
+>
 > - Untuk **menghentikan Docker sementara** (data tetap aman): `docker compose stop`
 > - Untuk **menjalankan kembali layanan**: `docker compose start`
 > - Untuk **menghentikan dan menghapus semua data container** (termasuk isi database): `docker compose down -v`
