@@ -83,11 +83,11 @@ graph TD
 
 ### Halaman Beranda
 
-![Home Page](assets/ui_home.png)
+![Home Page](assets/ui_home.png?v=2)
 
 ### Dasbor Analitik
 
-![Dashboard](assets/ui_dashboard.png)
+![Dashboard](assets/ui_dashboard.png?v=2)
 
 ---
 
