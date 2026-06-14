@@ -234,6 +234,70 @@ async def count_comments_by_video(
     return result or 0
 
 
+async def create_user_comment(
+    db: AsyncSession, 
+    video_id: str, 
+    comment_id: str,
+    author_name: str, 
+    text: str, 
+    sentiment: str, 
+    sentiment_score: float
+) -> CommentData:
+    """Create a new manual comment from the user."""
+    from datetime import datetime
+    
+    db_comment = CommentData(
+        id=comment_id,
+        video_id=video_id,
+        author_display_name=author_name,
+        author_profile_image_url="", # Empty or default avatar
+        text_display=text,
+        text_original=text,
+        like_count=0,
+        published_at=datetime.utcnow().isoformat() + "Z",
+        is_reply=False,
+        sentiment=sentiment,
+        sentiment_score=sentiment_score,
+    )
+    db.add(db_comment)
+    await db.commit()
+    await db.refresh(db_comment)
+    return db_comment
+
+
+async def update_user_comment(
+    db: AsyncSession, 
+    comment_id: str, 
+    new_text: str, 
+    new_sentiment: str, 
+    new_score: float
+) -> Optional[CommentData]:
+    """Update an existing comment."""
+    result = await db.execute(select(CommentData).where(CommentData.id == comment_id))
+    comment = result.scalars().first()
+    
+    if comment:
+        comment.text_display = new_text
+        comment.text_original = new_text
+        comment.sentiment = new_sentiment
+        comment.sentiment_score = new_score
+        await db.commit()
+        await db.refresh(comment)
+        return comment
+    return None
+
+
+async def delete_user_comment(
+    db: AsyncSession, 
+    comment_id: str
+) -> bool:
+    """Delete a comment by its ID."""
+    from sqlalchemy import delete
+    result = await db.execute(delete(CommentData).where(CommentData.id == comment_id))
+    await db.commit()
+    return result.rowcount > 0
+
+
 # ── Sentiment Summary ─────────────────────────────────────────────
 
 

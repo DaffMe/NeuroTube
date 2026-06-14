@@ -37,15 +37,16 @@ Berikut adalah penjelasan tiap blok kodenya seolah-olah ditambahkan tanda `//`:
   // Ini adalah daftar "bahan pokok" yang wajib ada agar aplikasinya BISA HIDUP & JALAN.
   // -----------------------------------------------------------------------------
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.4", // Komponen dasar yang fleksibel untuk membuat UI
+    "@radix-ui/react-slot": "^1.2.4", // Komponen dasar yang fleksibel untuk membuat UI (dipakai Shadcn UI)
     "@tanstack/react-router": "^1.169.2", // Perpustakaan canggih pembuat URL Halaman (Pindah-pindah page tanpa loading)
     "class-variance-authority": "^0.7.1", // Alat untuk membuat variasi class CSS Tailwind lebih rapi (dipakai bawaan Shadcn UI)
     "clsx": "^2.1.1", // Alat untuk menggabungkan class CSS dinamis (jika kondisinya True/False)
-    "framer-motion": "^12.38.0", // Mesin animasi super mulus untuk komponen React
-    "lucide-react": "^1.14.0", // Kumpulan gambar ikon-ikon cantik yang siap pakai
-    "react": "^19.2.5", // Inti utama dari aplikasi antarmuka pengguna (React)
+    "framer-motion": "^12.38.0", // Mesin animasi super mulus untuk komponen React (transisi, hover effects, dll)
+    "lucide-react": "^1.14.0", // Kumpulan gambar ikon-ikon cantik yang siap pakai (Search, Edit, Trash, Send, dll)
+    "react": "^19.2.5", // Inti utama dari aplikasi antarmuka pengguna (React versi 19)
     "react-dom": "^19.2.5", // Jembatan yang menempelkan kode React ke layar Browser (HTML DOM)
-    "recharts": "^3.8.1", // Alat utama untuk menggambar visualisasi Grafik Data (Pie Chart, Bar Chart)
+    "react-is": "^19.2.6", // Utilitas internal React untuk pemeriksaan tipe komponen
+    "recharts": "^3.8.1", // Alat utama untuk menggambar visualisasi Grafik Data (Pie Chart, Bar Chart, Timeline)
     "tailwind-merge": "^3.6.0" // Alat yang mencegah perkelahian tabrakan gaya CSS Tailwind
   },
 
@@ -55,15 +56,22 @@ Berikut adalah penjelasan tiap blok kodenya seolah-olah ditambahkan tanda `//`:
   // Tidak akan dibawa dan tidak dipakai saat aplikasinya sudah rilis di publik.
   // -----------------------------------------------------------------------------
   "devDependencies": {
+    "@eslint/js": "^10.0.1", // Konfigurasi dasar aturan ESLint untuk JavaScript
     "@tailwindcss/vite": "^4.3.0", // Jembatan agar Vite paham bahasa Tailwind versi terbaru
     "@types/node": "^25.6.2", // Kamus kata agar TypeScript paham aturan Node.js
     "@types/react": "^19.2.14", // Kamus kata agar TypeScript paham aturan React
-    "@vitejs/plugin-react": "^6.0.1", // Plugin agar Vite bisa membaca dan kompilasi React
-    "eslint": "^10.2.1", // Polisi pemeriksa kode JavaScript
+    "@types/react-dom": "^19.2.3", // Kamus kata agar TypeScript paham aturan React DOM
+    "@vitejs/plugin-react": "^6.0.1", // Plugin agar Vite bisa membaca dan kompilasi React (JSX/TSX)
+    "autoprefixer": "^10.5.0", // Alat otomatis menambahkan prefix CSS untuk kompatibilitas browser lama
+    "eslint": "^10.2.1", // Polisi pemeriksa kode JavaScript/TypeScript
+    "eslint-plugin-react-hooks": "^7.1.1", // Plugin ESLint khusus memeriksa aturan React Hooks
+    "eslint-plugin-react-refresh": "^0.5.2", // Plugin ESLint untuk memastikan React Hot Reload berjalan benar
+    "globals": "^17.5.0", // Daftar variabel global JavaScript yang dikenal (window, document, dll)
     "postcss": "^8.5.14", // Mesin perubah bahasa CSS modern menjadi CSS jadul agar kompatibel
-    "tailwindcss": "^4.3.0", // Mesin kerangka gaya desain antarmuka
+    "tailwindcss": "^4.3.0", // Mesin kerangka gaya desain antarmuka (utility-first CSS framework)
     "typescript": "~6.0.2", // Kompiler bahasa TypeScript ke JavaScript biasa
-    "vite": "^8.0.10" // Mesin server lokal & pengepak utama aplikasinya
+    "typescript-eslint": "^8.58.2", // Plugin ESLint untuk memeriksa aturan TypeScript
+    "vite": "^8.0.10" // Mesin server lokal & pengepak utama aplikasinya (sangat cepat)
   }
 }
 ```

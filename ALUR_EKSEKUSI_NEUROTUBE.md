@@ -6,21 +6,45 @@ Dokumen ini menjelaskan urutan jalannya proses aplikasi NeuroTube langkah-demi-l
 
 ## Ringkasan Peta Alur (Pipeline Map)
 
-Proses dibagi menjadi 3 fase utama yang berjalan secara teratur:
+NeuroTube memiliki **2 jalur utama** yang berbeda:
+
+### Jalur 1: Analisis Video YouTube (ML Otomatis)
 
 ```text
 [FRONTEND REACT] ───────────────> [BACKEND GOLANG] ──────────────> [REDIS QUEUE]
 Halaman Utama                     1. cmd/main.go                   Antrean Tugas
-Home.tsx                          2. internal/handler/handler.go   In-Memory
+App.tsx                           2. internal/handler/handler.go   In-Memory
                                   3. internal/youtube/youtube.go
                                   4. internal/youtube/metrics.go
                                          │
                                          ▼
 [FRONTEND REACT] <─────────────── [DATABASE PG] <──────────── [BACKEND PYTHON]
 Halaman Dashboard                 PostgreSQL DB               1. app/workers/worker.py
-Dashboard.tsx                                                 2. app/core/sentiment/sentiment.py
+App.tsx                                                       2. app/core/sentiment/sentiment.py
                                                               3. app/core/topics.py
                                                               4. app/crud/crud.py
+```
+
+### Jalur 2: Komentar Manual (Keyword-Based)
+
+```text
+[FRONTEND REACT] ──── POST/PUT/DELETE ────> [BACKEND PYTHON]
+CommentSection.tsx                           app/api/routes/analysis.py
+ ├── Form Tambah Komentar                    ├── POST /comments/{video_id}
+ ├── Tombol Edit                             ├── PUT /comments/{comment_id}
+ └── Tombol Hapus                            └── DELETE /comments/{comment_id}
+                                                    │
+                                              analyze_sentiment_keyword()
+                                              (Kata Kunci Positif/Negatif)
+```
+
+### Jalur 3: Pencarian & Pengurutan (Frontend Algorithms)
+
+```text
+[FRONTEND REACT]
+CommentSection.tsx
+ ├── Search Bar ──> algorithms.ts ──> sequentialSearch() / binarySearch()
+ └── Sort Dropdown ──> algorithms.ts ──> selectionSortByLength() / insertionSortBySentiment()
 ```
 
 ---
@@ -31,7 +55,7 @@ Fase ini dimulai dari browser pengguna ketika mengirimkan URL video YouTube yang
 
 ```mermaid
 flowchart TD
-    Start([User Klik Submit]) --> F1[frontend/src/pages/Home.tsx]
+    Start([User Klik Submit]) --> F1[frontend/src/App.tsx]
     F1 -->|POST /api/analyze| F2[backend-fetcher/cmd/main.go]
     F2 -->|Inisiasi Router & Queue| F3[backend-fetcher/internal/handler/handler.go]
     F3 -->|Panggil API YouTube| F4[backend-fetcher/internal/youtube/youtube.go]
@@ -39,9 +63,9 @@ flowchart TD
     F4 -->|Kirim ke Redis| F6[backend-fetcher/internal/queue/publisher.go]
 ```
 
-* **`frontend/src/pages/Home.tsx`**
-  * **Peran:** Antarmuka Awal.
-  * **Proses:** Pengguna memasukkan URL YouTube di halaman utama dan menekan tombol analisis. Halaman ini mengirim request HTTP `POST /api/analyze` berisi payload URL tersebut ke backend Golang.
+* **`frontend/src/App.tsx`**
+  * **Peran:** Antarmuka Utama (Single Page Application).
+  * **Proses:** Pengguna memasukkan URL YouTube dan menekan tombol analisis. Halaman ini mengirim request HTTP `POST /api/analyze` berisi payload URL tersebut ke backend Golang.
 * **`backend-fetcher/cmd/main.go`**
   * **Peran:** Titik Masuk (Entry Point) Golang.
   * **Proses:** Server Golang menerima request. Pertama kali masuk ke fungsi `main()`, program menginisiasi koneksi ke Redis menggunakan `queue.NewPublisher` dan menyalakan router HTTP (Chi Router) untuk mengoper kendali request ke handler.
@@ -100,20 +124,66 @@ Halaman frontend React mengambil data hasil analisis dari database PostgreSQL un
 
 ```mermaid
 flowchart TD
-    R1[frontend/src/pages/Dashboard.tsx] -->|GET /api/results| R2[backend-ml/app/main.py]
+    R1[frontend/src/App.tsx] -->|GET /api/results| R2[backend-ml/app/main.py]
     R2 -->|Query PostgreSQL| R3[backend-ml/app/crud/crud.py]
     R3 -->|Kembalikan Hasil JSON| R1
 ```
 
-* **`frontend/src/pages/Dashboard.tsx`**
-  * **Peran:** Halaman Laporan Utama (Dashboard View).
+* **`frontend/src/App.tsx`**
+  * **Peran:** Halaman Utama & Dashboard (Single Page Application).
   * **Proses:** Selama Fase 1 & 2 berlangsung, halaman ini melakukan polling status analisis ke backend. Setelah mendeteksi status pekerjaan di Redis bernilai `"completed"`, halaman ini menembak API Python `GET /api/results/{job_id}`.
 * **`backend-ml/app/main.py` & `backend-ml/app/crud/crud.py` (Fungsi `get_analysis_result`)**
   * **Peran:** API Endpoint & Database Reader.
   * **Proses:** FastAPI Python menerima permintaan, melakukan kueri pembacaan data (operasi `SELECT`) hasil analisis dari database PostgreSQL, lalu mengirimkannya kembali ke Frontend dalam struktur data JSON.
 * **Visualisasi Komponen Grafik:**
-  * `Dashboard.tsx` menerima JSON tersebut dan meredistribusikannya ke komponen grafik visual berikut untuk ditampilkan kepada pengguna:
-    * **`frontend/src/components/SentimentDistribution.tsx`** (Grafik lingkaran pembagian sentimen).
+  * `App.tsx` menerima JSON tersebut dan meredistribusikannya ke komponen grafik visual berikut untuk ditampilkan kepada pengguna:
+    * **`frontend/src/components/CommentCharts.tsx`** (Grafik lingkaran pembagian sentimen / Pie Chart).
     * **`frontend/src/components/SentimentTimeline.tsx`** (Grafik garis tren sentimen dari waktu ke waktu).
-    * **`frontend/src/components/KeywordCloud.tsx`** (Visualisasi awan kata kunci populer).
-    * **`frontend/src/components/CommentList.tsx`** (Daftar tabel pencarian komentar beserta filter sentimennya).
+    * **`frontend/src/components/AiSummary.tsx`** (Ringkasan AI dan awan kata kunci / Keyword Cloud).
+    * **`frontend/src/components/CommentSection.tsx`** (Daftar komentar dengan CRUD, search, sort, dan filter sentimen).
+
+---
+
+## 4. Fase 4: Komentar Manual & Algoritma Tugas Besar
+
+Fase ini berjalan secara independen dari analisis YouTube. Pengguna bisa berinteraksi langsung dengan komentar melalui antarmuka web.
+
+```mermaid
+flowchart TD
+    U([User]) --> CS[CommentSection.tsx]
+    CS -->|Tambah Komentar| API1[POST /comments/video_id]
+    CS -->|Edit Komentar| API2[PUT /comments/comment_id]
+    CS -->|Hapus Komentar| API3[DELETE /comments/comment_id]
+    API1 --> KW[analyze_sentiment_keyword]
+    API2 --> KW
+    KW -->|Kata Kunci Matching| DB[(PostgreSQL)]
+    
+    CS -->|Ketik di Search Bar| ALG[algorithms.ts]
+    ALG -->|Sequential Search| R1[Hasil Pencarian]
+    ALG -->|Binary Search| R1
+    
+    CS -->|Pilih Sort Mode| ALG2[algorithms.ts]
+    ALG2 -->|Selection Sort by Length| R2[Hasil Pengurutan]
+    ALG2 -->|Insertion Sort by Sentiment| R2
+```
+
+* **CRUD Komentar (Requirement A):**
+  * **Tambah:** Form input nama + teks → `POST /comments/{video_id}` → sentimen dianalisis otomatis via `analyze_sentiment_keyword()`.
+  * **Edit:** Klik ikon pensil → edit teks → `PUT /comments/{comment_id}` → sentimen dihitung ulang.
+  * **Hapus:** Klik ikon tong sampah → `DELETE /comments/{comment_id}`.
+
+* **Analisis Sentimen Kata Kunci (Requirement B):**
+  * Fungsi `analyze_sentiment_keyword()` di `analysis.py` mencocokkan teks dengan daftar kata kunci positif (bagus, keren, mantap, good, awesome, love, dll) dan negatif (jelek, buruk, parah, bad, terrible, hate, dll).
+  * Jika kata positif > negatif → "positive". Jika negatif > positif → "negative". Jika sama → "neutral".
+
+* **Pencarian (Requirement C):**
+  * **Sequential Search:** Memeriksa setiap komentar satu per satu secara berurutan (linear).
+  * **Binary Search:** Mengurutkan komentar secara abjad terlebih dahulu, lalu membelah data menjadi dua bagian berulang kali untuk menemukan kecocokan.
+
+* **Pengurutan (Requirement D):**
+  * **Selection Sort:** Mengurutkan berdasarkan panjang teks komentar (terpanjang/terpendek).
+  * **Insertion Sort:** Mengurutkan berdasarkan tingkat sentimen (Positif → Netral → Negatif).
+
+* **Statistik Sentimen (Requirement E):**
+  * Filter buttons di `CommentSection.tsx` menampilkan hitungan jumlah komentar per sentimen: All (total), Positive, Neutral, Negative.
+  * Grafik Pie Chart di `CommentCharts.tsx` dan angka ringkasan di `StatBlock.tsx`.

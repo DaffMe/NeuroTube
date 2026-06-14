@@ -1,15 +1,16 @@
-import { useState, useMemo } from "react"; // Alat-alat pemori React (Menyimpan input teks sementara dan merekam hasil hitung kalkulasi berat agar tak berulang)
-import { motion, AnimatePresence } from "framer-motion"; // Pustaka pemulus gerak animasi masuk/keluarnya tabel komponen
-import { ThumbsUp, ChevronDown, ChevronUp, Filter } from "lucide-react"; // Kumpulan aset ikon grafis cantik
-import type { Comment } from "@/types"; // Format struktur acuan TypeScript untuk satu buah data Komentar
-import { Button } from "@/components/ui/button"; // Memanggil desain elemen tombol standar dari kerangka Shadcn UI
-import { ExpandableText } from "./ExpandableText"; // Komponen pemotong teks panjang agar jadi "Baca Selengkapnya..."
-import { getTimelineData } from "@/lib/timeline"; // Memanggil fungsi pembantu penghitung statistik dari hari ke hari
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ThumbsUp, ChevronDown, ChevronUp, Filter, Search as SearchIcon, Edit2, Trash2, Send } from "lucide-react";
+import type { Comment } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ExpandableText } from "./ExpandableText";
+import { getTimelineData } from "@/lib/timeline";
+import { addComment, updateComment, deleteComment } from "@/services/api";
+import { sequentialSearch, binarySearch, selectionSortByLength, insertionSortBySentiment } from "@/lib/algorithms";
 
-// Konfigurasi efek pegas animasi (Bouncy spring)
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
-// Kamus gaya warna Lencana (Badge) Sentimen
 const sentimentBadge = {
   positive: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
   neutral: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
@@ -19,28 +20,22 @@ const sentimentBadge = {
 interface CommentItemProps {
   comment: Comment;
   replies?: Comment[];
-  isReply?: boolean; // Penanda apakah item ini merupakan balasan (anak) atau komentar utama (induk)
+  isReply?: boolean;
+  onEdit: (commentId: string, newText: string) => void;
+  onDelete: (commentId: string) => void;
 }
 
-// -----------------------------------------------------------------------------
-// KOMPONEN ANAK: CommentItem
-// Berfungsi untuk merender SATU BARIS komentar secara visual (Avatar, Nama, Teks, Tombol Balasan)
-// -----------------------------------------------------------------------------
-function CommentItem({ comment, replies = [], isReply = false }: CommentItemProps) {
-  // Melacak status apakah daftar komentar balasan sedang dibuka (diperluas)
+function CommentItem({ comment, replies = [], isReply = false, onEdit, onDelete }: CommentItemProps) {
   const [showReplies, setShowReplies] = useState(false);
-  // Melacak jika ada kesalahan saat memuat gambar foto profil pengguna
   const [imgError, setImgError] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(comment.textDisplay);
   
   const hasReplies = replies.length > 0;
-
-  // Penanganan dan Pembersihan Nama Tampilan Pengguna
   const authorName = comment.authorDisplayName || "User";
   const cleanName = authorName.startsWith("@") ? authorName.slice(1) : authorName;
-  const initial = cleanName.charAt(0).toUpperCase() || "?"; // Huruf pertama untuk avatar cadangan
+  const initial = cleanName.charAt(0).toUpperCase() || "?";
   
-  // Palet warna estetik pastel, ditentukan secara spesifik menggunakan teknik Hashing dari nama pengguna.
-  // Artinya pengguna bernama "Budi" akan SELALU mendapatkan warna ungu setiap kali halamannya di-refresh.
   const avatarColors = [
     "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 ring-pink-500/20",
     "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-purple-500/20",
@@ -49,9 +44,17 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
     "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 ring-violet-500/20",
   ];
   
-  // Algoritma Hash Sederhana: Menjumlahkan kode ASCII setiap huruf di nama pengguna
   const hash = cleanName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const colorClass = avatarColors[hash % avatarColors.length]; // Modulo untuk mengambil warna berulang kali tanpa keluar batas
+  const colorClass = avatarColors[hash % avatarColors.length];
+  
+  // Deteksi komentar manual (bukan dari YouTube API) untuk menampilkan tombol Edit/Delete
+  const isManual = comment.id.startsWith("manual_");
+
+  const handleSaveEdit = () => {
+    if (!editValue.trim()) return;
+    onEdit(comment.id, editValue);
+    setIsEditing(false);
+  };
 
   return (
     <div className="flex flex-col gap-1">
@@ -59,22 +62,19 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
         layout
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
-        className={`flex gap-3 rounded-2xl p-3 transition-colors hover:bg-muted/30 ${
-          // Jika komentar adalah balasan, maka ukurannya agak diperkecil dan ditarik sedikit ke dalam (margin-left)
+        className={`group flex gap-3 rounded-2xl p-3 transition-colors hover:bg-muted/30 ${
           isReply ? "ml-1 border-l border-border/50" : ""
         }`}
       >
-        {/* FOTO PROFIL AVATAR PENGGUNA */}
         {!imgError && comment.authorProfileImageUrl ? (
           <img
             src={comment.authorProfileImageUrl}
             alt={comment.authorDisplayName}
             referrerPolicy="no-referrer"
-            onError={() => setImgError(true)} // Jika link gambar rusak/tidak valid, ganti ke mode fallback inisial nama
+            onError={() => setImgError(true)}
             className={`${isReply ? "h-6 w-6" : "h-8 w-8"} shrink-0 rounded-full ring-2 ring-background object-cover`}
           />
         ) : (
-          // FOTO PROFIL CADANGAN (Hanya berisi 1 huruf dengan warna acak deterministik dari hash tadi)
           <div
             className={`${
               isReply ? "h-6 w-6 text-[10px]" : "h-8 w-8 text-xs"
@@ -84,28 +84,55 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
           </div>
         )}
         
-        {/* IDENTITAS PENGGUNA DAN ISI KOMENTAR */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className={`font-semibold tracking-tight ${isReply ? "text-[11px]" : "text-xs"}`}>
-              {comment.authorDisplayName}
-            </span>
-            {/* Tanda Lencana Sentimen per komentar individual */}
-            <span
-              className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${sentimentBadge[comment.sentiment]}`}
-            >
-              {comment.sentiment}
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={`font-semibold tracking-tight ${isReply ? "text-[11px]" : "text-xs"}`}>
+                {comment.authorDisplayName}
+              </span>
+              <span
+                className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${sentimentBadge[comment.sentiment]}`}
+              >
+                {comment.sentiment}
+              </span>
+            </div>
+            
+            {/* Action Buttons for Manual Comments */}
+            {isManual && !isEditing && (
+              <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity">
+                <button onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-primary transition-colors">
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => onDelete(comment.id)} className="text-muted-foreground hover:text-rose-500 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
           
-          {/* Komponen pembantu untuk memotong teks komentar yang terlalu panjang (Baca Selengkapnya) */}
-          <ExpandableText 
-            text={comment.textOriginal || comment.textDisplay} 
-            lineLimit={4}
-            className="mt-1 text-xs leading-relaxed text-foreground/90 font-medium"
-          />
+          {isEditing ? (
+            <div className="mt-2 flex gap-2">
+              <Input 
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                className="h-8 text-xs"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveEdit();
+                  if (e.key === "Escape") setIsEditing(false);
+                }}
+              />
+              <Button size="sm" onClick={handleSaveEdit} className="h-8 px-3 text-xs">Save</Button>
+              <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} className="h-8 px-3 text-xs">Cancel</Button>
+            </div>
+          ) : (
+            <ExpandableText 
+              text={comment.textOriginal || comment.textDisplay} 
+              lineLimit={4}
+              className="mt-1 text-xs leading-relaxed text-foreground/90 font-medium break-words whitespace-pre-wrap"
+            />
+          )}
           
-          {/* Ikon Barisan Bawah (Jumlah Tombol Jempol / Like) */}
           <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground/60 font-semibold">
             <div className="flex items-center gap-1">
               <ThumbsUp className="h-3 w-3" />
@@ -113,18 +140,13 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
             </div>
           </div>
 
-          {/* Tombol Tampilkan/Sembunyikan Balasan Komentar */}
           {hasReplies && !isReply && (
             <div className="mt-2">
               <button
                 onClick={() => setShowReplies(!showReplies)}
-                className="flex items-center gap-2 text-[11px] font-bold text-primary hover:text-primary/80 transition-colors py-1 group"
+                className="flex items-center gap-2 text-[11px] font-bold text-primary hover:text-primary/80 transition-colors py-1"
               >
-                {showReplies ? (
-                  <ChevronUp className="h-3.5 w-3.5" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5" />
-                )}
+                {showReplies ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                 <span className="flex items-center gap-1.5">
                   {showReplies ? "Hide replies" : `View ${replies.length} replies`}
                 </span>
@@ -134,7 +156,6 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
         </div>
       </motion.div>
 
-      {/* Bagian Daftar Balasan Anak yang Tersembunyi (Akan terbuka kebawah secara mulus ketika tombol "Tampilkan Balasan" ditekan) */}
       <AnimatePresence>
         {showReplies && hasReplies && (
           <motion.div
@@ -143,9 +164,14 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
             exit={{ height: 0, opacity: 0 }}
             className="ml-8 overflow-hidden border-l-2 border-primary/10 pl-4 space-y-1"
           >
-            {/* Karena ini balasan, maka kita memanggil komponen DIRINYA SENDIRI secara rekursif (CommentItem di dalam CommentItem) dengan tanda isReply=true */}
             {replies.map((reply) => (
-              <CommentItem key={reply.id} comment={reply} isReply />
+              <CommentItem 
+                key={reply.id} 
+                comment={reply} 
+                isReply 
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </motion.div>
         )}
@@ -154,68 +180,129 @@ function CommentItem({ comment, replies = [], isReply = false }: CommentItemProp
   );
 }
 
-// -----------------------------------------------------------------------------
-// KOMPONEN UTAMA: CommentSection
-// Bertanggung jawab merender wadah besar yang membungkus semua daftar komentar beserta navigasi tombol filter sentimen
-// -----------------------------------------------------------------------------
 interface Props {
-  comments: Comment[]; // Seluruh daftar panjang komentar dari database Python
-  selectedDate: string | null; // Filter opsional jika klik dari grafik sumbu waktu
+  videoId: string;
+  comments: Comment[];
+  selectedDate: string | null;
   onSelectDate: (date: string | null) => void;
 }
 
-// Konstanta jumlah batas komentar awal yang dimuat (Paginasi). Sisanya di-'Load More' (Muat Lebih Banyak)
 const PAGE_SIZE = 10;
 
-export function CommentSection({ comments, selectedDate, onSelectDate }: Props) {
+export function CommentSection({ videoId, comments: initialComments, selectedDate, onSelectDate }: Props) {
   const [filter, setFilter] = useState<"all" | "positive" | "neutral" | "negative">("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expanded, setExpanded] = useState(true);
+  
+  // Local state untuk menyimpan seluruh komentar secara dinamis agar bisa melakukan aksi CRUD di antarmuka pengguna tanpa memuat ulang API
+  const [localComments, setLocalComments] = useState<Comment[]>(initialComments);
 
-  // MENGELOMPOKKAN KOMENTAR (Komentar Utama vs Balasan Anak)
+  // Search and Sort states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<"sequential" | "binary">("sequential");
+  const [sortMode, setSortMode] = useState<"none" | "lengthDesc" | "lengthAsc" | "sentiment">("none");
+
+  // Add Comment Form State
+  const [newCommentName, setNewCommentName] = useState("");
+  const [newCommentText, setNewCommentText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [prevInitialComments, setPrevInitialComments] = useState(initialComments);
+
+  // Sync initial comments when props change (like selecting a new video)
+  if (initialComments !== prevInitialComments) {
+    setPrevInitialComments(initialComments);
+    setLocalComments(initialComments);
+  }
+
+  // CRUD Handlers
+  const handleAddComment = async () => {
+    if (!newCommentName.trim() || !newCommentText.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const newComment = await addComment(videoId, newCommentName, newCommentText);
+      setLocalComments(prev => [newComment, ...prev]);
+      setNewCommentName("");
+      setNewCommentText("");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add comment.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditComment = async (commentId: string, newText: string) => {
+    try {
+      const updatedComment = await updateComment(commentId, newText);
+      setLocalComments(prev => prev.map(c => c.id === commentId ? { ...c, ...updatedComment } : c));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update comment.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteComment(commentId);
+      setLocalComments(prev => prev.filter(c => c.id !== commentId && c.parentId !== commentId));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete comment.");
+    }
+  };
+
   const groupedComments = useMemo(() => {
-    const { getBucketKey } = getTimelineData(comments);
+    const { getBucketKey } = getTimelineData(localComments);
     
-    // Tahap 1: Saring komentar jika pengguna sebelumnya mengklik suatu bulan tertentu di Grafik Sumbu Waktu
-    const dateFiltered = selectedDate
-      ? comments.filter((c) => getBucketKey(c.publishedAt) === selectedDate)
-      : comments;
+    let processed = selectedDate
+      ? localComments.filter((c) => getBucketKey(c.publishedAt) === selectedDate)
+      : localComments;
 
-    // Tahap 2: Pisahkan komentar induk (bukan balasan)
-    const main = dateFiltered.filter(c => !c.isReply);
+    // Apply Search Algorithm (Requirement C)
+    if (searchQuery.trim()) {
+      if (searchMode === "sequential") {
+        processed = sequentialSearch(processed, searchQuery);
+      } else if (searchMode === "binary") {
+        processed = binarySearch(processed, searchQuery);
+      }
+    }
+
+    let main = processed.filter(c => !c.isReply);
     
-    // Objek Dictionary Kosong untuk menyusun balasan anak (Induk ID -> Array[Anak 1, Anak 2])
+    // Apply Sort Algorithm (Requirement D)
+    if (sortMode === "lengthDesc") {
+      main = selectionSortByLength(main, "desc");
+    } else if (sortMode === "lengthAsc") {
+      main = selectionSortByLength(main, "asc");
+    } else if (sortMode === "sentiment") {
+      main = insertionSortBySentiment(main);
+    }
+
     const repliesMap: Record<string, Comment[]> = {};
-    
-    // Mengelompokkan semua balasan sesuai siapa 'Orang Tua'-nya menggunakan 'parentId'
-    comments.forEach(c => {
+    processed.forEach(c => {
       if (c.isReply && c.parentId) {
         if (!repliesMap[c.parentId]) repliesMap[c.parentId] = [];
         repliesMap[c.parentId].push(c);
       }
     });
 
-    // Tahap 3: Saring berdasarkan filter Tombol Sentimen saat ini (Positive/Neutral/Negative)
     const filteredMain = filter === "all" ? main : main.filter((c) => c.sentiment === filter);
     
     return {
-      main: filteredMain, // Komentar induk utama (Orang Tua) yang sudah tersaring untuk ditampilkan
-      repliesMap          // Kamus relasi data balasan anak yang masih tersembunyi
+      main: filteredMain,
+      repliesMap
     };
-  }, [comments, filter, selectedDate]);
+  }, [localComments, filter, selectedDate, searchQuery, searchMode, sortMode]);
 
-  // Sistem Pemotongan Array untuk Fungsi "Muat Lebih Banyak" (Paginasi Tampilan)
   const visible = groupedComments.main.slice(0, visibleCount);
   const hasMore = visibleCount < groupedComments.main.length;
 
-  // Menghitung jumlah kategori sentimen murni yang berfokus pada tanggal yang sedang dipilih
   const dateComments = useMemo(() => {
-    if (!selectedDate) return comments;
-    const { getBucketKey } = getTimelineData(comments);
-    return comments.filter((c) => getBucketKey(c.publishedAt) === selectedDate);
-  }, [comments, selectedDate]);
+    if (!selectedDate) return localComments;
+    const { getBucketKey } = getTimelineData(localComments);
+    return localComments.filter((c) => getBucketKey(c.publishedAt) === selectedDate);
+  }, [localComments, selectedDate]);
 
-  // Menyusun tombol Filter Navigasi Sentimen dinamis (All, Positive, Neutral, Negative) beserta angkanya
   const filters = [
     { key: "all" as const, label: "All", count: dateComments.filter(c => !c.isReply).length },
     { key: "positive" as const, label: "Positive", count: dateComments.filter((c) => !c.isReply && c.sentiment === "positive").length },
@@ -230,7 +317,6 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
       transition={{ ...spring, delay: 0.45 }}
       className="rounded-[2.5rem] border border-border/40 bg-card/40 backdrop-blur-md shadow-2xl shadow-primary/5"
     >
-      {/* Header Utama Kotak Komentar */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center justify-between p-6 cursor-pointer"
@@ -244,11 +330,7 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
           </h3>
         </div>
         <div className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center hover:bg-muted/50 transition-colors">
-          {expanded ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          )}
+          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
       </button>
 
@@ -261,12 +343,9 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             className="overflow-hidden"
           >
-            {/* Spanduk (Banner) Pengingat Biru saat filter tanggal sedang aktif */}
             {selectedDate && (
               <div className="mx-6 mb-4 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs font-semibold text-primary">
-                <span>
-                  Showing comments from <strong>{selectedDate}</strong>
-                </span>
+                <span>Showing comments from <strong>{selectedDate}</strong></span>
                 <button
                   onClick={() => onSelectDate(null)}
                   className="rounded-xl border border-primary/30 px-3 py-1 bg-background hover:bg-muted text-primary text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer"
@@ -276,22 +355,78 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
               </div>
             )}
 
-            {/* Menu Navigasi Tombol Geser Tab (Tabs) untuk memfilter sentimen */}
+            {/* --- ADD NEW COMMENT FORM --- */}
+            <div className="px-6 mb-6">
+              <div className="flex flex-col gap-2 rounded-2xl border border-border/50 bg-background/50 p-4">
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Add Manual Comment</div>
+                <Input 
+                  placeholder="Your Name" 
+                  value={newCommentName} 
+                  onChange={e => setNewCommentName(e.target.value)} 
+                  className="h-10 text-sm bg-background"
+                />
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Type your comment here..." 
+                    value={newCommentText} 
+                    onChange={e => setNewCommentText(e.target.value)} 
+                    className="h-10 text-sm bg-background"
+                    onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+                  />
+                  <Button onClick={handleAddComment} disabled={isSubmitting} className="h-10 px-4 shrink-0">
+                    <Send className="w-4 h-4 mr-2" />
+                    Send
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* --- SEARCH & SORT CONTROLS --- */}
+            <div className="px-6 mb-6 flex flex-col sm:flex-row gap-4">
+              {/* Search Control */}
+              <div className="flex-1 flex gap-2 rounded-xl border border-border/50 bg-background/50 p-1 pl-3 items-center">
+                <SearchIcon className="w-4 h-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  placeholder="Search comments..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent border-none text-sm focus:outline-none"
+                />
+                <select 
+                  value={searchMode} 
+                  onChange={(e) => setSearchMode(e.target.value as "sequential" | "binary")}
+                  className="text-xs border-l border-border pl-2 pr-1 py-2 bg-transparent text-muted-foreground focus:outline-none cursor-pointer"
+                >
+                  <option value="sequential">Sequential Search</option>
+                  <option value="binary">Binary Search</option>
+                </select>
+              </div>
+              
+              {/* Sort Control */}
+              <select 
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as "none" | "lengthDesc" | "lengthAsc" | "sentiment")}
+                className="rounded-xl border border-border/50 bg-background/50 px-4 py-2 text-sm focus:outline-none cursor-pointer text-muted-foreground"
+              >
+                <option value="none">Default Sort</option>
+                <option value="lengthDesc">Sort: Longest Text (Selection)</option>
+                <option value="lengthAsc">Sort: Shortest Text (Selection)</option>
+                <option value="sentiment">Sort: Sentiment Level (Insertion)</option>
+              </select>
+            </div>
+
             <div className="flex gap-2 overflow-x-auto px-6 pb-6 no-scrollbar">
               {filters.map(({ key, label, count }) => (
                 <motion.button
                   key={key}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setFilter(key);
-                    // Setiap kali pengguna mengganti tab, kembalikan ke batas penampilan awal yaitu 10 item saja
-                    setVisibleCount(PAGE_SIZE);
-                  }}
+                  onClick={() => { setFilter(key); setVisibleCount(PAGE_SIZE); }}
                   className={`shrink-0 rounded-2xl border px-5 py-2.5 text-xs font-black transition-all cursor-pointer ${
                     filter === key
-                      ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20" // Warna tombol jika sedang aktif/terpilih
-                      : "border-border/50 bg-background/50 text-muted-foreground hover:border-primary/30" // Warna redup jika tidak aktif
+                      ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "border-border/50 bg-background/50 text-muted-foreground hover:border-primary/30"
                   }`}
                 >
                   {label} <span className="ml-1 opacity-60 font-medium">({count})</span>
@@ -299,26 +434,30 @@ export function CommentSection({ comments, selectedDate, onSelectDate }: Props) 
               ))}
             </div>
 
-            {/* Ruang Gambar Barisan Komentar Induk  */}
             <div className="space-y-4 px-6 pb-8">
-              {/* Animasi ketika satu blok komentar terhapus atau tertukar (misal saat berganti tab filter sentimen) */}
-              <AnimatePresence mode="popLayout">
-                {visible.map((comment) => (
-                  <CommentItem 
-                    key={comment.id} 
-                    comment={comment} 
-                    replies={groupedComments.repliesMap[comment.id]} // Memasukkan relasi balasan khusus milik komentar spesifik ini dari array kamus replikasi Map.
-                  />
-                ))}
-              </AnimatePresence>
+              {visible.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  No comments found.
+                </div>
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {visible.map((comment) => (
+                    <CommentItem 
+                      key={comment.id} 
+                      comment={comment} 
+                      replies={groupedComments.repliesMap[comment.id]} 
+                      onEdit={handleEditComment}
+                      onDelete={handleDeleteComment}
+                    />
+                  ))}
+                </AnimatePresence>
+              )}
 
-              {/* Tombol Muat Lebih Banyak (Load More) hanya tampil jika persediaan komentar belum habis ditampilakan */}
               {hasMore && (
                 <div className="pt-6 text-center">
                   <Button
                     variant="outline"
                     size="lg"
-                    // Tambah limit kemunculan sebesar 10 item setiap kali tombol diklik
                     onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                     className="rounded-4xl px-8 py-6 text-xs font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all active:scale-95"
                   >

@@ -1,4 +1,4 @@
-import type { AnalysisResponse, AnalyzedVideo } from "@/types"; // Format pengaman tipe dari TypeScript yang mewakili respons paket data dari backend Golang/Python
+import type { AnalysisResponse, AnalyzedVideo, Comment } from "@/types"; // Format pengaman tipe dari TypeScript yang mewakili respons paket data dari backend Golang/Python
 
 // Nama kunci penyimpanan lokal (Local Storage) di browser pengguna
 const STORAGE_KEY = "NeuroTube_history";
@@ -172,3 +172,46 @@ export async function deleteVideoFromServer(videoId: string): Promise<void> {
     console.error("Failed to update local storage after deletion", err);
   }
 }
+
+// ── CRUD Comments (Assignment Requirement A) ─────────────────────────────────────────────────────────────
+
+export async function addComment(videoId: string, authorName: string, text: string): Promise<Comment> {
+  const res = await fetch(`${ML_API}/comments/${videoId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ authorName, text }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Failed to add comment");
+  }
+  return res.json();
+}
+
+export async function updateComment(commentId: string, text: string): Promise<Comment> {
+  const res = await fetch(`${ML_API}/comments/${commentId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Failed to update comment");
+  }
+  return res.json();
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+  const res = await fetch(`${ML_API}/comments/${commentId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Failed to delete comment");
+  }
+}
+

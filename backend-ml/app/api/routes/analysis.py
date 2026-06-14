@@ -12,6 +12,8 @@ from datetime import datetime # Fungsi dasar Python untuk merekam tanggal dan wa
 from typing import Optional # Mengizinkan parameter fungsi atau rute untuk tidak diisi (opsional)
 
 from fastapi import APIRouter, Depends, HTTPException, Query # Pustaka FastAPI untuk membuat gerbang rute, melempar error HTTP, dan menangkap parameter URL
+from pydantic import BaseModel
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession # Menjamin koneksi database asinkron tidak saling bertabrakan
 
 from app.db.session import get_db # Modul internal yang bertugas membuka dan menutup brankas database setiap kali ada request
@@ -183,6 +185,105 @@ async def get_comments(
         "offset": offset,
         "hasMore": (offset + len(comments)) < total, # Boolean True/False untuk menandakan apakah masih ada sisa komentar untuk tombol Load More
     }
+
+
+# ── Simple Keyword-based Sentiment Analysis (Assignment Requirement B) ──
+
+def analyze_sentiment_keyword(text: str):
+    """
+    Sistem melakukan analisis sentimen komentar secara sederhana 
+    berdasarkan kata kunci positif dan negatif.
+    """
+    text_lower = text.lower()
+    positive_words = ["bagus", "keren", "mantap", "hebat", "suka", "terbaik", "kreatif", "bermanfaat", "good", "awesome", "amazing", "love"]
+    negative_words = ["jelek", "buruk", "parah", "sampah", "benci", "mengecewakan", "bad", "terrible", "awful", "boring", "hate"]
+    
+    pos_count = sum(1 for word in positive_words if word in text_lower)
+    neg_count = sum(1 for word in negative_words if word in text_lower)
+    
+    if pos_count > neg_count:
+        return "positive", 0.8
+    elif neg_count > pos_count:
+        return "negative", -0.8
+    else:
+        return "neutral", 0.0
+
+class CommentCreate(BaseModel):
+    authorName: str
+    text: str
+
+class CommentUpdate(BaseModel):
+    text: str
+
+@router.post("/comments/{video_id}")
+async def create_comment(
+    video_id: str,
+    payload: CommentCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Create a new manual comment with simple keyword sentiment."""
+    sentiment, score = analyze_sentiment_keyword(payload.text)
+    comment_id = f"manual_{uuid.uuid4().hex}"
+    
+    comment = await crud.create_user_comment(
+        db, 
+        video_id=video_id,
+        comment_id=comment_id,
+        author_name=payload.authorName,
+        text=payload.text,
+        sentiment=sentiment,
+        sentiment_score=score
+    )
+    
+    return {
+        "id": comment.id,
+        "authorDisplayName": comment.author_display_name,
+        "authorProfileImageUrl": comment.author_profile_image_url,
+        "textDisplay": comment.text_display,
+        "likeCount": comment.like_count,
+        "publishedAt": comment.published_at,
+        "sentiment": comment.sentiment,
+        "sentimentScore": comment.sentiment_score,
+    }
+
+@router.put("/comments/{comment_id}")
+async def update_comment(
+    comment_id: str,
+    payload: CommentUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update an existing comment and re-evaluate its sentiment."""
+    sentiment, score = analyze_sentiment_keyword(payload.text)
+    
+    updated = await crud.update_user_comment(
+        db,
+        comment_id=comment_id,
+        new_text=payload.text,
+        new_sentiment=sentiment,
+        new_score=score
+    )
+    
+    if not updated:
+        raise HTTPException(status_code=404, detail="Comment not found")
+        
+    return {
+        "id": updated.id,
+        "authorDisplayName": updated.author_display_name,
+        "textDisplay": updated.text_display,
+        "sentiment": updated.sentiment,
+        "sentimentScore": updated.sentiment_score,
+    }
+
+@router.delete("/comments/{comment_id}")
+async def delete_comment(
+    comment_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """Delete a manual comment."""
+    deleted = await crud.delete_user_comment(db, comment_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    return {"message": "Comment deleted successfully"}
 
 
 # ── Private helpers ───────────────────────────────────────────────

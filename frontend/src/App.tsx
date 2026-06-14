@@ -269,6 +269,7 @@ export default function HomePage() {
           onSelectDate={setSelectedDate} // Meneruskan state perubahan tanggal antar komponen (Prop Drilling)
         />
         <CommentSection
+          videoId={result.videoInfo.id}
           comments={result.comments}
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}

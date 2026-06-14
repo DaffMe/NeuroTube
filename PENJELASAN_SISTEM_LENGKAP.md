@@ -11,11 +11,12 @@ Berisi file-file yang mengatur konfigurasi infrastruktur dan lingkungan proyek s
 - **`docker-compose.yml`**: Orkestrasi Docker untuk menyalakan semua sistem (Frontend, Fetcher, ML, Postgres, Redis) secara serentak.
 - **`.env`** & **`.env.example`**: Tempat menyimpan kunci rahasia (API Key YouTube, API Key Gemini, password Database).
 - **`e2e_test_3.py`**: Skrip Python otomatis (End-to-End Test) untuk mengetes apakah semua komponen terhubung dengan benar.
-- **`README.md`**: Dokumentasi pengenalan proyek secara umum.
+- **`README.md`**: Dokumentasi pengenalan proyek secara umum, termasuk checklist ketentuan Tugas Besar.
 - **`MATERI.txt`**: Catatan referensi pribadi pengguna mengenai materi kuliah dasar pemrograman.
-- **`SYSTEM_DESIGN_NEUROTUBE.md` / `.txt`**: Penjelasan diagram alur logika dari sistem ini.
-- **`PENJELASAN_SISTEM_LENGKAP.md` / `.txt`**: File dokumentasi lengkap yang sedang Anda baca ini.
+- **`SYSTEM_DESIGN_NEUROTUBE.md`**: Penjelasan diagram alur logika dari sistem ini.
+- **`PENJELASAN_SISTEM_LENGKAP.md`**: File dokumentasi lengkap yang sedang Anda baca ini.
 - **`PENJELASAN_PACKAGE_DAN_BUN.md`**: Penjelasan khusus mengenai konfigurasi Node.js (package.json).
+- **`ALUR_EKSEKUSI_NEUROTUBE.md`**: Dokumentasi alur eksekusi langkah demi langkah dari setiap fase sistem.
 - **`.vscode/settings.json`**: Pengaturan seragam untuk teks editor Visual Studio Code.
 - **`assets/`**: Folder yang berisi aset visual pasif seperti logo (favicon) dan gambar tangkapan layar UI.
 
@@ -41,27 +42,38 @@ Berisi antarmuka pengguna interaktif (User Interface).
 ### Source Code (`src/`)
 
 - **`src/main.tsx`**: Titik masuk (Entry point) eksekusi React ke dalam browser HTML.
-- **`src/App.tsx`**: Halaman utama yang mengoordinasikan seluruh alur dan interaksi web.
+- **`src/App.tsx`**: Halaman utama (Single Page Application) yang mengoordinasikan seluruh alur dan interaksi web. Menggabungkan halaman Home dan Dashboard dalam satu file.
 - **`src/index.css`**: Pengaturan global warna, animasi, dan gaya Tailwind CSS.
 - **`src/types/index.ts`**: Buku kamus struktur data (Tipe data untuk Video, Komentar, dll).
-- **`src/services/api.ts`**: Fungsi penembak/pembawa pesan dari Frontend ke Backend (HTTP Request).
+- **`src/services/api.ts`**: Fungsi penembak/pembawa pesan dari Frontend ke Backend (HTTP Request). Termasuk fungsi CRUD komentar manual (`addComment`, `updateComment`, `deleteComment`).
 - **`src/lib/utils.ts`**: Fungsi asisten kecil untuk CSS.
 - **`src/lib/timeline.ts`**: Algoritma perhitungan grafik garis waktu (*Timeline*).
+- **`src/lib/algorithms.ts`**: **[BARU]** Implementasi 4 algoritma Tugas Besar:
+  - `sequentialSearch()` — Pencarian sekuensial satu per satu.
+  - `binarySearch()` — Pencarian biner dengan pembagian data.
+  - `selectionSortByLength()` — Pengurutan seleksi berdasarkan panjang teks.
+  - `insertionSortBySentiment()` — Pengurutan sisip berdasarkan tingkat sentimen.
 
 ### Komponen Visual (`src/components/`)
 
 - **`ui/` (`button.tsx`, `card.tsx`, `input.tsx`)**: Tombol, kartu, dan kotak input standar (Bawaan Shadcn UI).
 - **`theme-provider.tsx`** & **`theme-context.ts`**: Mesin pemindah Mode Gelap (Dark Mode) dan Mode Terang.
-- **`AiSummary.tsx`**: Menampilkan ringkasan teks Gemini.
-- **`AnalyzedVideoList.tsx`**: Menampilkan daftar video yang pernah dianalisis sebelumnya.
+- **`AiSummary.tsx`**: Menampilkan ringkasan teks dari Gemini AI dan visualisasi awan kata kunci (Keyword Cloud).
+- **`AnalyzedVideoList.tsx`**: Menampilkan daftar video yang pernah dianalisis sebelumnya (History).
 - **`CommentCharts.tsx`**: Menampilkan grafik bulat (Pie Chart) sentimen.
-- **`CommentSection.tsx`**: Menampilkan daftar percakapan/komentar individu.
-- **`ExpandableText.tsx`**: Teks yang bisa dipanjangkan/dipendekkan (Read More).
-- **`Header.tsx`**: Bagian atas halaman (Navigasi & Logo).
+- **`CommentSection.tsx`**: **[UTAMA]** Menampilkan daftar komentar dengan fitur lengkap:
+  - Form tambah komentar manual (input Nama + Teks → Send).
+  - Tombol Edit & Hapus pada komentar manual (hover untuk melihat).
+  - Search bar dengan pilihan Sequential Search / Binary Search.
+  - Dropdown pengurutan: Selection Sort (panjang teks) / Insertion Sort (sentimen).
+  - Filter buttons: All, Positive, Neutral, Negative (dengan hitungan jumlah).
+  - Pagination (Load More button).
+- **`ExpandableText.tsx`**: Teks yang bisa dipanjangkan/dipendekkan (Read More / Show Less).
+- **`Header.tsx`**: Bagian atas halaman (Navigasi & Logo NeuroTube).
 - **`LoadingSpinner.tsx`**: Animasi berputar saat menunggu proses loading.
-- **`SentimentTimeline.tsx`**: Grafik naik turun (Bar Chart) sentimen per menit.
-- **`StatBlock.tsx`**: Kotak-kotak kecil berisi angka ringkasan statistik.
-- **`VideoDetails.tsx`**: Menampilkan gambar *thumbnail* dan judul YouTube.
+- **`SentimentTimeline.tsx`**: Grafik batang (Bar Chart) sentimen per periode waktu.
+- **`StatBlock.tsx`**: Kotak-kotak kecil berisi angka ringkasan statistik (total komentar, rata-rata skor, dll).
+- **`VideoDetails.tsx`**: Menampilkan gambar *thumbnail*, judul, dan detail info video YouTube.
 
 ---
 
@@ -69,13 +81,14 @@ Berisi antarmuka pengguna interaktif (User Interface).
 
 Layanan pengambil data YouTube super cepat.
 
-- **`cmd/main.go`**: Titik awal eksekusi program Golang (Menyalakan Server HTTP).
+- **`cmd/main.go`**: Titik awal eksekusi program Golang (Menyalakan Server HTTP di port 8080).
 - **`internal/handler/handler.go`**: Penerima sinyal URL, mengatur proses secara berurutan, dan memancarkan status proses (SSE).
 - **`internal/youtube/youtube.go`**: Agen yang berbicara langsung dengan Server YouTube untuk menarik data komentar asli.
 - **`internal/youtube/metrics.go`**: Algoritma murni mata kuliah (Sorting, Searching, Pointer, Rekursi) untuk menghitung statistik data.
 - **`internal/queue/queue.go`**: Mesin pendorong paket ke dalam antrean (Redis Message Broker).
 - **`go.mod`** & **`go.sum`**: Daftar pustaka Golang yang dipakai (manajemen dependency).
 - **`Dockerfile`** & **`.dockerignore`**: Resep untuk mengompres program Golang ke Docker.
+- **`main.exe`**: Binary executable hasil kompilasi Go (untuk menjalankan tanpa `go run`).
 
 ---
 
@@ -86,31 +99,57 @@ Otak kecerdasan buatan (Machine Learning & NLP).
 ### File Akar Backend-ML
 
 - **`download_models.py`**: Skrip pra-syarat untuk mengunduh model AI sentimen (HuggingFace) ke komputer sebelum dipakai.
-- **`requirements.txt`**: Daftar pusaka (library) Python seperti FastAPI, SQLAlchemy.
+- **`requirements.txt`**: Daftar pustaka (library) Python seperti FastAPI, SQLAlchemy, PyTorch, Transformers.
 - **`Dockerfile`** & **`.dockerignore`**: Resep membuat mesin server AI dalam kontainer Docker.
+- **`.env`**: Konfigurasi lokal termasuk `DATABASE_URL` untuk koneksi ke PostgreSQL.
 
 ### Modul Aplikasi (`app/`)
 
 Setiap folder umumnya diakhiri dengan file kosong **`__init__.py`** sebagai penanda wajib bahwa itu adalah modul Python.
 
-- **`app/main.py`**: Titik nyala Server API Python (FastAPI).
-- **`app/reanalyze_video.py`**: Alat (skrip manual) untuk admin jika ingin menghitung ulang sentimen sebuah video.
-- **`app/core/config.py`**: Pembaca kata sandi dan pengaturan sistem.
-- **`app/core/topics.py`**: Mesin NLP peringkas percakapan menggunakan AI Gemini Google (atau algoritma kata sering muncul).
-- **`app/core/sentiment/sentiment.py`**: Mesin AI penebak nada emosi (Positif/Negatif/Netral) menggunakan model IndoBERT dan XLM-RoBERTa.
+- **`app/main.py`**: Titik nyala Server API Python (FastAPI) di port 8000.
+- **`app/reanalyze_video.py`**: Alat (skrip manual) untuk admin jika ingin menghitung ulang sentimen sebuah video menggunakan model ML.
+- **`app/core/config.py`**: Pembaca kata sandi dan pengaturan sistem (Redis URL, Database URL, dll).
+- **`app/core/topics.py`**: Mesin NLP peringkas percakapan menggunakan AI Gemini Google (atau algoritma kata sering muncul sebagai fallback).
+- **`app/core/sentiment/sentiment.py`**: Mesin AI penebak nada emosi (Positif/Negatif/Netral) menggunakan model Indo-RoBERTa dan XLM-RoBERTa.
 - **`app/core/sentiment/spam.py`**: Saringan/Detektor untuk mengabaikan komentar sampah (Spam, Promosi Judol, dsb).
-- **`app/api/routes/analysis.py`**: Pintu gerbang (Endpoint HTTP) untuk mengirim laporan statistik jadi kembali ke Frontend.
+- **`app/api/routes/analysis.py`**: **[UTAMA]** Pintu gerbang (Endpoint HTTP) yang menyediakan:
+  - `GET /analysis/{job_id}` — Mengambil hasil analisis berdasarkan Job ID.
+  - `GET /analysis/video/{video_id}` — Mengambil hasil analisis berdasarkan Video ID.
+  - `GET /history` — Daftar riwayat analisis.
+  - `DELETE /history` — Hapus semua riwayat.
+  - `DELETE /history/{video_id}` — Hapus riwayat spesifik 1 video.
+  - `GET /comments/{video_id}` — Ambil komentar dengan pagination.
+  - `POST /comments/{video_id}` — **Tambah komentar manual** + analisis keyword.
+  - `PUT /comments/{comment_id}` — **Edit komentar manual** + re-analisis keyword.
+  - `DELETE /comments/{comment_id}` — **Hapus komentar manual**.
+  - `analyze_sentiment_keyword()` — Fungsi analisis sentimen berbasis kata kunci (Requirement B Tugas Besar).
 - **`app/db/session.py`**: Modul penyambung kabel (koneksi) antara Python dan database PostgreSQL.
 - **`app/models/models.py`**: Cetak biru rancangan struktur kolom tabel di database.
-- **`app/crud/crud.py`**: Operasi spesifik (Create/Read/Update) untuk baca-tulis ke tabel database.
+- **`app/crud/crud.py`**: Operasi spesifik (Create/Read/Update/Delete) untuk baca-tulis ke tabel database. Termasuk fungsi `create_user_comment`, `update_user_comment`, dan `delete_user_comment`.
 - **`app/workers/worker.py`**: Kuli panggul (Background Worker) yang selalu siaga menarik kerjaan dari antrean Redis, dan menyetor teksnya ke Mesin AI.
 
 ---
 
 ## 5. Alur Komunikasi Arsitektur Keseluruhan (System Flow)
 
-1. **Frontend -> Golang**: Klien mentransmisikan *Request HTTP POST* yang menyertakan payload berisi referensi URL YouTube.
-2. **Golang -> Redis**: Layanan API Golang memanen parameter metrik dan komentar YouTube, merakit data, kemudian mendistribusikan paket tersebut melalui mekanisme *Message Passing* ke dalam memori antrean Redis.
-3. **Redis -> Python**: Pekerja otonom (*Background Worker*) berbasis Python secara persisten mengeksekusi ekstraksi (*dequeue*) dari antrean Redis.
-4. **Python -> Database**: Kumpulan teks ditransformasi secara matematis melalui vektor inferensi NLP, dirangkum menggunakan algoritma hibrida AI, kemudian hasil matriks sentimennya disinkronisasi ke dalam penyimpanan relasional PostgreSQL.
-5. **Frontend -> Python**: Klien Frontend, atas tindakan interaksi pengguna, mengeksekusi pemanggilan *REST API GET* untuk mengunduh laporan matriks, dan melakukan *re-rendering* grafik UI di layar.
+### Jalur Analisis YouTube (Otomatis)
+
+1. **Frontend → Golang**: Klien mentransmisikan *Request HTTP POST* yang menyertakan payload berisi referensi URL YouTube.
+2. **Golang → Redis**: Layanan API Golang memanen parameter metrik dan komentar YouTube, merakit data, kemudian mendistribusikan paket tersebut melalui mekanisme *Message Passing* ke dalam memori antrean Redis.
+3. **Redis → Python**: Pekerja otonom (*Background Worker*) berbasis Python secara persisten mengeksekusi ekstraksi (*dequeue*) dari antrean Redis.
+4. **Python → Database**: Kumpulan teks ditransformasi secara matematis melalui vektor inferensi NLP, dirangkum menggunakan algoritma hibrida AI, kemudian hasil matriks sentimennya disinkronisasi ke dalam penyimpanan relasional PostgreSQL.
+5. **Frontend → Python**: Klien Frontend, atas tindakan interaksi pengguna, mengeksekusi pemanggilan *REST API GET* untuk mengunduh laporan matriks, dan melakukan *re-rendering* grafik UI di layar.
+
+### Jalur Komentar Manual (Keyword-Based)
+
+1. **Frontend → Python**: Pengguna mengisi form nama dan teks komentar di `CommentSection.tsx`, lalu menekan tombol Send.
+2. **Python (Keyword Analysis)**: Server menerima teks dan menjalankan `analyze_sentiment_keyword()` yang mencocokkan dengan daftar kata kunci positif/negatif.
+3. **Python → Database**: Komentar beserta hasil sentimen disimpan ke PostgreSQL.
+4. **Frontend Update**: State lokal di React diperbarui secara langsung tanpa perlu polling.
+
+### Jalur Search & Sort (Frontend-Only)
+
+1. **Search**: Pengguna mengetik kata kunci di search bar → `algorithms.ts` menjalankan `sequentialSearch()` atau `binarySearch()` di client-side.
+2. **Sort**: Pengguna memilih mode pengurutan dari dropdown → `algorithms.ts` menjalankan `selectionSortByLength()` atau `insertionSortBySentiment()` di client-side.
+3. Tidak ada komunikasi ke backend — semua diproses di browser pengguna.

@@ -31,11 +31,16 @@ The project uses a microservices architecture to separate the fast data ingestio
 ## Features
 
 - **Tugas Besar Edition (Fully Documented)**: Seluruh basis kode aplikasi (Golang, Python, dan React) telah dilengkapi dengan anotasi komentar *line-by-line* dan penjelasan fungsi `import` dalam **Bahasa Indonesia** yang sangat komprehensif. Didesain khusus untuk mempermudah proses belajar dan presentasi akademik.
+- **CRUD Komentar Manual (Requirement A)**: Pengguna dapat menambahkan komentar baru secara manual, mengedit komentar yang sudah ada, dan menghapus komentar melalui antarmuka web.
+- **Analisis Sentimen Kata Kunci (Requirement B)**: Komentar manual dianalisis secara otomatis menggunakan metode pencocokan kata kunci positif dan negatif (`analyze_sentiment_keyword`).
+- **Sequential & Binary Search (Requirement C)**: Pengguna dapat mencari komentar berdasarkan kata kunci menggunakan algoritma Sequential Search atau Binary Search yang dapat dipilih melalui dropdown di UI.
+- **Selection & Insertion Sort (Requirement D)**: Pengguna dapat mengurutkan komentar berdasarkan panjang teks (Selection Sort) atau tingkat sentimen positif ke negatif (Insertion Sort).
+- **Statistik Sentimen (Requirement E)**: Sistem menampilkan statistik jumlah komentar berdasarkan kategori sentimen (Positif, Netral, Negatif) melalui filter buttons dan grafik visualisasi.
 - **Concurrent Data Fetching**: Uses a Go backend to rapidly fetch thousands of YouTube comments and their replies.
-- **Sentiment Analysis Engine**: A Python FastAPI backend that runs a Dual-Engine Hugging Face Transformers setup (XLM-RoBERTa & Indo-RoBERTa) for highly accurate, multilingual sentiment classification. Dilengkapi juga dengan Regex Spammer Filter untuk menghemat resource GPU.
+- **Dual-Engine Sentiment Analysis**: A Python FastAPI backend that runs Hugging Face Transformers (XLM-RoBERTa & Indo-RoBERTa) for highly accurate, multilingual sentiment classification. Dilengkapi juga dengan Regex Spammer Filter untuk menghemat resource GPU.
 - **Interactive Dashboard**: A modern, responsive frontend built with React 19 and Tailwind CSS v4, featuring:
   - **Sentiment Timeline**: A chart showing how sentiments change over time.
-  - **Keyword Cloud**: A dynamic visual representation of the most common topics.
+  - **Keyword Cloud**: A dynamic visual representation of the most common topics (powered by Gemini AI).
   - **Deep-Thread Comments Filtering**: Filter through thousands of comments based on their sentiment score.
 - **Containerized**: Fully dockerized setup for easy local deployment.
 
@@ -45,9 +50,9 @@ The project uses a microservices architecture to separate the fast data ingestio
 
 The app is split into three main services:
 
-1. **Frontend (React + Vite)**: Handles the user interface and data visualization.
+1. **Frontend (React + Vite)**: Handles the user interface, data visualization, search/sort algorithms, and CRUD komentar manual.
 2. **Fetcher Service (Go)**: Directly communicates with the YouTube Data API v3 to fetch comments as fast as possible and pushes them to Redis.
-3. **ML Service (Python + FastAPI)**: Pulls comments from Redis, calculates sentiment scores using Transformer models, and stores the results in PostgreSQL.
+3. **ML Service (Python + FastAPI)**: Pulls comments from Redis, calculates sentiment scores using Transformer models, stores results in PostgreSQL, and provides keyword-based sentiment analysis for manual comments.
 
 ```mermaid
 graph TD
@@ -59,6 +64,8 @@ graph TD
     MLEngine -->|Transformer Scoring| DB[(PostgreSQL)]
     Frontend -->|Poll Results| MLEngine
     MLEngine -->|History & Summaries| Frontend
+    Frontend -->|Manual Comment CRUD| MLEngine
+    MLEngine -->|Keyword Sentiment| Frontend
 ```
 
 ---
@@ -101,7 +108,7 @@ To run this project locally, you need Docker installed and a YouTube API Key.
    cp .env.example .env
    ```
 
-   Open the `.env` file and insert your `YOUTUBE_API_KEY`.
+   Open the `.env` file and insert your `YOUTUBE_API_KEY` and optionally `GEMINI_API_KEY`.
 
 3. **Run with Docker Compose**
 
@@ -113,20 +120,32 @@ To run this project locally, you need Docker installed and a YouTube API Key.
    - **Frontend UI**: `http://localhost:5173`
    - **Python API Docs**: `http://localhost:8000/docs`
 
+> [!TIP]
+> Untuk **mematikan Docker sementara** tanpa menghapus data: `docker compose stop`
+> Untuk **menyalakan ulang**: `docker compose start`
+> Untuk **menghapus semua** (termasuk data database): `docker compose down -v`
+
 ---
 
 ## Local Development (Without Docker)
 
-If you prefer to run the services directly on your host machine:
+If you prefer to run the services directly on your host machine, you still need PostgreSQL and Redis running (can use Docker for just these two):
+
+```bash
+docker compose start postgres redis
+```
 
 ### ML Backend (Python)
 
 ```bash
 cd backend-ml
 python -m venv venv
-source venv/bin/activate
+# Windows:
+.\venv\Scripts\activate
+# Linux/Mac:
+# source venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Fetcher Backend (Go)
@@ -134,18 +153,28 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd backend-fetcher
 go mod download
-go run cmd/main.go
+go run ./cmd/server
 ```
 
-### Frontend (React with Bun)
-
-Disarankan menggunakan **Bun** untuk instalasi Node modules yang lebih cepat.
+### Frontend (React)
 
 ```bash
 cd frontend
-bun install
-bun run dev
+npm install
+npm run dev
 ```
+
+---
+
+## Tugas Besar Specifications Checklist
+
+| # | Requirement | Status | Implementation |
+| --- | ------------ | -------- | ---------------- |
+| a | CRUD Komentar (Tambah, Ubah, Hapus) | ✅ | `analysis.py` (POST/PUT/DELETE endpoints), `CommentSection.tsx` (UI form) |
+| b | Analisis Sentimen Kata Kunci | ✅ | `analysis.py` → `analyze_sentiment_keyword()` |
+| c | Sequential & Binary Search | ✅ | `algorithms.ts` → `sequentialSearch()`, `binarySearch()` |
+| d | Selection & Insertion Sort | ✅ | `algorithms.ts` → `selectionSortByLength()`, `insertionSortBySentiment()` |
+| e | Statistik Sentimen | ✅ | `CommentSection.tsx` (filter counts), `StatBlock.tsx`, `CommentCharts.tsx` |
 
 ---
 
