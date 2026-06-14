@@ -5,7 +5,7 @@
 
 ![NeuroTube Banner](https://img.shields.io/badge/NeuroTube-Sentiment_Analyzer-FF69B4?style=for-the-badge&logo=youtube&logoColor=white)
 
-**Aplikasi full-stack buat nganalisis sentimen ribuan komentar YouTube secara otomatis.**
+**Aplikasi full-stack untuk menganalisis sentimen ribuan komentar YouTube secara otomatis pada skala besar.**
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev)
@@ -16,50 +16,50 @@
 ---
 
 > [!NOTE]
-> **Catatan Developer:** Ini adalah **project pertamaku**! Aku bikin ini full dengan bantuan **Google Antigravity AI Agent**. Karena ini pengalaman pertamaku bikin aplikasi yang lumayan kompleks, kode dan arsitekturnya mungkin belum 100% sempurna. Pasti masih ada bug atau bagian yang bisa dioptimasi lagi, tapi ini udah jadi batu loncatan belajar yang luar biasa buatku. Kritik dan saran selalu terbuka ya!
+> **Catatan Pengembang:** Proyek ini merupakan **proyek pengembangan aplikasi pertama** saya, yang dibangun dengan bantuan kolaboratif dari **Google Antigravity AI Agent**. Sebagai langkah awal dalam membangun sistem arsitektur perangkat lunak yang kompleks, mungkin masih terdapat ruang untuk optimasi maupun perbaikan _bug_. Masukan, kritik membangun, serta kontribusi dari rekan-rekan sangat diapresiasi.
 
 ---
 
 ## Gambaran Umum
 
-NeuroTube itu aplikasi web yang kerjanya ngambil URL video YouTube, terus dia bakal nganalisis sentimen dari komentar-komentarnya. Dia narik komentar langsung dari YouTube, memprosesnya pakai model Hugging Face Transformers buat nentuin apakah sentimennya (Positif, Netral, atau Negatif), dan nampilin hasilnya di dashboard interaktif yang keren.
+NeuroTube adalah aplikasi web yang dirancang untuk menerima tautan video YouTube dan menganalisis sentimen dari komentar-komentar pada video tersebut. Sistem akan mengekstraksi data komentar langsung dari YouTube Data API, memprosesnya menggunakan model bahasa Hugging Face Transformers untuk mengklasifikasikan polaritas sentimen (Positif, Netral, atau Negatif), dan menyajikan visualisasi data yang komprehensif pada dasbor interaktif.
 
-Project ini pakai arsitektur *microservices* biar proses narik data yang cepat bisa dipisah dari proses *machine learning* yang lumayan berat.
+Proyek ini mengadopsi arsitektur _microservices_ untuk memisahkan proses ekstraksi data konkuren yang berkinerja tinggi dari komputasi _machine learning_ yang membutuhkan sumber daya besar.
 
 ---
 
 ## Fitur Utama
 
-- **Edisi Tugas Besar (Full Dokumentasi)**: Seluruh baris kode aplikasi (Golang, Python, dan React) udah aku kasih anotasi komentar *line-by-line* dan penjelasan fungsi `import` dalam **Bahasa Indonesia** yang gampang dipahami. Didesain khusus biar gampang buat dipelajari dan dipresentasiin buat tugas kampus.
-- **CRUD Komentar Manual (Ketentuan A)**: Kita bisa nambahin komentar baru secara manual, ngedit komentar yang udah ada, atau ngehapus komentar langsung dari tampilan webnya.
-- **Analisis Sentimen Kata Kunci (Ketentuan B)**: Komen yang diinput manual bakal dianalisis otomatis pakai metode pencocokan kata kunci positif dan negatif (`analyze_sentiment_keyword`).
-- **Sequential & Binary Search (Ketentuan C)**: Kalau mau nyari komentar berdasarkan kata kunci, bisa milih mau pakai algoritma Sequential Search atau Binary Search lewat dropdown di UI.
-- **Selection & Insertion Sort (Ketentuan D)**: Mau ngurutin komentar? Bisa diurutin berdasarkan panjang teks (pakai Selection Sort) atau tingkat sentimen dari positif ke negatif (pakai Insertion Sort).
-- **Statistik Sentimen (Ketentuan E)**: Sistem bakal nampilin statistik jumlah komentar per kategori sentimen (Positif, Netral, Negatif) lewat filter button dan visualisasi grafik.
-- **Tarik Data Cepat (Concurrent)**: Pakai backend Go buat narik ribuan komentar dan balasannya dari YouTube secara paralel.
-- **Dual-Engine Sentiment Analysis**: Backend Python FastAPI yang ngejalanin model Hugging Face Transformers (XLM-RoBERTa & Indo-RoBERTa) buat klasifikasi sentimen multi-bahasa yang akurat. Plus, ada Regex Spammer Filter buat ngehemat beban GPU.
-- **Dashboard Interaktif**: Frontend yang modern dan responsif dibangun pakai React 19 dan Tailwind CSS v4. Fiturnya:
-  - **Sentiment Timeline**: Grafik garis waktu tren sentimen.
-  - **Keyword Cloud**: Awan kata kunci yang dinamis buat nunjukin topik yang paling sering dibahas (didukung Gemini AI).
-  - **Filter Komentar Deep-Thread**: Bisa filter ribuan komentar berdasarkan skor sentimennya.
-- **Containerized**: Udah full pakai Docker jadi gampang banget buat dijalanin di lokal.
+- **Edisi Tugas Besar (Terdokumentasi Penuh)**: Seluruh basis kode aplikasi (Golang, Python, dan React) telah dilengkapi dengan anotasi komentar pada setiap baris serta penjelasan pustaka (`import`) dalam **Bahasa Indonesia** yang komprehensif. Struktur ini didesain khusus untuk memfasilitasi kebutuhan akademis dan mempermudah proses pembelajaran.
+- **CRUD Komentar Manual (Ketentuan A)**: Pengguna memiliki akses manajemen data untuk menambahkan, mengubah, serta menghapus komentar secara manual melalui antarmuka web.
+- **Analisis Sentimen Kata Kunci (Ketentuan B)**: Setiap komentar yang ditambahkan secara manual akan dianalisis secara otomatis menggunakan metode pencocokan kata kunci sentimen positif dan negatif (`analyze_sentiment_keyword`).
+- **Sequential & Binary Search (Ketentuan C)**: Modul pencarian komentar dilengkapi dengan dua metode algoritma, yakni _Sequential Search_ dan _Binary Search_, yang dapat dikonfigurasi langsung dari antarmuka pengguna.
+- **Selection & Insertion Sort (Ketentuan D)**: Kemampuan pengurutan data (_sorting_) mencakup _Selection Sort_ untuk mengurutkan berdasarkan panjang karakter teks, dan _Insertion Sort_ untuk mengurutkan berdasarkan tingkat polaritas sentimen.
+- **Statistik Sentimen (Ketentuan E)**: Sistem secara otomatis menghasilkan agregasi data yang menampilkan metrik total komentar per kategori sentimen (Positif, Netral, Negatif) yang divisualisasikan melalui tombol filter dan grafik.
+- **Ekstraksi Data Konkuren**: Mengimplementasikan layanan _backend_ menggunakan bahasa Go untuk mengekstraksi puluhan ribu komentar dan balasan dari YouTube secara paralel dalam hitungan detik.
+- **Dual-Engine Sentiment Analysis**: Layanan ML _backend_ berbasis Python FastAPI yang menjalankan model Hugging Face Transformers (XLM-RoBERTa & Indo-RoBERTa) guna menghasilkan klasifikasi sentimen multi-bahasa dengan tingkat akurasi tinggi. Diperkuat dengan fitur penyaringan _spam_ berbasis Regex untuk efisiensi komputasi GPU.
+- **Dasbor Interaktif Modern**: Antarmuka _frontend_ yang responsif, dikembangkan dengan ekosistem modern React 19 dan Tailwind CSS v4. Meliputi:
+  - **Sentiment Timeline**: Representasi grafis perubahan tren sentimen berdasarkan rentang waktu.
+  - **Keyword Cloud**: Visualisasi awan kata kunci secara dinamis yang menyoroti topik paling dominan (didukung oleh Gemini AI).
+  - **Filter Komentar Deep-Thread**: Penyaringan komentar spesifik berdasarkan pembobotan skor sentimen.
+- **Siap Deployment (Containerized)**: Lingkungan pengembangan telah diisolasi sepenuhnya menggunakan Docker, memastikan proses instalasi yang konsisten di berbagai perangkat.
 
 ---
 
 ## Arsitektur Sistem
 
-Aplikasi ini dibagi jadi 3 service utama:
+Ekosistem aplikasi ini terbagi menjadi 3 layanan utama:
 
-1. **Frontend (React + Vite)**: Ngurusin antarmuka pengguna, visualisasi data, algoritma search/sort, dan CRUD komentar manual.
-2. **Fetcher Service (Go)**: Berkomunikasi langsung dengan YouTube Data API v3 buat narik komentar secepat kilat dan ngirim datanya ke antrean Redis.
-3. **ML Service (Python + FastAPI)**: Ngambil antrean komentar dari Redis, ngitung skor sentimen pakai model Transformer, nyimpen hasilnya ke PostgreSQL, dan ngurusin analisis sentimen kata kunci buat komentar manual.
+1. **Layanan Frontend (React + Vite)**: Menangani antarmuka pengguna, visualisasi data, eksekusi algoritma pencarian/pengurutan di sisi klien, serta antarmuka CRUD untuk komentar manual.
+2. **Layanan Fetcher (Go)**: Berfungsi sebagai agen ekstraksi data yang berinteraksi langsung dengan YouTube Data API v3 untuk mengumpulkan komentar secara asinkron dan mendistribusikannya ke antrean Redis.
+3. **Layanan Machine Learning (Python + FastAPI)**: Berfungsi sebagai pekerja latar belakang (_background worker_) yang mengambil tugas dari Redis, mengalkulasi skor sentimen melalui inferensi model Transformer, menyimpan hasil akhir ke dalam PostgreSQL, serta menangani API untuk analisis sentimen kata kunci.
 
 ```mermaid
 graph TD
-    User((User)) -->|URL YouTube| Frontend[React + Vite]
-    Frontend -->|POST /api/analyze| Fetcher[Go Fetcher Service]
+    User((Pengguna)) -->|URL YouTube| Frontend[React + Vite]
+    Frontend -->|POST /api/analyze| Fetcher[Layanan Fetcher Go]
     Fetcher -->|Parallel Page Fetch| YT_API[YouTube Data API v3]
-    Fetcher -->|Push Job Task| Redis[(Redis Broker)]
+    Fetcher -->|Push Job Task| Redis[(Message Broker Redis)]
     Redis -->|Worker Pull| MLEngine[Python Worker]
     MLEngine -->|Transformer Scoring| DB[(PostgreSQL)]
     Frontend -->|Poll Results| MLEngine
@@ -70,85 +70,87 @@ graph TD
 
 ---
 
-## Tech Stack (Teknologi yang Dipakai)
+## Teknologi yang Digunakan (Tech Stack)
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS v4, Shadcn UI, Framer Motion, Recharts.
 - **Backend Fetcher**: Go 1.24, Redis.
-- **Backend ML**: Python 3.13, FastAPI, SQLModel, PostgreSQL, Hugging Face Transformers, PyTorch, Langdetect, Gemini API (buat ringkasan AI).
-- **Infrastruktur**: Docker & Docker Compose.
+- **Backend ML**: Python 3.13, FastAPI, SQLModel, PostgreSQL, Hugging Face Transformers, PyTorch, Langdetect, Gemini API (untuk ekstraksi ringkasan topik).
+- **Infrastruktur & DevOps**: Docker & Docker Compose.
 
 ---
 
-## Tampilan UI (Showcase)
+## Cuplikan Antarmuka (UI Showcase)
 
-### Halaman Utama
+### Halaman Beranda
 
 ![Home Page](assets/ui_home.png)
 
-### Dashboard Analisis
+### Dasbor Analitik
 
 ![Dashboard](assets/ui_dashboard.png)
 
 ---
 
-## Cara Jalanin Pakai Docker (Quick Start)
+## Panduan Instalasi Cepat (Dengan Docker)
 
-Buat jalanin project ini di komputer kamu, pastikan udah install Docker dan punya YouTube API Key.
+Untuk menjalankan proyek ini di lingkungan pengembangan lokal, pastikan Docker telah terpasang dan Anda memiliki Kunci API YouTube (_YouTube API Key_).
 
-1. **Clone repository-nya**
+1. **Kloning Repositori**
 
    ```bash
    git clone https://github.com/DaffMe/NeuroTube.git
    cd NeuroTube
    ```
 
-2. **Atur Environment Variables**
+2. **Konfigurasi Variabel Lingkungan (_Environment Variables_)**
 
    ```bash
    cp .env.example .env
    ```
 
-   Buka file `.env` dan masukin `YOUTUBE_API_KEY` kamu (kalau ada `GEMINI_API_KEY` boleh dimasukin juga).
+   Buka file `.env` menggunakan teks editor Anda dan masukkan kredensial `YOUTUBE_API_KEY`. (Opsional: tambahkan `GEMINI_API_KEY` untuk mengaktifkan fitur ringkasan topik AI).
 
-3. **Jalankan Docker Compose**
+3. **Jalankan Layanan dengan Docker Compose**
 
    ```bash
    docker compose up --build -d
    ```
 
-4. **Buka Aplikasinya**
-   - **Frontend UI**: `http://localhost:5173`
-   - **Python API Docs**: `http://localhost:8000/docs`
+4. **Akses Aplikasi**
+   - **Antarmuka Frontend**: `http://localhost:5173`
+   - **Dokumentasi API Python**: `http://localhost:8000/docs`
 
 > [!TIP]
-> Buat **matiin Docker sementara** (data aman gak ilang): `docker compose stop`
-> Buat **nyalain lagi**: `docker compose start`
-> Buat **menghapus semua** (termasuk data di database): `docker compose down -v`
+> - Untuk **menghentikan Docker sementara** (data tetap aman): `docker compose stop`
+> - Untuk **menjalankan kembali layanan**: `docker compose start`
+> - Untuk **menghentikan dan menghapus semua data container** (termasuk isi database): `docker compose down -v`
 
 ---
 
-## Cara Jalanin Lokal (Tanpa Docker)
+## Pengembangan Lokal (Tanpa Docker)
 
-Kalau kamu lebih suka ngejalanin service-nya langsung di komputer (lokal), kamu tetap butuh PostgreSQL dan Redis nyala (bisa pakai Docker khusus buat 2 ini aja):
+Apabila Anda lebih memilih untuk mengeksekusi layanan secara langsung di mesin lokal (_host_), Anda tetap diwajibkan untuk menjalankan instansi PostgreSQL dan Redis (dapat dijalankan secara terpisah menggunakan Docker):
 
 ```bash
 docker compose start postgres redis
 ```
 
-### ML Backend (Python)
+### Backend ML (Python)
 
 ```bash
 cd backend-ml
 python -m venv venv
-# Buat Windows:
+
+# Untuk sistem operasi Windows:
 .\venv\Scripts\activate
-# Buat Linux/Mac:
+# Untuk sistem operasi Linux/macOS:
 # source venv/bin/activate
+
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Fetcher Backend (Go)
+### Backend Fetcher (Go)
 
 ```bash
 cd backend-fetcher
@@ -166,25 +168,25 @@ npm run dev
 
 ---
 
-## Checklist Ketentuan Tugas Besar
+## Checklist Pemenuhan Persyaratan Tugas Besar
 
-| # | Ketentuan | Status | Lokasi Kode |
+| # | Persyaratan | Status | Lokasi Implementasi |
 | --- | ------------ | -------- | ---------------- |
-| a | CRUD Komentar (Tambah, Ubah, Hapus) | ✅ | `analysis.py` (POST/PUT/DELETE endpoints), `CommentSection.tsx` (UI form) |
-| b | Analisis Sentimen Kata Kunci | ✅ | `analysis.py` → fungsi `analyze_sentiment_keyword()` |
-| c | Sequential & Binary Search | ✅ | `algorithms.ts` → fungsi `sequentialSearch()`, `binarySearch()` |
-| d | Selection & Insertion Sort | ✅ | `algorithms.ts` → fungsi `selectionSortByLength()`, `insertionSortBySentiment()` |
-| e | Statistik Sentimen | ✅ | `CommentSection.tsx` (hitungan filter), `StatBlock.tsx`, `CommentCharts.tsx` |
+| a | Operasi CRUD Komentar (Tambah, Ubah, Hapus) | ✅ | `analysis.py` (API endpoints HTTP POST/PUT/DELETE), `CommentSection.tsx` (Formulir antarmuka) |
+| b | Analisis Sentimen Berbasis Kata Kunci | ✅ | `analysis.py` → metode `analyze_sentiment_keyword()` |
+| c | Algoritma Pencarian (_Sequential & Binary Search_) | ✅ | `algorithms.ts` → utilitas `sequentialSearch()`, `binarySearch()` |
+| d | Algoritma Pengurutan (_Selection & Insertion Sort_) | ✅ | `algorithms.ts` → utilitas `selectionSortByLength()`, `insertionSortBySentiment()` |
+| e | Rekapitulasi Statistik Sentimen | ✅ | `CommentSection.tsx` (tombol penyaring dinamis), `StatBlock.tsx`, `CommentCharts.tsx` |
 
 ---
 
-## Apresiasi
+## Penghargaan
 
-- Dibangun secara kolaboratif bareng **Google Antigravity AI Agent**.
-- Terinspirasi dari [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
+- Proyek ini dikembangkan secara kolaboratif bersama dengan integrasi AI dari **Google Antigravity Agent**.
+- Terinspirasi oleh konsep arsitektur dari [youtube-comment-sentiment-analyzer](https://github.com/00200200/youtube-comment-sentiment-analyzer).
 
 ---
 
 <div align="center">
-  <b>Developed by <a href="https://github.com/DaffMe">DaffMe</a></b>
+  <b>Dikembangkan oleh <a href="https://github.com/DaffMe">DaffMe</a></b>
 </div>
