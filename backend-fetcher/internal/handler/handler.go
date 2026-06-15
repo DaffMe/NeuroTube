@@ -38,7 +38,8 @@ func New(publisher *queue.Publisher, apiKey string) *Handler {
 // penerapan materi Modul 06 (Tipe Bentukan)
 // baris code ini berfungsi mendefinisikan custom struct untuk menampung format JSON pada request
 type AnalyzeRequest struct {
-	URL string `json:"url"` // Menampung data URL video dari frontend
+	URL   string `json:"url"` // Menampung data URL video dari frontend
+	Limit int    `json:"limit,omitempty"` // Menampung jumlah batas komentar
 }
 
 // Struct untuk menampung format balasan (response) saat analisis berhasil dimulai
@@ -146,11 +147,17 @@ func (h *Handler) Analyze(w http.ResponseWriter, r *http.Request) {
 
 		_ = h.publisher.SetProgress(jobID, 10) // Set progres loading ke 10%
 		totalComments, _ := strconv.Atoi(videoInfo.CommentCount) // Mengonversi jumlah komentar menjadi integer
-		log.Printf(" [%s] Video: %s | Total comments on YT: %d (Target: 5000)", jobID, videoInfo.Title, totalComments)
+		
+		targetLimit := 5000
+		if req.Limit > 0 {
+			targetLimit = req.Limit
+		}
+		
+		log.Printf(" [%s] Video: %s | Total comments on YT: %d (Target: %d)", jobID, videoInfo.Title, totalComments, targetLimit)
 
 		// 2. Mengunduh komentar secara bertahap
-		// Fungsi ini memanggil YouTube API berkali-kali untuk meraup hingga 5000 komentar, sambil mengupdate persen progres
-		comments, err := h.ytClient.FetchComments(videoID, 5000, func(percent int) {
+		// Fungsi ini memanggil YouTube API berkali-kali untuk meraup hingga batas komentar yang ditentukan, sambil mengupdate persen progres
+		comments, err := h.ytClient.FetchComments(videoID, targetLimit, func(percent int) {
 			_ = h.publisher.SetProgress(jobID, percent)
 		})
 		if err != nil {

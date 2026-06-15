@@ -115,9 +115,19 @@ async def clear_history(db: AsyncSession = Depends(get_db)):
     """
     Clear all analysis history from the database.
     Deletes jobs, summaries, and video metadata records.
+    Also clears the Redis cache to prevent quota guard mismatches.
     """
     # Menghapus seluruh memori di database PostgreSQL jika pengguna ingin cuci gudang/restart
     await crud.clear_all_data(db)
+    
+    # Membersihkan semua cache di Redis agar "Quota Guard" tidak mengembalikan Job ID usang
+    try:
+        redis_client = aioredis.from_url(settings.REDIS_URL)
+        await redis_client.flushdb()
+        await redis_client.close()
+    except Exception as e:
+        pass
+        
     return {"message": "All history cleared successfully"}
 
 

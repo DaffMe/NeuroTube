@@ -10,13 +10,13 @@ const ML_API = (import.meta.env.VITE_ML_API_URL || "http://localhost:8000") + "/
 // ── Antarmuka API Publik (Public API) ───────────────────────────────────────────────────────────────
 
 // Fungsi untuk mengirim tautan YouTube ke server Golang untuk mulai dianalisis
-export async function submitAnalysisJob(url: string, force = false): Promise<{ jobId: string; status: string; message: string }> {
+export async function submitAnalysisJob(url: string, limit?: number, force = false): Promise<{ jobId: string; status: string; message: string }> {
   // Jika 'force' bernilai true, maka server akan dipaksa untuk menganalisis ulang meskipun videonya sudah pernah dianalisis
   const endpoint = force ? `${FETCHER_API}/analyze?force=true` : `${FETCHER_API}/analyze`;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" }, // Memberitahu server bahwa kita mengirim format data JSON
-    body: JSON.stringify({ url }), // Membungkus URL ke dalam format JSON
+    body: JSON.stringify({ url, limit }), // Membungkus URL dan limit ke dalam format JSON
   });
   
   // Jika server mengembalikan status error (seperti 400 atau 500)

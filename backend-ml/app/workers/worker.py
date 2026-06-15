@@ -13,6 +13,7 @@ import asyncio # Mesin penggerak utama latar belakang (Background Task) agar bis
 import json # Pustaka perakit dan pembongkar teks bersarang format JSON dari Redis
 import logging # Pustaka untuk mencetak laporan kerja (Log) setiap kuli panggul memproses pesan
 import redis.asyncio as aioredis # Pustaka koneksi ke kotak surat antrean Redis secara asinkron (kuli panggul mengecek kotak ini berulang kali)
+import redis.exceptions # Pustaka error spesifik dari Redis
 
 from app.core.config import settings # Memanggil URL Redis dan pengaturan sandi sistem
 from app.core.sentiment.sentiment import analyze_comment, analyze_comment_async # Memanggil kecerdasan buatan (otak sentiment NLP) buatan sendiri
@@ -234,7 +235,12 @@ async def worker_loop():
 
         except json.JSONDecodeError as e:
             logger.error(f" Failed to decode job data: {e}")
+        except redis.exceptions.TimeoutError:
+            # Abaikan error timeout dari brpop karena ini perilaku normal jika tidak ada antrean masuk
+            continue
         except Exception as e:
+            if "Timeout reading from" in str(e):
+                continue
             logger.error(f" Worker error: {e}")
             await asyncio.sleep(2)  # Brief backoff on error (istirahat 2 detik kalau error)
 

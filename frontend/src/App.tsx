@@ -37,6 +37,8 @@ export default function HomePage() {
   // ---------------------------------------------------------------------------
   // url: Menyimpan teks tautan YouTube yang diketik pengguna di kotak pencarian
   const [url, setUrl] = useState("");
+  // limit: Menyimpan batas jumlah komentar yang ingin dianalisis
+  const [limit, setLimit] = useState<number>(5000);
   // error: Menyimpan pesan kesalahan jika tautan tidak valid atau analisis gagal
   const [error, setError] = useState("");
   // shake: Pemicu (trigger) animasi bergetar pada kotak pencarian jika terjadi error
@@ -86,7 +88,7 @@ export default function HomePage() {
 
       try {
         // 1. Kirim video ke sistem Antrean (Queue) Backend. Server merespons dengan memberikan 'Job ID'
-        const jobRes = await submitAnalysisJob(target);
+        const jobRes = await submitAnalysisJob(target, limit);
         const jobId = jobRes.jobId;
 
         // 2. Periksa apakah pekerjaannya kebetulan selesai seketika
@@ -173,7 +175,7 @@ export default function HomePage() {
         setProgress(undefined);
       }
     },
-    [url]
+    [url, limit]
   );
 
   // ---------------------------------------------------------------------------
@@ -342,7 +344,7 @@ export default function HomePage() {
           transition={{ ...spring, delay: 0.25 }}
           className="mt-10 w-full max-w-xl relative"
         >
-          <div className="flex gap-2">
+          <div className="flex items-end gap-2">
             <motion.div 
               className="flex-1" 
               whileHover={{ scale: 1.01 }} 
@@ -359,6 +361,22 @@ export default function HomePage() {
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} // Menjalankan fungsi jika menekan tombol Enter
                 className={`h-12 rounded-2xl border-primary/20 bg-secondary/40 px-5 text-sm backdrop-blur-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary ${error ? 'border-rose-500/50 focus-visible:ring-rose-500/50' : ''}`}
+              />
+            </motion.div>
+            <motion.div 
+              className="shrink-0 flex flex-col items-center" 
+              whileHover={{ scale: 1.02 }} 
+              transition={spring}
+            >
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-0.5">Limit</span>
+              <Input
+                type="number"
+                min="100"
+                max="10000"
+                value={limit}
+                onChange={(e) => setLimit(Number(e.target.value))}
+                className="h-12 w-20 rounded-2xl border-primary/20 bg-secondary/40 px-2 text-sm backdrop-blur-sm focus-visible:ring-primary text-center font-semibold text-foreground/80"
+                title="Comment Limit (Max 10000)"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.92 }} transition={spring}>

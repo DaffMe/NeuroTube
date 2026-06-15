@@ -398,7 +398,7 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
                 <select 
                   value={searchMode} 
                   onChange={(e) => setSearchMode(e.target.value as "sequential" | "binary")}
-                  className="text-xs border-l border-border pl-2 pr-1 py-2 bg-transparent text-muted-foreground focus:outline-none cursor-pointer"
+                  className="text-xs border-l border-border/50 pl-3 py-2 bg-card text-foreground/80 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer transition-colors hover:bg-muted/50"
                 >
                   <option value="sequential">Sequential Search</option>
                   <option value="binary">Binary Search</option>
@@ -409,7 +409,7 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
               <select 
                 value={sortMode}
                 onChange={(e) => setSortMode(e.target.value as "none" | "lengthDesc" | "lengthAsc" | "sentimentDesc" | "sentimentAsc")}
-                className="rounded-xl border border-border/50 bg-background/50 px-4 py-2 text-sm focus:outline-none cursor-pointer text-muted-foreground"
+                className="rounded-xl border border-border/50 bg-card px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer text-foreground/80 transition-colors hover:border-primary/30"
               >
                 <option value="none">Default Sort</option>
                 <option value="lengthDesc">Sort: Longest Text (Selection)</option>

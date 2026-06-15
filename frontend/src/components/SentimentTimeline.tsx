@@ -30,8 +30,8 @@ const TIME_RANGES = ["1D", "5D", "1M", "6M", "YTD", "1Y", "MAX"];
 // -----------------------------------------------------------------------------
 // Komponen SentimentTimeline menampilkan grafik tren komentar sentimen dari waktu ke waktu.
 export function SentimentTimeline({ comments, selectedDate, onSelectDate }: Props) {
-  // State untuk menyimpan rentang waktu yang dipilih oleh pengguna (bawaan: MAX/Sepanjang waktu)
-  const [timeRange, setTimeRange] = useState("MAX");
+  // State untuk menyimpan rentang waktu yang dipilih oleh pengguna (bawaan: 1D/Satu hari)
+  const [timeRange, setTimeRange] = useState("1D");
 
   // useMemo memastikan bahwa logika penyaringan (filter) hanya berjalan ketika ada perubahan pada komentar atau tombol waktu.
   // Ini penting agar komputer tidak lag (memori berlebih) setiap kali komponen menggambar ulang (re-render)
