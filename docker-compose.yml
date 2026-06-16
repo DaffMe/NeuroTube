@@ -20,7 +20,7 @@ services:
       - pgdata:/var/lib/postgresql/data # Simpan data secara permanen agar tidak hilang saat container dihapus
     healthcheck:
       # Secara berkala mengecek apakah database sudah siap menerima koneksi
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-neurotube}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-neurotube} -d $${POSTGRES_DB:-neurotube}"]
       interval: 5s
       timeout: 3s
       retries: 5
