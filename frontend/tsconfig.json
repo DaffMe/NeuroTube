@@ -1,20 +1,11 @@
 {
-  // -----------------------------------------------------------------------------
-  // KONFIGURASI AKAR TYPESCRIPT (ROOT TSCONFIG)
-  // Berfungsi sebagai "Peta" utama bagi compiler (penerjemah) TypeScript.
-  // Karena proyek ini dibagi menjadi dua bagian (Aplikasi Web & Alat Build Node.js),
-  // file ini berperan sekadar merujuk/menunjuk ke file konfigurasi spesifik masing-masing.
-  // -----------------------------------------------------------------------------
   
-  // Kosongkan target files langsung di akar, karena semua dialihkan ke referensi di bawah
   "files": [],
   "references": [
     {
-      // Menunjuk ke konfigurasi khusus untuk kode asli React Aplikasi Web (di dalam folder src)
       "path": "./tsconfig.app.json"
     },
     {
-      // Menunjuk ke konfigurasi khusus untuk file-file mesin alat bantu (seperti vite.config.ts)
       "path": "./tsconfig.node.json"
     }
   ]

@@ -1,124 +1,88 @@
-import { useState, useCallback, useEffect } from "react"; // Alat-alat bawaan React (Hooks) untuk mengatur memori (State) dan siklus hidup halaman
-import { motion, AnimatePresence } from "framer-motion"; // Pustaka animasi eksternal untuk membuat transisi UI yang halus (Smooth)
-import { Search, Sparkles, ArrowRight } from "lucide-react"; // Pustaka ikon-ikon estetis
-import { Button } from "@/components/ui/button"; // Memanggil komponen tombol modular (Shadcn UI)
-import { Input } from "@/components/ui/input"; // Memanggil komponen kotak isian teks (Shadcn UI)
-import { AnalyzedVideoList } from "@/components/AnalyzedVideoList"; // Memanggil komponen daftar video yang tersimpan
-import { LoadingSpinner } from "@/components/LoadingSpinner"; // Memanggil komponen animasi loading berputar
-import { VideoDetails } from "@/components/VideoDetails"; // Memanggil komponen kotak profil video YouTube
-import { CommentCharts } from "@/components/CommentCharts"; // Memanggil komponen grafik persentase statistik sentimen
-import { CommentSection } from "@/components/CommentSection"; // Memanggil komponen daftar tabel komentar dan filternya
-import { SentimentSummary } from "@/components/StatBlock"; // Memanggil komponen kartu angka statistik (misal: Total Positif 1000)
-import { AiSummary } from "@/components/AiSummary"; // Memanggil komponen teks paragraf rangkuman AI
-import { SentimentTimeline } from "@/components/SentimentTimeline"; // Memanggil komponen diagram garis perjalanan waktu sentimen
+import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Sparkles, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AnalyzedVideoList } from "@/components/AnalyzedVideoList";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { VideoDetails } from "@/components/VideoDetails";
+import { CommentCharts } from "@/components/CommentCharts";
+import { CommentSection } from "@/components/CommentSection";
+import { SentimentSummary } from "@/components/StatBlock";
+import { AiSummary } from "@/components/AiSummary";
+import { SentimentTimeline } from "@/components/SentimentTimeline";
 import {
-  isValidYouTubeUrl, // Fungsi pembantu untuk memvalidasi pola URL
-  submitAnalysisJob, // Fungsi API untuk mengirimkan URL ke backend fetcher
-  getJobStatus, // Fungsi API untuk mengecek status pekerjaan dari backend
-  getJobStatusStreamUrl, // Fungsi API pembuat tautan untuk mendengarkan progress real-time (SSE)
-  getAnalysisResults, // Fungsi API untuk mengunduh hasil lengkap komentar dari backend ML
-  getAnalysisByVideo, // Fungsi API untuk melihat data video dari database yang sudah ada
-  fetchHistory, // Fungsi API untuk mengambil seluruh riwayat analisis dari database
-  getLocalHistory, // Fungsi pembantu untuk mengambil data riwayat dari penyimpanan memori Browser (Local Storage)
-  deleteHistoryFromServer, // Fungsi API untuk menghapus semua database riwayat secara total
-  deleteVideoFromServer, // Fungsi API untuk menghapus 1 data video spesifik dari riwayat
-} from "@/services/api"; // Modul tempat semua penembak server (HTTP Client) disatukan
-import type { AnalysisResponse, AnalyzedVideo } from "@/types"; // Memanggil kerangka Tipe Data agar TypeScript bisa mencegah error salah struktur
+  isValidYouTubeUrl,
+  submitAnalysisJob,
+  getJobStatus,
+  getJobStatusStreamUrl,
+  getAnalysisResults,
+  getAnalysisByVideo,
+  fetchHistory,
+  getLocalHistory,
+  deleteHistoryFromServer,
+  deleteVideoFromServer,
+} from "@/services/api";
+import type { AnalysisResponse, AnalyzedVideo } from "@/types";
 
-// -----------------------------------------------------------------------------
-// KONFIGURASI ANIMASI PEGAS (SPRING)
-// -----------------------------------------------------------------------------
-// Objek 'spring' ini mengatur seberapa memantul (bouncy) dan mulus transisi UI menggunakan Framer Motion
 const spring = { type: "spring" as const, stiffness: 400, damping: 18 };
 
 export default function HomePage() {
-  // ---------------------------------------------------------------------------
-  // MANAJEMEN STATE (PENYIMPANAN DATA SEMENTARA UNTUK HALAMAN INI)
-  // ---------------------------------------------------------------------------
-  // url: Menyimpan teks tautan YouTube yang diketik pengguna di kotak pencarian
   const [url, setUrl] = useState("");
-  // limit: Menyimpan batas jumlah komentar yang ingin dianalisis
   const [limit, setLimit] = useState<number>(5000);
-  // error: Menyimpan pesan kesalahan jika tautan tidak valid atau analisis gagal
   const [error, setError] = useState("");
-  // shake: Pemicu (trigger) animasi bergetar pada kotak pencarian jika terjadi error
   const [shake, setShake] = useState(false);
-  // loading: Penanda apakah sistem sedang memuat (loading)
   const [loading, setLoading] = useState(false);
-  // loadingMessage: Menyimpan teks status seperti "Sedang mengambil data...", "Sedang menganalisis..."
   const [loadingMessage, setLoadingMessage] = useState("");
-  // progress: Menyimpan angka persentase progres (0 sampai 100%) dari pekerjaan Backend
   const [progress, setProgress] = useState<number | undefined>(undefined);
-  // result: Menyimpan seluruh hasil akhir analisis (statistik, grafik, ringkasan AI) setelah sukses
   const [result, setResult] = useState<AnalysisResponse | null>(null);
-  // history: Menyimpan daftar riwayat video yang pernah dianalisis sebelumnya (diambil dari database)
   const [history, setHistory] = useState<AnalyzedVideo[]>(getLocalHistory());
-  // selectedDate: Menyimpan tanggal spesifik yang dipilih jika pengguna mengklik suatu titik pada grafik timeline
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // ---------------------------------------------------------------------------
-  // EFEK SAMPING (BERJALAN SAAT APLIKASI PERTAMA KALI DIMUAT)
-  // ---------------------------------------------------------------------------
   useEffect(() => {
-    // Menghubungi server (backend) untuk meminta daftar riwayat analisis sebelumnya
     fetchHistory().then(setHistory).catch(console.error);
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // FUNGSI UTAMA: MEMPROSES KLIK TOMBOL ANALISIS
-  // ---------------------------------------------------------------------------
   const handleAnalyze = useCallback(
     async (inputUrl?: string) => {
-      // Gunakan URL dari kotak input, ATAU URL langsung (jika diklik dari riwayat)
       const target = inputUrl || url;
       
-      // Hentikan proses jika tautan yang diberikan bukan URL YouTube yang sah (valid)
       if (!isValidYouTubeUrl(target)) {
         setError("Please enter a valid YouTube URL!");
-        setShake(true); // Getarkan kotak pencarian
-        setTimeout(() => setShake(false), 500); // Hentikan getaran setelah setengah detik
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
         return;
       }
       
-      // Bersihkan pesan kesalahan sebelumnya dan aktifkan mode Loading
       setError("");
       setLoading(true);
       setLoadingMessage("Sending request to server...");
       setProgress(0);
 
       try {
-        // 1. Kirim video ke sistem Antrean (Queue) Backend. Server merespons dengan memberikan 'Job ID'
         const jobRes = await submitAnalysisJob(target, limit);
         const jobId = jobRes.jobId;
 
-        // 2. Periksa apakah pekerjaannya kebetulan selesai seketika
-        // Menggunakan const karena nilai ini hanya ditetapkan sekali dan tidak diubah setelahnya
         const completed = jobRes.status === "completed";
         
-        // Jika belum selesai, kita akan terus memantau perkembangannya secara langsung (Polling/Streaming)
         if (!completed) {
           try {
             await new Promise<void>((resolve, reject) => {
-              // Membuka jalur komunikasi khusus (Server-Sent Events / SSE) untuk menerima pembaruan progres secara real-time (waktu nyata)
               const eventSource = new EventSource(getJobStatusStreamUrl(jobId));
 
-              // Setiap kali Backend mengirimkan pesan pembaruan progres:
               eventSource.onmessage = (event) => {
                 try {
                   const data = JSON.parse(event.data);
-                  // Perbarui angka persentase bilah progres di layar UI
                   if (typeof data.progress === "number") {
                     setProgress(data.progress);
                   }
-                  // Perbarui pesan teks pemuatan di layar UI
                   if (data.message) {
                     setLoadingMessage(data.message);
                   }
 
-                  // Jika server mengatakan prosesnya sudah "completed" (selesai)
                   if (data.status === "completed") {
-                    eventSource.close(); // Tutup saluran komunikasi
-                    resolve();           // Lanjut ke langkah berikutnya (mengambil hasil)
+                    eventSource.close();
+                    resolve();
                   } else if (data.status === "failed") {
                     eventSource.close();
                     reject(new Error(data.message || "Analysis failed during processing"));
@@ -129,18 +93,15 @@ export default function HomePage() {
                 }
               };
 
-              // Jika koneksi internet terputus secara tiba-tiba
               eventSource.onerror = () => {
                 eventSource.close();
                 reject(new Error("Connection lost"));
               };
             });
           } catch (sseErr) {
-            // JIKA aliran SSE khusus tadi gagal, kembali ke mode Polling (bertanya secara manual)
             console.warn("SSE stream connection failed, switching to manual polling...", sseErr);
             let fallbackCompleted = false;
             
-            // Sistem akan berulang kali bertanya ke server "Apakah sudah selesai?" setiap 2 detik (Polling)
             while (!fallbackCompleted) {
               await new Promise((r) => setTimeout(r, 2000));
               const statusRes = await getJobStatus(jobId);
@@ -149,27 +110,22 @@ export default function HomePage() {
               if (statusRes.status === "completed") {
                 fallbackCompleted = true;
               } else if (statusRes.status.startsWith("failed")) {
-                // Lampirkan penyebab error asli (sseErr) agar mudah dilacak (tracing)
                 throw new Error(statusRes.message, { cause: sseErr });
               }
             }
           }
         }
 
-        // 3. Ambil Hasil Lengkapnya (Data Statistik & Komentar) setelah proses mencapai 100%
         setLoadingMessage("Downloading final results...");
         const data = await getAnalysisResults(jobId);
-        setResult(data); // Simpan hasil tersebut ke dalam state 'result' agar langsung tergambar di layar
+        setResult(data);
         
-        // Segarkan (Refresh) daftar riwayat karena kita baru saja berhasil menganalisis video baru
         const newHistory = await fetchHistory();
         setHistory(newHistory);
 
       } catch (err) {
-        // Tampilkan teks error berwarna merah jika analisis gagal
         setError(err instanceof Error ? err.message : "An error occurred during analysis");
       } finally {
-        // Terlepas dari apakah sukses atau gagal, pastikan untuk mematikan ikon pemuatan (loading spinner)
         setLoading(false);
         setLoadingMessage("");
         setProgress(undefined);
@@ -178,17 +134,11 @@ export default function HomePage() {
     [url, limit]
   );
 
-  // ---------------------------------------------------------------------------
-  // FUNGSI-FUNGSI PEMBANTU (HELPER FUNCTIONS)
-  // ---------------------------------------------------------------------------
-
-  // Fungsi untuk tombol "Sample" (mengisi kotak dengan tautan Rickroll untuk keperluan uji coba)
   const handleSample = useCallback(async () => {
     setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     handleAnalyze("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   }, [handleAnalyze]);
 
-  // Fungsi ketika pengguna mengklik salah satu video yang pernah dianalisis dari menu samping (sidebar) riwayat
   const handleHistorySelect = useCallback(async (video: AnalyzedVideo) => {
     setError("");
     setLoading(true);
@@ -204,39 +154,32 @@ export default function HomePage() {
     }
   }, []);
 
-  // Fungsi untuk tombol "Kembali" dari layar hasil menuju ke halaman awal pencarian
   const handleBack = useCallback(() => {
-    setResult(null); // Kosongkan hasil saat ini
+    setResult(null);
     setUrl("");
     setError("");
     setSelectedDate(null);
   }, []);
 
-  // Fungsi untuk menghapus seluruh riwayat analisis dari server
   const handleClearHistory = useCallback(async () => {
     try {
       await deleteHistoryFromServer();
       setHistory([]);
     } catch (err) {
       console.error("Failed to clear history:", err);
-      // Opsi cadangan: jika server gagal, setidaknya hapus secara lokal
       setHistory([]);
     }
   }, []);
 
-  // Fungsi untuk menghapus satu buah video tertentu dari riwayat
   const handleDeleteVideo = useCallback(async (videoId: string) => {
     try {
       await deleteVideoFromServer(videoId);
-      // Perbarui tampilan dengan memfilter (membuang) video yang ID-nya sama dengan yang dihapus
-      setHistory((prev) => prev.filter((v) => v.videoId !== videoId));
+      setHistory((prev) => prev.filter((v) => (v.videoId || v.id) !== videoId));
     } catch (err) {
       console.error("Failed to delete video:", err);
     }
   }, []);
 
-  // ── Tampilan Hasil (Result View) ─────────────────────────────────────────────────────────────
-  // Jika ada 'result' yang sukses diambil, sembunyikan halaman utama dan tampilkan panel statistik
   if (result) {
     return (
       <motion.div
@@ -246,7 +189,7 @@ export default function HomePage() {
         exit={{ opacity: 0 }}
         className="mx-auto max-w-4xl space-y-6 px-4 py-8"
       >
-        {/* Tombol Kembali (Back button) */}
+        {}
         <motion.button
           onClick={handleBack}
           whileHover={{ scale: 1.05, x: -4 }}
@@ -257,7 +200,7 @@ export default function HomePage() {
           ← New Analysis
         </motion.button>
 
-        {/* Pemisahan berbagai Komponen UI untuk modularitas dan keterbacaan kode */}
+        {}
         <VideoDetails video={result.videoInfo} />
         <SentimentSummary result={result.sentimentResult} />
         <CommentCharts result={result.sentimentResult} />
@@ -268,7 +211,7 @@ export default function HomePage() {
         <SentimentTimeline
           comments={result.comments}
           selectedDate={selectedDate}
-          onSelectDate={setSelectedDate} // Meneruskan state perubahan tanggal antar komponen (Prop Drilling)
+          onSelectDate={setSelectedDate}
         />
         <CommentSection
           videoId={result.videoInfo.id}
@@ -280,7 +223,6 @@ export default function HomePage() {
     );
   }
 
-  // ── Tampilan Halaman Utama / Pencarian (Home View) ─────────────────────────────────────────────────────
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -337,7 +279,6 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        {/* Bilah Input Pencarian (Input bar) */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -357,9 +298,9 @@ export default function HomePage() {
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
-                  setError(""); // Reset pesan kesalahan saat pengguna mulai mengetik ulang
+                  setError("");
                 }}
-                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} // Menjalankan fungsi jika menekan tombol Enter
+                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
                 className={`h-12 rounded-2xl border-primary/20 bg-secondary/40 px-5 text-sm backdrop-blur-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary ${error ? 'border-rose-500/50 focus-visible:ring-rose-500/50' : ''}`}
               />
             </motion.div>
@@ -409,7 +350,6 @@ export default function HomePage() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Tombol Contoh Analisis (Sample button) */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -431,7 +371,7 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
 
-        {/* Layar Pemuatan (Loading Overlay) */}
+        {}
         <AnimatePresence>
           {loading && (
             <LoadingSpinner
@@ -441,7 +381,6 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* Panel Riwayat Pencarian (History Sidebar) */}
         <AnalyzedVideoList
           history={history}
           onSelect={handleHistorySelect}

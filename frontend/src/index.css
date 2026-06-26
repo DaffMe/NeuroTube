@@ -1,154 +1,86 @@
-/* Memanggil library utama Tailwind CSS versi 4 */
 @import "tailwindcss";
-
-/* -----------------------------------------------------------------------------
- * BLOK KONFIGURASI TEMA (THEME)
- * Menggantikan tailwind.config.js yang lama. Di sini kita mendeklarasikan semua
- * variabel warna, font, dan animasi yang bisa digunakan secara global oleh aplikasi.
- * ----------------------------------------------------------------------------- */
 @theme {
-  /* Pengaturan jenis huruf standar: Outfit dan Inter */
   --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
-  
-  /* Variabel warna dasar (diambil dari nilai HSL di layar base) */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-logo-tube: hsl(var(--logo-tube));
-  
-  /* Warna Utama (Primary: Pink) */
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
-  
-  /* Warna Sekunder (Secondary) */
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  
-  /* Warna Aksen (Accent) */
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
-  
-  /* Warna Redup/Pudar (Muted) */
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-  
-  /* Warna Komponen Kartu (Card) */
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
-  
-  /* Warna Bahaya/Error (Destructive: Merah) - Dideklarasikan statis */
   --color-destructive: hsl(0 84% 60%);
   --color-destructive-foreground: hsl(0 0% 100%);
-  
-  /* Warna batas tepi dan ring fokus */
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  
-  /* Pengaturan kelengkungan sudut (Border Radius) */
   --radius-lg: 1.5rem;
   --radius-md: 1rem;
   --radius-sm: 0.75rem;
-
-  /* Registrasi animasi khusus: Mengambang lembut */
   --animate-bounce-soft: bounce-soft 2s infinite;
 }
-
-/* -----------------------------------------------------------------------------
- * LAPISAN DASAR (BASE LAYER)
- * Di sinilah kita mendefinisikan "Nilai Asli" dari warna-warna di atas (Hue, Saturation, Lightness).
- * Terbagi menjadi 2 area: 
- * 1. :root -> Untuk Mode Terang (Light Mode)
- * 2. .dark -> Untuk Mode Gelap (Dark Mode)
- * ----------------------------------------------------------------------------- */
 @layer base {
-  /* ================== MODE TERANG ================== */
   :root {
-    --background: 359 20% 98%; /* Latar putih kemerahan sangat pucat */
-    --foreground: 293 36% 18%; /* Teks hitam keunguan */
+    --background: 359 20% 98%; 
+    --foreground: 293 36% 18%; 
     --logo-tube: 293 36% 18%;
-    
-    --primary: 359 98% 82%; /* Pink terang utama */
+    --primary: 359 98% 82%; 
     --primary-foreground: 293 36% 18%;
-    
     --secondary: 359 40% 94%;
     --secondary-foreground: 293 36% 18%;
-    
     --accent: 359 90% 75%;
     --accent-foreground: 293 36% 18%;
-    
     --muted: 293 20% 95%;
     --muted-foreground: 293 20% 40%;
-    
-    --card: 0 0% 100%; /* Latar kartu putih bersih */
+    --card: 0 0% 100%; 
     --card-foreground: 293 36% 18%;
-    
     --border: 359 30% 90%;
     --input: 359 30% 90%;
     --ring: 359 98% 82%;
-    
     --radius: 1rem;
-
-    /* Warna spesifik untuk grafik (Chart) di mode terang */
     --chart-tick: 293 20% 50%;
     --chart-tooltip-bg: 0 0% 100%;
     --chart-tooltip-border: 359 30% 90%;
     --chart-tooltip-text: 293 36% 18%;
   }
-
-  /* ================== MODE GELAP ================== */
   .dark {
-    --background: 293 36% 12%; /* Latar belakang hitam ungu gelap */
-    --foreground: 359 40% 96%; /* Teks putih kemerahan */
-    --logo-tube: 270 100% 95%; /* Warna tulisan logo di mode gelap */
-    
+    --background: 293 36% 12%; 
+    --foreground: 359 40% 96%; 
+    --logo-tube: 270 100% 95%; 
     --primary: 359 98% 82%;
     --primary-foreground: 293 36% 18%;
-    
     --secondary: 293 40% 20%;
     --secondary-foreground: 359 40% 96%;
-    
     --accent: 359 90% 75%;
     --accent-foreground: 293 36% 18%;
-    
     --muted: 293 30% 25%;
     --muted-foreground: 359 20% 75%;
-    
-    --card: 293 36% 16%; /* Kartu agak lebih terang dari latar gelap */
+    --card: 293 36% 16%; 
     --card-foreground: 359 40% 96%;
-    
     --border: 293 40% 25%;
     --input: 293 40% 25%;
     --ring: 359 98% 82%;
-
-    /* Warna spesifik untuk grafik (Chart) di mode gelap */
     --chart-tick: 359 20% 70%;
     --chart-tooltip-bg: 293 36% 16%;
     --chart-tooltip-border: 293 40% 25%;
     --chart-tooltip-text: 359 40% 96%;
   }
-
-  /* RESET TAMBAHAN: Terapkan warna border bawaan ke semua elemen */
   * {
     @apply border-border;
   }
-  
-  /* Pengaturan dasar untuk seluruh layar (body) */
   body {
-    /* Terapkan warna latar dan teks */
     @apply bg-background text-foreground;
-    /* Aktifkan fitur font tingkat lanjut (ligatures) */
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Transisi mulus saat berpindah dari Mode Terang <-> Gelap */
     transition: background-color 0.4s ease, color 0.4s ease;
   }
-  
-  /* Pastikan tombol selalu menampilkan kursor jari telunjuk */
   button, [role="button"], a {
     cursor: pointer;
   }
-
-  /* ================== STYLING DROPDOWN SELECT ================== */
-  /* Elemen <option> tidak bisa di-styling via Tailwind, jadi perlu CSS global */
   select {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -156,20 +88,15 @@
     background-position: right 0.6rem center;
     padding-right: 2rem;
   }
-
   select option {
     background-color: hsl(var(--card));
     color: hsl(var(--foreground));
     padding: 0.5rem 0.75rem;
   }
-
   select option:checked {
     background-color: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
   }
-
-  /* ================== STYLING INPUT NUMBER (SPINNER) ================== */
-  /* Sembunyikan panah atas-bawah bawaan browser pada input angka */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -180,17 +107,13 @@
     appearance: textfield;
   }
 }
-
-/* -----------------------------------------------------------------------------
- * ANIMASI KHUSUS (KEYFRAMES)
- * ----------------------------------------------------------------------------- */
 @keyframes bounce-soft {
   0%, 100% {
-    transform: translateY(-5%); /* Naik sedikit */
+    transform: translateY(-5%); 
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
   50% {
-    transform: translateY(0); /* Turun ke posisi asli */
+    transform: translateY(0); 
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }

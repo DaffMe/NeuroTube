@@ -1,14 +1,10 @@
-"""
-NeuroTube End-to-End System Test & Profiler
-Tests: Fetcher -> ML Sentiment (with Spam Filter) -> Gemini AI Summary -> API Response
-"""
 import urllib.request, json, sys, time
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-VIDEO_URL = "https://youtu.be/qNIhngowViI" # Link percobaan
-FETCHER = "http://localhost:8080" # URL service Penarik YouTube
-ML = "http://localhost:8000" # URL service Machine Learning
+VIDEO_URL = "https://youtu.be/K2BpNt3UBOQ"
+FETCHER = "http://localhost:8080"
+ML = "http://localhost:8000"
 
 def post_json(url, data):
     req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), headers={'Content-Type': 'application/json'})
@@ -20,12 +16,12 @@ def get_json(url):
         return json.loads(f.read().decode('utf-8'))
 
 print("=" * 60)
-print("  NeuroTube System Test - Validation Check")
+print(f"  NeuroTube System Test - URL: {VIDEO_URL} (Limit: 500)")
 print("=" * 60)
 
 print("\n[1/6] Submitting job to Fetcher...")
 try:
-    resp = post_json(f"{FETCHER}/api/analyze?force=true", {"url": VIDEO_URL}) 
+    resp = post_json(f"{FETCHER}/api/analyze?force=true", {"url": VIDEO_URL, "limit": 500}) 
     job_id = resp.get('jobId')
     print(f"  ✅ Fetcher OK — Job ID: {job_id}")
 except Exception as e:
@@ -65,7 +61,6 @@ try:
          print(f"  ❌ Backend Failed: {data.get('message')}")
          sys.exit(1)
          
-    # Mengumpulkan total sentimennya
     result = data.get('sentimentResult', {})
     pos = result.get('positive', 0)
     neg = result.get('negative', 0)
@@ -83,7 +78,6 @@ except Exception as e:
 
 print(f"\n[4/6] Checking Gemini AI Summary & Word Cloud data...")
 topics_pos = result.get('topicsPositive', [])
-topics_neg = result.get('topicsNegative', [])
 
 gemini_ok = False
 if topics_pos:

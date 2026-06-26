@@ -8,33 +8,29 @@ Provides endpoints for the frontend to:
 - Health check
 """
 
-from datetime import datetime # Fungsi dasar Python untuk merekam tanggal dan waktu akses
-from typing import Optional # Mengizinkan parameter fungsi atau rute untuk tidak diisi (opsional)
+from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query # Pustaka FastAPI untuk membuat gerbang rute, melempar error HTTP, dan menangkap parameter URL
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 import uuid
-from sqlalchemy.ext.asyncio import AsyncSession # Menjamin koneksi database asinkron tidak saling bertabrakan
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db # Modul internal yang bertugas membuka dan menutup brankas database setiap kali ada request
-from app.crud import crud # Modul internal berisi fungsi perantara manipulasi data SQL (Create, Read, Update, Delete)
-import redis.asyncio as aioredis # Pustaka klien untuk membaca antrean RAM pada server Redis secara asinkron
-from app.core.config import settings # Konfigurasi pusat yang menyimpan alamat peladen (Host) Redis
+from app.db.session import get_db
+from app.crud import crud
+import redis.asyncio as aioredis
+from app.core.config import settings
 
-# Router berfungsi sebagai sub-aplikasi yang mengatur sekelompok endpoint tertentu (seperti Controller di pola MVC)
 router = APIRouter()
-
 
 @router.get("/health")
 async def health():
     """Health check endpoint."""
-    # Endpoint untuk mengecek apakah server ini masih hidup atau crash
     return {
         "status": "ok",
         "service": "NeuroTube-ml",
         "time": datetime.utcnow().isoformat() + "Z",
     }
-
 
 @router.get("/analysis/{job_id}")
 async def get_analysis_by_job(
@@ -44,12 +40,10 @@ async def get_analysis_by_job(
     Get analysis results by job ID.
     Returns the full AnalysisResponse matching the frontend interface.
     """
-    # Mencari status pekerjaan berdasarkan ID job dari database
     job = await crud.get_job(db, job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    # Jika masih dihitung/diproses, tolak permintaan data lengkap tapi kembalikan statusnya ke frontend
     if job.status == "processing" or job.status == "analyzing":
         return {
             "status": job.status,
@@ -58,7 +52,6 @@ async def get_analysis_by_job(
             "message": "Analysis in progress...",
         }
 
-    # Jika sempat crash atau gagal, lempar peringatan error 500 (Internal Server Error)
     if job.status == "failed":
         raise HTTPException(
             status_code=500,
@@ -66,9 +59,7 @@ async def get_analysis_by_job(
         )
 
     # Job completed — return full results
-    # Jika sudah 'completed', rakit datanya dan kirimkan format lengkap ke frontend
     return await _build_analysis_response(db, job.video_id, job.id)
-
 
 @router.get("/analysis/video/{video_id}")
 async def get_analysis_by_video(
@@ -78,7 +69,6 @@ async def get_analysis_by_video(
     Get analysis results by YouTube video ID.
     Looks up the latest completed job for this video.
     """
-    # Mirip endpoint di atas, bedanya ini dicari menggunakan URL ID videonya langsung dari YouTube
     job = await crud.get_job_by_video(db, video_id)
     if not job:
         raise HTTPException(status_code=404, detail="No analysis found for this video")
@@ -93,7 +83,6 @@ async def get_analysis_by_video(
 
     return await _build_analysis_response(db, video_id, job.id)
 
-
 @router.get("/history")
 async def get_history(
     limit: int = Query(20, ge=1, le=100),
@@ -104,11 +93,8 @@ async def get_history(
     Get analysis history — list of previously analyzed videos.
     Returns data matching the frontend AnalyzedVideo[] interface.
     """
-    # Mengambil daftar histori riwayat video yang sudah pernah dianalisis orang lain
-    # Mendukung 'Limit' (batas jumlah halaman) dan 'Offset' (mulai dari baris ke berapa) untuk fitur Pagination Dashboard
     history = await crud.get_analysis_history(db, limit=limit, offset=offset)
     return history
-
 
 @router.delete("/history")
 async def clear_history(db: AsyncSession = Depends(get_db)):
@@ -117,10 +103,8 @@ async def clear_history(db: AsyncSession = Depends(get_db)):
     Deletes jobs, summaries, and video metadata records.
     Also clears the Redis cache to prevent quota guard mismatches.
     """
-    # Menghapus seluruh memori di database PostgreSQL jika pengguna ingin cuci gudang/restart
     await crud.clear_all_data(db)
     
-    # Membersihkan semua cache di Redis agar "Quota Guard" tidak mengembalikan Job ID usang
     try:
         redis_client = aioredis.from_url(settings.REDIS_URL)
         await redis_client.flushdb()
@@ -130,18 +114,14 @@ async def clear_history(db: AsyncSession = Depends(get_db)):
         
     return {"message": "All history cleared successfully"}
 
-
 @router.delete("/history/{video_id}")
 async def delete_history_item(video_id: str, db: AsyncSession = Depends(get_db)):
     """
     Delete a specific video and all its analysis results from history.
     Also deletes its Redis cache.
     """
-    # Menghapus riwayat spesifik untuk 1 buah video saja
     await crud.delete_video_data(db, video_id)
     
-    # Delete from Redis cache
-    # Pastikan data di memori sementara Redis juga ikut dihapus (Invalidate Cache) agar saat dicari ulang, sistem akan mengambil ulang dari awal
     try:
         redis_client = aioredis.from_url(settings.REDIS_URL)
         await redis_client.delete(f"neurotube:cache:{video_id}")
@@ -151,11 +131,10 @@ async def delete_history_item(video_id: str, db: AsyncSession = Depends(get_db))
         
     return {"message": f"History for video {video_id} deleted successfully"}
 
-
 @router.get("/comments/{video_id}")
 async def get_comments(
     video_id: str,
-    sentiment: Optional[str] = Query(None), # Memungkinkan filter: hanya mencari komen Positif / Negatif saja
+    sentiment: Optional[str] = Query(None),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
@@ -169,11 +148,9 @@ async def get_comments(
     'limit': Number of comments per page (default 100).
     'offset': Starting index for data retrieval (for pagination).
     """
-    # Endpoint ini khusus untuk memuat isi komentarnya saja secara bertahap saat di-scroll di Frontend
     comments = await crud.get_comments_by_video(
         db, video_id, sentiment_filter=sentiment, limit=limit, offset=offset
     )
-    # Menghitung total seluruh komentar agar komponen Paginasi di Frontend tau batas akhirnya
     total = await crud.count_comments_by_video(db, video_id, sentiment_filter=sentiment)
 
     return {
@@ -193,11 +170,8 @@ async def get_comments(
         "total": total,
         "limit": limit,
         "offset": offset,
-        "hasMore": (offset + len(comments)) < total, # Boolean True/False untuk menandakan apakah masih ada sisa komentar untuk tombol Load More
+        "hasMore": (offset + len(comments)) < total,
     }
-
-
-# ── Simple Keyword-based Sentiment Analysis (Assignment Requirement B) ──
 
 def analyze_sentiment_keyword(text: str):
     """
@@ -295,9 +269,7 @@ async def delete_comment(
         raise HTTPException(status_code=404, detail="Comment not found")
     return {"message": "Comment deleted successfully"}
 
-
 # ── Private helpers ───────────────────────────────────────────────
-
 
 async def _build_analysis_response(
     db: AsyncSession, video_id: str, job_id: str
@@ -306,7 +278,6 @@ async def _build_analysis_response(
     Build the full AnalysisResponse matching the frontend interface:
     { videoInfo, comments, sentimentResult }
     """
-    # Fungsi pembantu rahasia (private) untuk mengkompilasi data video, rangkuman skor AI, dan ribuan komentar menjadi 1 paket besar
     video = await crud.get_video(db, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video data not found")
@@ -314,7 +285,6 @@ async def _build_analysis_response(
     summary = await crud.get_sentiment_summary(db, video_id)
     comments = await crud.get_comments_by_video(db, video_id, limit=10000)
 
-    # Mengemasnya ke dalam struktur Map/Dictionary (akan otomatis diubah jadi JSON oleh FastAPI saat dikirim)
     return {
         "jobId": job_id,
         "status": "completed",

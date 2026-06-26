@@ -2,30 +2,30 @@
 version: "3.9"
 
 services:
-  # ─── Infrastructure (Mesin Infrastruktur Pendukung) ────────────────────────────────────────────
+
   
-  # Layanan Database Relasional PostgreSQL
+
   postgres:
-    image: postgres:16-alpine # Menggunakan versi Alpine (ringan) dari PostgreSQL versi 16
+    image: postgres:16-alpine
     container_name: neurotube-postgres
-    restart: unless-stopped # Jika server restart/mati, otomatis nyalakan kembali kecuali dimatikan paksa
+    restart: unless-stopped
     environment:
-      # Kredensial masuk yang diambil dari file .env (atau nilai default jika kosong)
+
       POSTGRES_USER: ${POSTGRES_USER:-neurotube}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neurotube_secret}
       POSTGRES_DB: ${POSTGRES_DB:-neurotube}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432" # Ekspos port 5432 ke komputer host agar bisa diremote
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data # Simpan data secara permanen agar tidak hilang saat container dihapus
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      # Secara berkala mengecek apakah database sudah siap menerima koneksi
+
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-neurotube} -d $${POSTGRES_DB:-neurotube}"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  # Layanan Database In-Memory Redis (Untuk Antrean Tugas/Message Broker)
+
   redis:
     image: redis:7-alpine
     container_name: neurotube-redis
@@ -33,51 +33,51 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
-      # Pengecekan denyut nadi (ping) untuk memastikan Redis hidup
+
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  # ─── Go Data Fetcher (Penarik Data YouTube via Golang) ───────────────────────────────────────────
+
   backend-fetcher:
     build:
-      context: ./backend-fetcher # Arahkan ke folder kode Golang
+      context: ./backend-fetcher
       dockerfile: Dockerfile
     container_name: neurotube-fetcher
     restart: unless-stopped
     ports:
       - "${FETCHER_PORT:-8080}:8080"
     environment:
-      # Variabel lingkungan untuk aplikasi Golang
+
       YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
       REDIS_URL: redis://redis:6379/0
       PORT: "8080"
       ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
     depends_on:
-      # Jangan nyalakan Golang sebelum Redis benar-benar sehat (healthy)
+
       redis:
         condition: service_healthy
 
-  # ─── Python ML Engine (Mesin AI & Machine Learning) ──────────────────────────────────────────
+
   backend-ml:
     build:
-      context: ./backend-ml # Arahkan ke folder kode Python
+      context: ./backend-ml
       dockerfile: Dockerfile
     container_name: neurotube-ml
     restart: unless-stopped
     ports:
       - "${ML_PORT:-8000}:8000"
     environment:
-      # Variabel lingkungan untuk aplikasi Python FastAPI
+
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-neurotube}:${POSTGRES_PASSWORD:-neurotube_secret}@postgres:5432/${POSTGRES_DB:-neurotube}
       REDIS_URL: redis://redis:6379/0
       ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
-      HF_HUB_OFFLINE: "1" # Mode hemat kuota, larang unduh model AI berulang kali
+      HF_HUB_OFFLINE: "1"
       PORT: "8000"
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     depends_on:
-      # Jangan nyalakan ML sebelum DB Postgres dan antrean Redis siap
+
       postgres:
         condition: service_healthy
       redis:
@@ -85,16 +85,16 @@ services:
     deploy:
       resources:
         reservations:
-          # Permintaan khusus agar Docker mengizinkan akses ke kartu grafis (GPU) NVIDIA host
+
           devices:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
     volumes:
-      # Menyambungkan folder cache AI komputer host dengan di dalam docker, agar tidak download model gigabyte lagi
+
       - ~/.cache/huggingface:/root/.cache/huggingface
 
-  # ─── Frontend Dev Server (Tampilan Antarmuka React) ───────────────────────────────────────
+
   frontend:
     build:
       context: ./frontend
@@ -103,16 +103,16 @@ services:
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     environment:
-      # Tunjuk alamat URL tempat API Backend berada
+
       VITE_FETCHER_API_URL: http://localhost:${FETCHER_PORT:-8080}
       VITE_ML_API_URL: http://localhost:${ML_PORT:-8000}
     depends_on:
       - backend-fetcher
       - backend-ml
     volumes:
-      # Mount folder frontend lokal agar setiap perubahan kode (Ctrl+S) langsung me-refresh browser (Hot Reloading)
+
       - ./frontend:/app
-      - /app/node_modules # Lindungi node_modules di dalam docker agar tidak tertimpa node_modules lokal
+      - /app/node_modules
 
 # Deklarasi wadah (volume) persisten untuk menyimpan file asli database
 volumes:
