@@ -31,10 +31,10 @@ Proyek ini mengadopsi arsitektur _microservices_ untuk memisahkan proses ekstrak
 ## Fitur Utama
 
 - **Edisi Tugas Besar (Terdokumentasi Penuh)**: Seluruh basis kode aplikasi (Golang, Python, dan React) telah dilengkapi dengan anotasi komentar pada setiap baris serta penjelasan pustaka (`import`) dalam **Bahasa Indonesia** yang komprehensif. Struktur ini didesain khusus untuk memfasilitasi kebutuhan akademis dan mempermudah proses pembelajaran.
-- **CRUD Komentar Manual (Ketentuan A)**: Pengguna memiliki akses manajemen data untuk menambahkan, mengubah, serta menghapus komentar secara manual melalui antarmuka web.
-- **Analisis Sentimen Kata Kunci (Ketentuan B)**: Setiap komentar yang ditambahkan secara manual akan dianalisis secara otomatis menggunakan metode pencocokan kata kunci sentimen positif dan negatif (`analyze_sentiment_keyword`).
-- **Sequential & Binary Search (Ketentuan C)**: Modul pencarian komentar dilengkapi dengan dua metode algoritma, yakni _Sequential Search_ dan _Binary Search_, yang dapat dikonfigurasi langsung dari antarmuka pengguna.
-- **Selection & Insertion Sort (Ketentuan D)**: Kemampuan pengurutan data (_sorting_) mencakup _Selection Sort_ untuk mengurutkan berdasarkan panjang karakter teks, dan _Insertion Sort_ untuk mengurutkan berdasarkan tingkat polaritas sentimen.
+- **CRUD Komentar Manual (Ketentuan A)**: Pengguna memiliki akses manajemen data untuk menambahkan, mengubah, serta menghapus komentar secara manual melalui antarmuka web (Diproses oleh Backend Go).
+- **Analisis Sentimen Kata Kunci (Ketentuan B)**: Setiap komentar yang ditambahkan secara manual akan dianalisis secara otomatis menggunakan metode pencocokan kata kunci sentimen positif dan negatif di dalam Backend Go.
+- **Sequential & Binary Search (Ketentuan C)**: Modul pencarian komentar dilengkapi dengan dua metode algoritma, yakni _Sequential Search_ dan _Binary Search_, yang diproses melalui API Golang.
+- **Selection & Insertion Sort (Ketentuan D)**: Kemampuan pengurutan data (_sorting_) mencakup _Selection Sort_ untuk mengurutkan berdasarkan panjang karakter teks, dan _Insertion Sort_ untuk mengurutkan berdasarkan tingkat polaritas sentimen, yang dieksekusi secara native di Backend Go.
 - **Statistik Sentimen (Ketentuan E)**: Sistem secara otomatis menghasilkan agregasi data yang menampilkan metrik total komentar per kategori sentimen (Positif, Netral, Negatif) yang divisualisasikan melalui tombol filter dan grafik.
 - **Ekstraksi Data Konkuren**: Mengimplementasikan layanan _backend_ menggunakan bahasa Go untuk mengekstraksi puluhan ribu komentar dan balasan dari YouTube secara paralel dalam hitungan detik.
 - **Dual-Engine Sentiment Analysis**: Layanan ML _backend_ berbasis Python FastAPI yang menjalankan model Hugging Face Transformers (XLM-RoBERTa & Indo-RoBERTa) guna menghasilkan klasifikasi sentimen multi-bahasa dengan tingkat akurasi tinggi. Diperkuat dengan fitur penyaringan _spam_ berbasis Regex untuk efisiensi komputasi GPU.
@@ -173,10 +173,10 @@ npm run dev
 
 | # | Persyaratan | Status | Lokasi Implementasi |
 | --- | ------------ | -------- | ---------------- |
-| a | Operasi CRUD Komentar (Tambah, Ubah, Hapus) | ✅ | `analysis.py` (API endpoints HTTP POST/PUT/DELETE), `CommentSection.tsx` (Formulir antarmuka) |
-| b | Analisis Sentimen Berbasis Kata Kunci | ✅ | `analysis.py` → metode `analyze_sentiment_keyword()` |
-| c | Algoritma Pencarian (_Sequential & Binary Search_) | ✅ | `algorithms.ts` → utilitas `sequentialSearch()`, `binarySearch()` |
-| d | Algoritma Pengurutan (_Selection & Insertion Sort_) | ✅ | `algorithms.ts` → utilitas `selectionSortByLength()`, `insertionSortBySentiment()` |
+| a | Operasi CRUD Komentar (Tambah, Ubah, Hapus) | ✅ | Backend Go (`internal/algorithms/crud.go`), `CommentSection.tsx` (UI) |
+| b | Analisis Sentimen Berbasis Kata Kunci | ✅ | Backend Go (`internal/algorithms/sentiment.go`), `CommentSection.tsx` (UI) |
+| c | Algoritma Pencarian (_Sequential & Binary Search_) | ✅ | Backend Go (`internal/algorithms/search.go`), `algorithms.ts` (Client-side fallback) |
+| d | Algoritma Pengurutan (_Selection & Insertion Sort_) | ✅ | Backend Go (`internal/algorithms/sort.go`), `algorithms.ts` (Client-side fallback) |
 | e | Rekapitulasi Statistik Sentimen | ✅ | `CommentSection.tsx` (tombol penyaring dinamis), `StatBlock.tsx`, `CommentCharts.tsx` |
 
 ---

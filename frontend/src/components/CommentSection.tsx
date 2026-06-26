@@ -8,6 +8,8 @@ import { ExpandableText } from "./ExpandableText";
 import { getTimelineData } from "@/lib/timeline";
 import { addComment, updateComment, deleteComment } from "@/services/api";
 import { sequentialSearch, binarySearch, selectionSortByLength, insertionSortBySentiment } from "@/lib/algorithms";
+import { goSearchComments, goSortComments, goCRUDComment } from "@/lib/goAlgorithms";
+import { useEffect } from "react";
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 20 };
 
@@ -47,7 +49,6 @@ function CommentItem({ comment, replies = [], isReply = false, onEdit, onDelete 
   const hash = cleanName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const colorClass = avatarColors[hash % avatarColors.length];
   
-  // Deteksi komentar manual (bukan dari YouTube API) untuk menampilkan tombol Edit/Delete
   const isManual = comment.id.startsWith("manual_");
 
   const handleSaveEdit = () => {
@@ -194,7 +195,6 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expanded, setExpanded] = useState(true);
   
-  // Local state untuk menyimpan seluruh komentar secara dinamis agar bisa melakukan aksi CRUD di antarmuka pengguna tanpa memuat ulang API
   const [localComments, setLocalComments] = useState<Comment[]>(initialComments);
 
   // Search and Sort states
@@ -202,25 +202,81 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
   const [searchMode, setSearchMode] = useState<"sequential" | "binary">("sequential");
   const [sortMode, setSortMode] = useState<"none" | "lengthDesc" | "lengthAsc" | "sentimentDesc" | "sentimentAsc">("none");
 
+  // Go Backend Processing State
+  const [useGoBackend, setUseGoBackend] = useState(false);
+  const [goProcessedComments, setGoProcessedComments] = useState<Comment[] | null>(null);
+  const [isProcessingGo, setIsProcessingGo] = useState(false);
+
   // Add Comment Form State
   const [newCommentName, setNewCommentName] = useState("");
   const [newCommentText, setNewCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [prevInitialComments, setPrevInitialComments] = useState(initialComments);
 
-  // Sync initial comments when props change (like selecting a new video)
   if (initialComments !== prevInitialComments) {
     setPrevInitialComments(initialComments);
     setLocalComments(initialComments);
   }
+
+  // Effect to call Go Backend for Search/Sort
+  useEffect(() => {
+    if (!useGoBackend) {
+      return;
+    }
+    
+    const processGo = async () => {
+      setIsProcessingGo(true);
+      try {
+        let current = [...localComments];
+        
+        // Search
+        if (searchQuery.trim()) {
+           current = await goSearchComments(current, searchQuery, searchMode);
+        }
+        
+        if (sortMode !== "none") {
+           const mode: "asc" | "desc" = sortMode.endsWith("Desc") ? "desc" : "asc";
+           const sortBy: "length" | "sentiment" = sortMode.startsWith("length") ? "length" : "sentiment";
+           current = await goSortComments(current, sortBy, mode);
+        }
+        
+        setGoProcessedComments(current);
+      } catch (err) {
+         console.error(err);
+      } finally {
+         setIsProcessingGo(false);
+      }
+    };
+    
+    const timeout = setTimeout(processGo, 300); // debounce
+    return () => clearTimeout(timeout);
+  }, [useGoBackend, localComments, searchQuery, searchMode, sortMode]);
 
   // CRUD Handlers
   const handleAddComment = async () => {
     if (!newCommentName.trim() || !newCommentText.trim() || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const newComment = await addComment(videoId, newCommentName, newCommentText);
-      setLocalComments(prev => [newComment, ...prev]);
+      if (useGoBackend) {
+        const tempId = `manual_${Date.now()}`;
+        const newCommentObj: Comment = {
+          id: tempId,
+          textDisplay: newCommentText,
+          textOriginal: newCommentText,
+          authorDisplayName: newCommentName,
+          authorProfileImageUrl: "",
+          likeCount: 0,
+          publishedAt: new Date().toISOString(),
+          sentiment: "neutral",
+          sentimentScore: 0,
+          isReply: false
+        };
+        const updated = await goCRUDComment(localComments, "add", { comment: newCommentObj });
+        setLocalComments(updated);
+      } else {
+        const newComment = await addComment(videoId, newCommentName, newCommentText);
+        setLocalComments(prev => [newComment, ...prev]);
+      }
       setNewCommentName("");
       setNewCommentText("");
     } catch (err) {
@@ -233,8 +289,13 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
 
   const handleEditComment = async (commentId: string, newText: string) => {
     try {
-      const updatedComment = await updateComment(commentId, newText);
-      setLocalComments(prev => prev.map(c => c.id === commentId ? { ...c, ...updatedComment } : c));
+      if (useGoBackend) {
+        const updated = await goCRUDComment(localComments, "update", { id: commentId, text: newText });
+        setLocalComments(updated);
+      } else {
+        const updatedComment = await updateComment(commentId, newText);
+        setLocalComments(prev => prev.map(c => c.id === commentId ? { ...c, ...updatedComment } : c));
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to update comment.");
@@ -243,8 +304,13 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
 
   const handleDeleteComment = async (commentId: string) => {
     try {
-      await deleteComment(commentId);
-      setLocalComments(prev => prev.filter(c => c.id !== commentId && c.parentId !== commentId));
+      if (useGoBackend) {
+        const updated = await goCRUDComment(localComments, "delete", { id: commentId });
+        setLocalComments(updated);
+      } else {
+        await deleteComment(commentId);
+        setLocalComments(prev => prev.filter(c => c.id !== commentId && c.parentId !== commentId));
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to delete comment.");
@@ -255,11 +321,11 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
     const { getBucketKey } = getTimelineData(localComments);
     
     let processed = selectedDate
-      ? localComments.filter((c) => getBucketKey(c.publishedAt) === selectedDate)
-      : localComments;
+      ? (useGoBackend ? (goProcessedComments || localComments) : localComments).filter((c) => getBucketKey(c.publishedAt) === selectedDate)
+      : (useGoBackend ? (goProcessedComments || localComments) : localComments);
 
-    // Apply Search Algorithm (Requirement C)
-    if (searchQuery.trim()) {
+    // Apply Search Algorithm (Requirement C) - Only if NOT using Go Backend
+    if (!useGoBackend && searchQuery.trim()) {
       if (searchMode === "sequential") {
         processed = sequentialSearch(processed, searchQuery);
       } else if (searchMode === "binary") {
@@ -269,15 +335,17 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
 
     let main = processed.filter(c => !c.isReply);
     
-    // Apply Sort Algorithm (Requirement D)
-    if (sortMode === "lengthDesc") {
-      main = selectionSortByLength(main, "desc");
-    } else if (sortMode === "lengthAsc") {
-      main = selectionSortByLength(main, "asc");
-    } else if (sortMode === "sentimentDesc") {
-      main = insertionSortBySentiment(main, "desc");
-    } else if (sortMode === "sentimentAsc") {
-      main = insertionSortBySentiment(main, "asc");
+    // Apply Sort Algorithm (Requirement D) - Only if NOT using Go Backend
+    if (!useGoBackend && sortMode !== "none") {
+      if (sortMode === "lengthDesc") {
+        main = selectionSortByLength(main, "desc");
+      } else if (sortMode === "lengthAsc") {
+        main = selectionSortByLength(main, "asc");
+      } else if (sortMode === "sentimentDesc") {
+        main = insertionSortBySentiment(main, "desc");
+      } else if (sortMode === "sentimentAsc") {
+        main = insertionSortBySentiment(main, "asc");
+      }
     }
 
     const repliesMap: Record<string, Comment[]> = {};
@@ -294,7 +362,7 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
       main: filteredMain,
       repliesMap
     };
-  }, [localComments, filter, selectedDate, searchQuery, searchMode, sortMode]);
+  }, [localComments, filter, selectedDate, searchQuery, searchMode, sortMode, useGoBackend, goProcessedComments]);
 
   const visible = groupedComments.main.slice(0, visibleCount);
   const hasMore = visibleCount < groupedComments.main.length;
@@ -417,6 +485,30 @@ export function CommentSection({ videoId, comments: initialComments, selectedDat
                 <option value="sentimentDesc">Sort: Sentiment Descending (Insertion)</option>
                 <option value="sentimentAsc">Sort: Sentiment Ascending (Insertion)</option>
               </select>
+            </div>
+            
+            {/* Go Backend Toggle */}
+            <div className="px-6 mb-4 flex items-center justify-between">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={useGoBackend}
+                    onChange={(e) => setUseGoBackend(e.target.checked)}
+                  />
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${useGoBackend ? 'bg-primary' : 'bg-muted-foreground/30'}`}></div>
+                  <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${useGoBackend ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">Use Go Backend Algorithms</span>
+                  <span className="text-[10px] text-muted-foreground">Process sorting, searching, & sentiment via REST API</span>
+                </div>
+              </label>
+              
+              {isProcessingGo && (
+                <span className="text-[10px] font-bold text-primary animate-pulse uppercase tracking-widest">Processing...</span>
+              )}
             </div>
 
             <div className="flex gap-2 overflow-x-auto px-6 pb-6 no-scrollbar">

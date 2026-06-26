@@ -23,10 +23,11 @@ This directory contains the user interface for the NeuroTube project, built with
 ## Key Files
 
 - `src/App.tsx` — Halaman utama yang mengoordinasikan seluruh alur dan interaksi web.
-- `src/services/api.ts` — Fungsi HTTP Request ke Backend (termasuk CRUD komentar).
-- `src/lib/algorithms.ts` — Implementasi algoritma Search (Sequential & Binary) dan Sort (Selection & Insertion).
+- `src/services/api.ts` — Fungsi HTTP Request ke Backend.
+- `src/lib/algorithms.ts` — Implementasi algoritma Search (Sequential & Binary) dan Sort (Selection & Insertion) versi Client-side (TypeScript).
+- `src/lib/goAlgorithms.ts` — Fetch wrapper untuk mengirim permintaan Search, Sort, dan CRUD ke Backend Go.
 - `src/lib/timeline.ts` — Algoritma perhitungan grafik garis waktu (Timeline).
-- `src/components/CommentSection.tsx` — UI komentar dengan form CRUD, search bar, dan sort dropdown.
+- `src/components/CommentSection.tsx` — UI komentar dengan form CRUD, search bar, sort dropdown, dan *toggle switch* Go Backend.
 
 ## Local Setup
 
