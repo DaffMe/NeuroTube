@@ -21,3 +21,5 @@ walkthrough.md
 backend-fetcher_backup/
 .understand-anything/
 .claude/
+e2e_test_*.py
+clean_all*.py
